@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Test Tracking System - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-button {
+            padding: 15px 25px;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .nav-button.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            height: fit-content;
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+            color: white;
+            padding: 25px;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+        
+        .sidebar-content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+        
+        .upload-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+        
+        .uploaded-files {
+            margin-top: 15px;
+        }
+        
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        
+        .dashboard {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .dashboard-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .dashboard-stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            min-width: 80px;
+        }
+        
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .dashboard-content {
+            padding: 0;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background: #e9ecef;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            min-height: 600px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .pr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .pr-card {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .pr-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+        
+        .pr-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        
+        .pr-info {
+            flex: 1;
+        }
+        
+        .pr-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        
+        .pr-meta {
+            color: #6c757d;
+            font-size: 0.9em;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .pr-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .priority-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .priority-urgent {
+            background: #ffebee;
+            color: #c62828;
+            animation: pulse 2s infinite;
+        }
+        
+        .priority-high {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .priority-medium {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .priority-low {
+            background: #f1f8e9;
+            color: #388e3c;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .pr-status {
+            text-align: center;
+        }
+        
+        .progress-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .status-label {
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-ready {
+            color: #27ae60;
+        }
+        
+        .status-testing {
+            color: #f39c12;
+        }
+        
+        .status-blocked {
+            color: #e74c3c;
+        }
+        
+        .status-new {
+            color: #3498db;
+        }
+        
+        .pr-body {
+            padding: 25px;
+        }
+        
+        .branch-comparison {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .branch-result {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .branch-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .test-results {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .result-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .result-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .result-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .result-skip {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+        }
+        
+        .test-section-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #f1f3f4;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+        }
+        
+        .test-item:hover {
+            background: #f0f3f7;
+            border-color: #3498db;
+        }
+        
+        .test-info {
+            flex: 1;
+        }
+        
+        .test-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .test-meta {
+            font-size: 0.85em;
+            color: #6c757d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .test-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-secondary {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .badge-info {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .trace-files {
+            margin-top: 10px;
+        }
+        
+        .trace-file {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .trace-file:hover {
+            background: #bbdefb;
+        }
+        
+        .activity-feed {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .activity-time {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        
+        .activity-details {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #e74c3c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            min-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .empty-state p {
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .summary-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .trend-indicator {
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+        
+        .trend-up {
+            color: #27ae60;
+        }
+        
+        .trend-down {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 QA Test Tracking System</h1>
+            <p>Complete PR Testing Management with Playwright Trace Support</p>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="main-nav">
+            <button class="nav-button active" onclick="showMainTab('dashboard')">
+                📊 Dashboard
+            </button>
+            <button class="nav-button" onclick="showMainTab('create-pr')">
+                ➕ Create PR
+            </button>
+            <button class="nav-button" onclick="showMainTab('analytics')">
+                📈 Analytics
+            </button>
+            <button class="nav-button" onclick="showMainTab('settings')">
+                ⚙️ Settings
+            </button>
+        </div>
+        
+        <div id="dashboard-section" class="main-section">
+            <div class="main-content">
+                <!-- Sidebar - Quick Actions -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        ⚡ Quick Actions
+                    </div>
+                    <div class="sidebar-content">
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;" onclick="showCreatePRModal()">
+                            ➕ New PR Entry
+                        </button>
+                        <button class="btn btn-success" style="width: 100%; margin-bottom: 15px;" onclick="showTestModal()">
+                            📝 Add Test Results
+                        </button>
+                        <button class="btn btn-warning" style="width: 100%; margin-bottom: 25px;" onclick="showTraceUploadModal()">
+                            📎 Upload Trace Files
+                        </button>
+                        
+                        <hr style="margin: 25px 0; border: 1px solid #e9ecef;">
+                        
+                        <h4 style="margin-bottom: 15px; color: #2c3e50;">📊 Quick Stats</h4>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Active PRs</span>
+                                <strong>7</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Ready to Merge</span>
+                                <strong style="color: #27ae60;">2</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>In Testing</span>
+                                <strong style="color: #f39c12;">3</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Blocked</span>
+                                <strong style="color: #e74c3c;">2</strong>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 25px 0 15px 0; color: #2c3e50;">👥 Team Activity</h4>
+                        <div style="font-size: 0.9em;">
+                            <div style="margin-bottom: 8px;">
+                                <strong>Alice</strong> - Testing login flows
+                                <div style="font-size: 0.8em; color: #6c757d;">15 min ago</div>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong>Bob</strong> - Uploaded trace files
+                                <div style="font-size: 0.8em; color: #6c757d;">1 hour ago</div>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong>Carol</strong> - Approved PR #125
+                                <div style="font-size: 0.8em; color: #6c757d;">2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Dashboard -->
+                <div class="dashboard">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title">Active Testing Dashboard</div>
+                        <div class="dashboard-stats">
+                            <div class="stat">
+                                <div class="stat-number">7</div>
+                                <div class="stat-label">Active PRs</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">2</div>
+                                <div class="stat-label">Ready</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">24</div>
+                                <div class="stat-label">Tests Today</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">92%</div>
+                                <div class="stat-label">Pass Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active" onclick="showDashboardTab('all-prs')">📋 All PRs (7)</div>
+                        <div class="tab" onclick="showDashboardTab('ready')">✅ Ready (2)</div>
+                        <div class="tab" onclick="showDashboardTab('testing')">🔄 In Testing (3)</div>
+                        <div class="tab" onclick="showDashboardTab('blocked')">⚠️ Blocked (2)</div>
+                        <div class="tab" onclick="showDashboardTab('activity')">📊 Activity</div>
+                    </div>
+                    
+                    <!-- All PRs Tab -->
+                    <div id="all-prs-tab" class="tab-content active">
+                        <div class="filters">
+                            <input type="text" class="search-box" placeholder="Search PRs..." id="pr-search">
+                            <div class="filter-group">
+                                <span class="filter-label">Priority:</span>
+                                <select class="form-select" style="width: auto;">
+                                    <option value="">All</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <span class="filter-label">Developer:</span>
+                                <select class="form-select" style="width: auto;">
+                                    <option value="">All</option>
+                                    <option value="alice">Alice</option>
+                                    <option value="bob">Bob</option>
+                                    <option value="carol">Carol</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="pr-grid">
+                            <!-- PR Card 1 - Ready to Merge -->
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-info">
+                                        <div class="pr-title">feature/shopping-cart-improvements</div>
+                                        <div class="pr-meta">
+                                            <span>👤 mike_dev</span>
+                                            <span>🕐 1 day ago</span>
+                                            <span class="priority-badge priority-medium">Medium</span>
+                                        </div>
+                                    </div>
+                                    <div class="pr-status">
+                                        <div class="progress-circle" style="background: conic-gradient(#27ae60 0deg, #27ae60 360deg);">100%</div>
+                                        <div class="status-label status-ready">Ready</div>
+                                    </div>
+                                </div>
+                                <div class="pr-body">
+                                    <div class="branch-comparison">
+                                        <div class="comparison-title">
+                                            🔄 Branch Test Comparison
+                                        </div>
+                                        <div class="comparison-grid">
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    🌿 feature/shopping-cart
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">8 Pass</span>
+                                                    <span class="result-badge result-fail">0 Fail</span>
+                                                </div>
+                                            </div>
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    📦 main branch
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">6 Pass</span>
+                                                    <span class="result-badge result-fail">2 Fail</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 15px; font-size: 0.85em; color: #27ae60; font-weight: 600;">
+                                            ✅ Feature tests pass on branch, fail on main (Expected behavior)
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-section">
+                                        <div class="test-section-title">
+                                            📋 Completed Tests
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Add/Remove Items Functionality</div>
+                                                <div class="test-meta">
+                                                    <span>👤 David</span>
+                                                    <span>🧪 Functional</span>
+                                                    <span>🕐 2h ago</span>
+                                                </div>
+                                                <div class="trace-files">
+                                                    <span class="trace-file" onclick="viewTrace('add-remove-items.zip')">
+                                                        📎 add-remove-items.zip
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-success">Passed</span>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Checkout Process End-to-End</div>
+                                                <div class="test-meta">
+                                                    <span>👤 Alice</span>
+                                                    <span>🧪 E2E</span>
+                                                    <span>🕐 1h ago</span>
+                                                </div>
+                                                <div class="trace-files">
+                                                    <span class="trace-file" onclick="viewTrace('checkout-e2e.zip')">
+                                                        📎 checkout-e2e.zip
+                                                    </span>
+                                                    <span class="trace-file" onclick="viewTrace('payment-flow.zip')">
+                                                        📎 payment-flow.zip
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-success">Passed</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; padding-top: 20px; border-top: 2px solid #27ae60; background: #e8f5e8; margin: 20px -25px -25px -25px; padding: 20px;">
+                                        <strong style="color: #27ae60; font-size: 1.1em;">🚀 Ready for Merge!</strong>
+                                        <div style="margin-top: 8px; font-size: 0.9em; color: #155724;">All tests passed, traces uploaded</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- PR Card 2 - In Progress -->
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-info">
+                                        <div class="pr-title">feature/user-authentication-fix</div>
+                                        <div class="pr-meta">
+                                            <span>👤 sarah_dev</span>
+                                            <span>🕐 3 hours ago</span>
+                                            <span class="priority-badge priority-high">High</span>
+                                        </div>
+                                    </div>
+                                    <div class="pr-status">
+                                        <div class="progress-circle" style="background: conic-gradient(#f39c12 0deg, #f39c12 216deg, #e9ecef 216deg);">60%</div>
+                                        <div class="status-label status-testing">Testing</div>
+                                    </div>
+                                </div>
+                                <div class="pr-body">
+                                    <div class="branch-comparison">
+                                        <div class="comparison-title">
+                                            🔄 Branch Test Comparison
+                                        </div>
+                                        <div class="comparison-grid">
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    🌿 feature/auth-fix
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">4 Pass</span>
+                                                    <span class="result-badge result-fail">1 Fail</span>
+                                                </div>
+                                            </div>
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    📦 main branch
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">2 Pass</span>
+                                                    <span class="result-badge result-fail">3 Fail</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 15px; font-size: 0.85em; color: #f39c12; font-weight: 600;">
+                                            ⚠️ Some improvement, but 1 test still failing on branch
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-section">
+                                        <div class="test-section-title">
+                                            🔄 Test Progress
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Login Flow Testing</div>
+                                                <div class="test-meta">
+                                                    <span>👤 Alice</span>
+                                                    <span>🧪 Functional</span>
+                                                    <span>🕐 45m ago</span>
+                                                </div>
+                                                <div class="trace-files">
+                                                    <span class="trace-file" onclick="viewTrace('login-success.zip')">
+                                                        📎 login-success.zip
+                                                    </span>
+                                                    <span class="trace-file" onclick="viewTrace('login-failure.zip')">
+                                                        📎 login-failure.zip
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-danger">1 Failed</span>
+                                                <button class="btn btn-small btn-primary">View Details</button>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Password Reset Flow</div>
+                                                <div class="test-meta">
+                                                    <span>👤 Bob</span>
+                                                    <span>🧪 Security</span>
+                                                    <span>🕐 In progress</span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-warning">Testing</span>
+                                                <button class="btn btn-small btn-warning">Update</button>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Cross-Browser Compatibility</div>
+                                                <div class="test-meta">
+                                                    <span>👤 Carol</span>
+                                                    <span>🧪 Browser Testing</span>
+                                                    <span>🕐 Pending</span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-secondary">Waiting</span>
+                                                <button class="btn btn-small btn-primary">Start</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- PR Card 3 - Urgent/Blocked -->
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-info">
+                                        <div class="pr-title">hotfix/payment-gateway-timeout</div>
+                                        <div class="pr-meta">
+                                            <span>👤 alex_dev</span>
+                                            <span>🕐 5 hours ago</span>
+                                            <span class="priority-badge priority-urgent">Urgent</span>
+                                        </div>
+                                    </div>
+                                    <div class="pr-status">
+                                        <div class="progress-circle" style="background: conic-gradient(#e74c3c 0deg, #e74c3c 72deg, #e9ecef 72deg);">20%</div>
+                                        <div class="status-label status-blocked">Blocked</div>
+                                    </div>
+                                </div>
+                                <div class="pr-body">
+                                    <div class="branch-comparison">
+                                        <div class="comparison-title">
+                                            🔄 Branch Test Comparison
+                                        </div>
+                                        <div class="comparison-grid">
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    🌿 hotfix/payment
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-skip">Tests Skipped</span>
+                                                </div>
+                                            </div>
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    📦 main branch
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">3 Pass</span>
+                                                    <span class="result-badge result-fail">2 Fail</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 15px; font-size: 0.85em; color: #e74c3c; font-weight: 600;">
+                                            🚨 Cannot test - Environment configuration issue
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-section">
+                                        <div class="test-section-title">
+                                            ⚠️ Blocked Tests
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Payment Gateway Integration</div>
+                                                <div class="test-meta">
+                                                    <span>👤 Bob</span>
+                                                    <span>🧪 Integration</span>
+                                                    <span>⚠️ Environment Issue</span>
+                                                </div>
+                                                <div style="background: #f8d7da; padding: 8px; border-radius: 5px; margin-top: 8px; font-size: 0.85em; color: #721c24;">
+                                                    Payment sandbox is down. Cannot test transaction flows.
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-danger">Blocked</span>
+                                                <button class="btn btn-small btn-danger">Escalate</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; padding-top: 20px; border-top: 2px solid #e74c3c; background: #f8d7da; margin: 20px -25px -25px -25px; padding: 20px;">
+                                        <strong style="color: #721c24; font-size: 1.1em;">🚨 Testing Blocked</strong>
+                                        <div style="margin-top: 8px; font-size: 0.9em; color: #721c24;">Environment issue requires DevOps intervention</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- PR Card 4 - New PR -->
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-info">
+                                        <div class="pr-title">feature/dark-mode-toggle</div>
+                                        <div class="pr-meta">
+                                            <span>👤 emma_dev</span>
+                                            <span>🕐 30 minutes ago</span>
+                                            <span class="priority-badge priority-low">Low</span>
+                                        </div>
+                                    </div>
+                                    <div class="pr-status">
+                                        <div class="progress-circle" style="background: conic-gradient(#3498db 0deg, #3498db 0deg, #e9ecef 0deg);">0%</div>
+                                        <div class="status-label status-new">New</div>
+                                    </div>
+                                </div>
+                                <div class="pr-body">
+                                    <div class="branch-comparison">
+                                        <div class="comparison-title">
+                                            🔄 Branch Test Comparison
+                                        </div>
+                                        <div class="comparison-grid">
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    🌿 feature/dark-mode
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-skip">Not tested yet</span>
+                                                </div>
+                                            </div>
+                                            <div class="branch-result">
+                                                <div class="branch-name">
+                                                    📦 main branch
+                                                </div>
+                                                <div class="test-results">
+                                                    <span class="result-badge result-pass">5 Pass</span>
+                                                    <span class="result-badge result-fail">0 Fail</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 15px; font-size: 0.85em; color: #6c757d; font-weight: 600;">
+                                            ℹ️ Awaiting test assignment and execution
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="test-section">
+                                        <div class="test-section-title">
+                                            📋 Planned Tests
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">UI Theme Switching</div>
+                                                <div class="test-meta">
+                                                    <span>🧪 UI Testing</span>
+                                                    <span>⏳ Not assigned</span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-info">Plan</span>
+                                                <button class="btn btn-small btn-primary">Assign</button>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <div class="test-info">
+                                                <div class="test-name">Persistence Across Sessions</div>
+                                                <div class="test-meta">
+                                                    <span>🧪 Functional</span>
+                                                    <span>⏳ Not assigned</span>
+                                                </div>
+                                            </div>
+                                            <div class="test-actions">
+                                                <span class="badge badge-info">Plan</span>
+                                                <button class="btn btn-small btn-primary">Assign</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; padding-top: 20px; border-top: 2px solid #3498db; background: #e3f2fd; margin: 20px -25px -25px -25px; padding: 20px;">
+                                        <strong style="color: #1976d2; font-size: 1.1em;">🆕 Ready for Testing</strong>
+                                        <div style="margin-top: 8px; font-size: 0.9em; color: #1976d2;">Assign tests to team members to begin</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ready Tab -->
+                    <div id="ready-tab" class="tab-content">
+                        <div class="summary-cards">
+                            <div class="summary-card" style="border-left-color: #27ae60;">
+                                <div class="summary-number">2</div>
+                                <div class="summary-label">Ready to Merge</div>
+                                <div class="trend-indicator trend-up">↗️ +1 from yesterday</div>
+                            </div>
+                            <div class="summary-card" style="border-left-color: #3498db;">
+                                <div class="summary-number">18</div>
+                                <div class="summary-label">Total Tests</div>
+                                <div class="trend-indicator">All passed</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pr-grid">
+                            <!-- Only show ready PRs here -->
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-info">
+                                        <div class="pr-title">feature/shopping-cart-improvements</div>
+                                        <div class="pr-meta">
+                                            <span>👤 mike_dev</span>
+                                            <span>🕐 1 day ago</span>
+                                            <span class="priority-badge priority-medium">Medium</span>
+                                        </div>
+                                    </div>
+                                    <div class="pr-status">
+                                        <div class="progress-circle" style="background: conic-gradient(#27ae60 0deg, #27ae60 360deg);">100%</div>
+                                        <div class="status-label status-ready">Ready</div>
+                                    </div>
+                                </div>
+                                <div class="pr-body">
+                                    <div style="text-align: center; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+                                        <h3 style="color: #27ae60; margin-bottom: 10px;">🚀 Ready for Merge!</h3>
+                                        <p style="color: #155724; margin-bottom: 15px;">All tests passed, traces uploaded, QA approved</p>
+                                        <button class="btn btn-success">Proceed to Merge</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Testing Tab -->
+                    <div id="testing-tab" class="tab-content">
+                        <div class="summary-cards">
+                            <div class="summary-card" style="border-left-color: #f39c12;">
+                                <div class="summary-number">3</div>
+                                <div class="summary-label">In Testing</div>
+                                <div class="trend-indicator">Active work</div>
+                            </div>
+                            <div class="summary-card" style="border-left-color: #3498db;">
+                                <div class="summary-number">4</div>
+                                <div class="summary-label">Active Testers</div>
+                                <div class="trend-indicator">Team engaged</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pr-grid">
+                            <!-- Show in-progress PRs -->
+                            <div class="empty-state">
+                                <h3>Testing in Progress</h3>
+                                <p>3 PRs currently being tested by the QA team</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blocked Tab -->
+                    <div id="blocked-tab" class="tab-content">
+                        <div class="summary-cards">
+                            <div class="summary-card" style="border-left-color: #e74c3c;">
+                                <div class="summary-number">2</div>
+                                <div class="summary-label">Blocked PRs</div>
+                                <div class="trend-indicator trend-down">Needs attention</div>
+                            </div>
+                        </div>
+                        
+                        <div class="pr-grid">
+                            <!-- Show blocked PRs with escalation options -->
+                            <div class="empty-state">
+                                <h3>⚠️ Blocked Tests</h3>
+                                <p>2 PRs blocked due to environment or dependency issues</p>
+                                <button class="btn btn-danger">Escalate Issues</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Tab -->
+                    <div id="activity-tab" class="tab-content">
+                        <div class="activity-feed">
+                            <div class="activity-item">
+                                <div class="activity-avatar">A</div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>Alice</strong> uploaded trace files for login flow testing</div>
+                                    <div class="activity-time">15 minutes ago</div>
+                                    <div class="activity-details">
+                                        PR: feature/user-authentication-fix<br>
+                                        Files: login-success.zip, login-failure.zip
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">D</div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>David</strong> completed functional testing and marked PR ready</div>
+                                    <div class="activity-time">1 hour ago</div>
+                                    <div class="activity-details">
+                                        PR: feature/shopping-cart-improvements<br>
+                                        Status: Ready for merge ✅
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">B</div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>Bob</strong> reported environment issue blocking payment tests</div>
+                                    <div class="activity-time">2 hours ago</div>
+                                    <div class="activity-details">
+                                        PR: hotfix/payment-gateway-timeout<br>
+                                        Issue: Payment sandbox unreachable
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">E</div>
+                                <div class="activity-content">
+                                    <div class="activity-text"><strong>Emma</strong> created new PR entry for dark mode feature</div>
+                                    <div class="activity-time">30 minutes ago</div>
+                                    <div class="activity-details">
+                                        PR: feature/dark-mode-toggle<br>
+                                        Status: Awaiting test assignment
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create PR Section (Hidden by default) -->
+        <div id="create-pr-section" class="main-section" style="display: none;">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    ➕ Create New PR Entry
+                </div>
+                <div class="sidebar-content">
+                    <form id="create-pr-form">
+                        <div class="form-group">
+                            <label class="form-label">PR/Branch Name *</label>
+                            <input type="text" class="form-input" id="pr-name" placeholder="e.g., feature/user-login-fix" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Developer *</label>
+                            <input type="text" class="form-input" id="developer" placeholder="e.g., john_doe" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-textarea" id="description" placeholder="What changes does this PR contain?"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="priority">
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="low">Low</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Target Environment</label>
+                            <select class="form-select" id="environment">
+                                <option value="staging">Staging</option>
+                                <option value="qa">QA Environment</option>
+                                <option value="dev">Development</option>
+                                <option value="local">Local Testing</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Create PR Entry
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <div class="dashboard-title">PR Creation Guidelines</div>
+                </div>
+                <div class="dashboard-content" style="padding: 40px;">
+                    <h3 style="margin-bottom: 20px;">How to Create Effective PR Entries</h3>
+                    
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 25px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">✅ Best Practices</h4>
+                        <ul style="line-height: 1.8;">
+                            <li>Use descriptive branch names (feature/fix/hotfix prefix)</li>
+                            <li>Include clear description of changes</li>
+                            <li>Set appropriate priority level</li>
+                            <li>Specify target testing environment</li>
+                            <li>Add planned test scenarios in description</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; padding: 25px; border-radius: 10px;">
+                        <h4 style="color: #1976d2; margin-bottom: 15px;">💡 Pro Tips</h4>
+                        <ul style="line-height: 1.8;">
+                            <li>Create entries as soon as development begins</li>
+                            <li>Update descriptions as scope changes</li>
+                            <li>Use priority levels to help QA prioritize work</li>
+                            <li>Include links to related tickets/issues</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showMainTab(tabName) {
+            // Hide all main sections
+            const sections = document.querySelectorAll('.main-section');
+            sections.forEach(section => section.style.display = 'none');
+            
+            // Show selected section
+            const targetSection = document.getElementById(tabName + '-section');
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+            
+            // Update nav button states
+            const navButtons = document.querySelectorAll('.nav-button');
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Dashboard tab functionality
+        function showDashboardTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+            
+            // Update tab states
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Mock functions for button interactions
+        function showCreatePRModal() {
+            showNotification('Create PR modal would open here');
+        }
+
+        function showTestModal() {
+            showNotification('Test results modal would open here');
+        }
+
+        function showTraceUploadModal() {
+            showNotification('Trace upload modal would open here');
+        }
+
+        function viewTrace(filename) {
+            showNotification(`Opening trace file: ${filename}`);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Hide and remove notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Form submission for creating PR
+        document.getElementById('create-pr-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const prName = document.getElementById('pr-name').value;
+            const developer = document.getElementById('developer').value;
+            
+            showNotification(`PR "${prName}" created successfully for ${developer}!`);
+            
+            // Reset form
+            this.reset();
+        });
+
+        // Search functionality
+        document.getElementById('pr-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            // Mock search - in real implementation, this would filter PR cards
+            console.log('Searching for:', searchTerm);
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('Welcome to QA Test Tracking System!');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
