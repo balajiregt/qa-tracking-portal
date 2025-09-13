@@ -896,7 +896,7 @@
                             ➕ New PR Entry
                         </button>
                         <button class="btn btn-success" style="width: 100%; margin-bottom: 15px;" onclick="showTestModal()">
-                            📝 Add Test Results
+                            📝 Add Test Cases
                         </button>
                         <button class="btn btn-warning" style="width: 100%; margin-bottom: 25px;" onclick="showTraceUploadModal()">
                             📎 Upload Trace Files
@@ -1652,14 +1652,55 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Test Steps *</label>
-                            <div id="test-steps-container">
-                                <div class="test-step-input" style="display: flex; align-items: center; margin-bottom: 10px;">
-                                    <input type="text" class="form-input" placeholder="Step 1: Enter test step" style="flex: 1; margin-right: 10px;">
-                                    <button type="button" class="btn btn-small btn-danger" onclick="removeStep(this)">✕</button>
+                            <label class="form-label">BDD Test Steps *</label>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label" style="font-size: 0.9em; color: #6c757d;">Given (Preconditions)</label>
+                                <div id="given-container">
+                                    <div class="bdd-step-input" data-type="given" style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <span style="min-width: 60px; font-weight: 600; color: #17a2b8;">Given</span>
+                                        <input type="text" class="form-input" placeholder="the user is on the login page" style="flex: 1; margin: 0 10px;">
+                                        <button type="button" class="btn btn-small btn-danger" onclick="removeBDDStep(this)">✕</button>
+                                    </div>
                                 </div>
+                                <button type="button" class="btn btn-small btn-secondary" onclick="addBDDStep('given')">+ Add Given</button>
                             </div>
-                            <button type="button" class="btn btn-small btn-primary" onclick="addStep()">+ Add Step</button>
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label" style="font-size: 0.9em; color: #6c757d;">When (Actions)</label>
+                                <div id="when-container">
+                                    <div class="bdd-step-input" data-type="when" style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <span style="min-width: 60px; font-weight: 600; color: #28a745;">When</span>
+                                        <input type="text" class="form-input" placeholder="the user enters valid credentials" style="flex: 1; margin: 0 10px;">
+                                        <button type="button" class="btn btn-small btn-danger" onclick="removeBDDStep(this)">✕</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-small btn-secondary" onclick="addBDDStep('when')">+ Add When</button>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label" style="font-size: 0.9em; color: #6c757d;">And (Additional Actions - Optional)</label>
+                                <div id="and-container">
+                                    <div class="bdd-step-input" data-type="and" style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <span style="min-width: 60px; font-weight: 600; color: #6f42c1;">And</span>
+                                        <input type="text" class="form-input" placeholder="clicks the login button" style="flex: 1; margin: 0 10px;">
+                                        <button type="button" class="btn btn-small btn-danger" onclick="removeBDDStep(this)">✕</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-small btn-secondary" onclick="addBDDStep('and')">+ Add And</button>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label" style="font-size: 0.9em; color: #6c757d;">Then (Expected Results)</label>
+                                <div id="then-container">
+                                    <div class="bdd-step-input" data-type="then" style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <span style="min-width: 60px; font-weight: 600; color: #dc3545;">Then</span>
+                                        <input type="text" class="form-input" placeholder="the user should be redirected to dashboard" style="flex: 1; margin: 0 10px;">
+                                        <button type="button" class="btn btn-small btn-danger" onclick="removeBDDStep(this)">✕</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-small btn-secondary" onclick="addBDDStep('then')">+ Add Then</button>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -1691,31 +1732,47 @@
             form.addEventListener('submit', saveNewTestCase);
         }
 
-        function addStep() {
-            const container = document.getElementById('test-steps-container');
-            const stepCount = container.children.length + 1;
+        function addBDDStep(type) {
+            const container = document.getElementById(`${type}-container`);
+            const colors = {
+                'given': '#17a2b8',
+                'when': '#28a745', 
+                'and': '#6f42c1',
+                'then': '#dc3545'
+            };
+            
+            const placeholders = {
+                'given': 'the system is in a specific state',
+                'when': 'the user performs an action',
+                'and': 'additional actions are performed',
+                'then': 'the expected result should occur'
+            };
             
             const stepDiv = document.createElement('div');
-            stepDiv.className = 'test-step-input';
-            stepDiv.style.cssText = 'display: flex; align-items: center; margin-bottom: 10px;';
+            stepDiv.className = 'bdd-step-input';
+            stepDiv.setAttribute('data-type', type);
+            stepDiv.style.cssText = 'display: flex; align-items: center; margin-bottom: 8px;';
             stepDiv.innerHTML = `
-                <input type="text" class="form-input" placeholder="Step ${stepCount}: Enter test step" style="flex: 1; margin-right: 10px;">
-                <button type="button" class="btn btn-small btn-danger" onclick="removeStep(this)">✕</button>
+                <span style="min-width: 60px; font-weight: 600; color: ${colors[type]};">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                <input type="text" class="form-input" placeholder="${placeholders[type]}" style="flex: 1; margin: 0 10px;">
+                <button type="button" class="btn btn-small btn-danger" onclick="removeBDDStep(this)">✕</button>
             `;
             
             container.appendChild(stepDiv);
         }
 
-        function removeStep(button) {
-            const container = document.getElementById('test-steps-container');
+        function removeBDDStep(button) {
+            const stepDiv = button.parentElement;
+            const container = stepDiv.parentElement;
+            const type = stepDiv.getAttribute('data-type');
+            
+            // Don't remove if it's the last step of this type
             if (container.children.length > 1) {
-                button.parentElement.remove();
-                
-                // Renumber remaining steps
-                Array.from(container.children).forEach((step, index) => {
-                    const input = step.querySelector('input');
-                    input.placeholder = `Step ${index + 1}: Enter test step`;
-                });
+                stepDiv.remove();
+            } else {
+                // Clear the input instead of removing the entire step
+                const input = stepDiv.querySelector('input');
+                input.value = '';
             }
         }
 
@@ -1730,10 +1787,20 @@
                         <strong>Tags:</strong> ${formData.tags.join(', ')}
                     </div>
                     <div style="margin-bottom: 10px;">
-                        <strong>Steps:</strong>
-                        <ol style="margin: 5px 0 0 20px;">
-                            ${formData.steps.map(step => `<li>${step}</li>`).join('')}
-                        </ol>
+                        <strong>BDD Test Scenario:</strong>
+                        <div style="background: white; padding: 15px; border-radius: 5px; margin-top: 8px; font-family: monospace;">
+                            ${formData.bddSteps.map(step => {
+                                const colors = {
+                                    'given': '#17a2b8',
+                                    'when': '#28a745',
+                                    'and': '#6f42c1', 
+                                    'then': '#dc3545'
+                                };
+                                return `<div style="margin-bottom: 5px; color: ${colors[step.type]};">
+                                    <strong>${step.type.toUpperCase()}</strong> ${step.text}
+                                </div>`;
+                            }).join('')}
+                        </div>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <strong>Duration:</strong> ${formData.duration}ms
@@ -1767,20 +1834,41 @@
                 return null;
             }
 
-            const stepInputs = document.querySelectorAll('.test-step-input input');
-            const steps = Array.from(stepInputs)
-                .map(input => input.value.trim())
-                .filter(step => step.length > 0);
+            // Collect BDD steps
+            const bddSteps = [];
+            const stepTypes = ['given', 'when', 'and', 'then'];
+            
+            stepTypes.forEach(type => {
+                const container = document.getElementById(`${type}-container`);
+                const inputs = container.querySelectorAll('.bdd-step-input input');
+                
+                Array.from(inputs).forEach(input => {
+                    const value = input.value.trim();
+                    if (value.length > 0) {
+                        bddSteps.push({
+                            type: type,
+                            text: value,
+                            formatted: `${type.charAt(0).toUpperCase() + type.slice(1)} ${value}`
+                        });
+                    }
+                });
+            });
 
-            if (steps.length === 0) {
-                showNotification('At least one test step is required', 'error');
+            // Require at least Given, When, and Then
+            const hasGiven = bddSteps.some(step => step.type === 'given');
+            const hasWhen = bddSteps.some(step => step.type === 'when');
+            const hasThen = bddSteps.some(step => step.type === 'then');
+            
+            if (!hasGiven || !hasWhen || !hasThen) {
+                showNotification('At least one Given, When, and Then step is required', 'error');
                 return null;
             }
 
             return {
                 name: name,
                 tags: selectedTags,
-                steps: steps,
+                bddSteps: bddSteps,
+                steps: bddSteps.map(step => step.formatted), // For backward compatibility
                 duration: parseInt(document.getElementById('test-duration').value) || 2000,
                 description: document.getElementById('test-description').value.trim()
             };
