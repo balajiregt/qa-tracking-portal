@@ -1628,8 +1628,379 @@
             showNotification('Test results modal would open here');
         }
 
+        // Tag-based Test Case System
+        const TEST_INTENTS = {
+            'regression': {
+                name: 'Regression Testing',
+                icon: '🔄',
+                description: 'Full regression test suite',
+                tags: ['@regression', '@smoke', '@critical']
+            },
+            'e2e': {
+                name: 'End-to-End Testing', 
+                icon: '🌐',
+                description: 'Complete user journey testing',
+                tags: ['@e2e', '@integration', '@flow']
+            },
+            'smoke': {
+                name: 'Smoke Testing',
+                icon: '💨',
+                description: 'Quick validation of core functionality',
+                tags: ['@smoke', '@sanity', '@quick']
+            },
+            'api': {
+                name: 'API Testing',
+                icon: '🔗',
+                description: 'Backend API and integration testing',
+                tags: ['@api', '@backend', '@integration']
+            },
+            'ui': {
+                name: 'UI Testing',
+                icon: '🎨',
+                description: 'User interface and visual testing',
+                tags: ['@ui', '@visual', '@frontend']
+            },
+            'performance': {
+                name: 'Performance Testing',
+                icon: '⚡',
+                description: 'Load and performance validation',
+                tags: ['@performance', '@load', '@stress']
+            }
+        };
+
+        class TagBasedTestExtractor {
+            constructor() {
+                this.testCaseDatabase = this.initializeTestCases();
+            }
+
+            initializeTestCases() {
+                // Mock test case database organized by tags
+                return {
+                    '@regression': [
+                        { name: 'User Login Flow', steps: ['Navigate to login', 'Enter credentials', 'Verify dashboard'], duration: 2500 },
+                        { name: 'Product Search', steps: ['Enter search term', 'Filter results', 'Verify products'], duration: 1800 },
+                        { name: 'Checkout Process', steps: ['Add to cart', 'Proceed to checkout', 'Complete payment'], duration: 3200 }
+                    ],
+                    '@e2e': [
+                        { name: 'Complete Purchase Journey', steps: ['Browse products', 'Add to cart', 'Checkout', 'Payment', 'Order confirmation'], duration: 4500 },
+                        { name: 'User Registration to First Purchase', steps: ['Register account', 'Verify email', 'Login', 'Browse', 'Purchase'], duration: 5200 }
+                    ],
+                    '@smoke': [
+                        { name: 'Application Load Test', steps: ['Open application', 'Verify home page loads', 'Check navigation'], duration: 800 },
+                        { name: 'Critical Path Validation', steps: ['Login check', 'Main features accessible', 'Basic functionality'], duration: 1200 }
+                    ],
+                    '@api': [
+                        { name: 'User Authentication API', steps: ['POST /auth/login', 'Verify token', 'Test protected routes'], duration: 1500 },
+                        { name: 'Product Catalog API', steps: ['GET /products', 'Verify response format', 'Test pagination'], duration: 900 }
+                    ],
+                    '@ui': [
+                        { name: 'Responsive Design Test', steps: ['Test mobile view', 'Test tablet view', 'Test desktop view'], duration: 2100 },
+                        { name: 'Theme Switching', steps: ['Switch to dark mode', 'Verify colors', 'Switch to light mode'], duration: 1600 }
+                    ],
+                    '@performance': [
+                        { name: 'Page Load Performance', steps: ['Measure initial load', 'Test with network throttling', 'Verify metrics'], duration: 3000 },
+                        { name: 'API Response Times', steps: ['Measure API latency', 'Test under load', 'Verify thresholds'], duration: 2800 }
+                    ]
+                };
+            }
+
+            extractTestCasesByTagAndIntent(selectedTags, intent, traceFile = null) {
+                const intentConfig = TEST_INTENTS[intent];
+                if (!intentConfig) {
+                    throw new Error('Invalid test intent specified');
+                }
+
+                const relevantTags = selectedTags.length > 0 ? selectedTags : intentConfig.tags;
+                const extractedTests = [];
+
+                relevantTags.forEach(tag => {
+                    const testsForTag = this.testCaseDatabase[tag] || [];
+                    testsForTag.forEach(test => {
+                        extractedTests.push({
+                            id: `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            name: test.name,
+                            tag: tag,
+                            intent: intent,
+                            description: `${intentConfig.description} - ${test.name}`,
+                            steps: test.steps,
+                            expectedDuration: test.duration,
+                            status: traceFile ? 'extracted' : 'planned',
+                            sourceFile: traceFile?.name || 'Tag-based extraction',
+                            timestamp: new Date().toISOString()
+                        });
+                    });
+                });
+
+                return this.removeDuplicates(extractedTests);
+            }
+
+            removeDuplicates(testCases) {
+                const seen = new Set();
+                return testCases.filter(test => {
+                    const key = `${test.name}_${test.tag}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            }
+
+            getAvailableTags() {
+                return Object.keys(this.testCaseDatabase);
+            }
+        }
+
+        const tagExtractor = new TagBasedTestExtractor();
+
         function showTraceUploadModal() {
-            showNotification('Trace upload modal would open here');
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <div class="modal-header">🏷️ Tag-Based Test Case Extraction</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Select PR</label>
+                        <select class="form-select" id="pr-select">
+                            <option value="pr1">feature/shopping-cart-improvements</option>
+                            <option value="pr2">feature/user-authentication-fix</option>
+                            <option value="pr3">hotfix/payment-gateway-timeout</option>
+                            <option value="pr4">feature/dark-mode-toggle</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Test Intent</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                            ${Object.entries(TEST_INTENTS).map(([key, intent]) => `
+                                <label style="display: flex; align-items: center; padding: 15px; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+                                    <input type="radio" name="test-intent" value="${key}" style="margin-right: 10px;">
+                                    <div>
+                                        <div style="font-size: 1.2em;">${intent.icon} ${intent.name}</div>
+                                        <div style="font-size: 0.8em; color: #6c757d; margin-top: 5px;">${intent.description}</div>
+                                    </div>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Specific Tags (Optional)</label>
+                        <div id="tag-selector" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                            ${tagExtractor.getAvailableTags().map(tag => `
+                                <label style="display: flex; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: all 0.3s ease;">
+                                    <input type="checkbox" value="${tag}" style="margin-right: 8px;">
+                                    <span>${tag}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.85em; color: #6c757d;">
+                            Leave empty to use default tags for selected intent
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Trace Files (Optional)</label>
+                        <div class="file-upload-area" id="trace-upload-area">
+                            <div class="upload-icon">📁</div>
+                            <p><strong>Drop trace files here or click to browse</strong></p>
+                            <p>Optional: Upload traces to enhance test case details</p>
+                            <input type="file" id="trace-files" multiple accept=".zip,.json,.har" style="display: none;">
+                        </div>
+                        <div id="selected-files"></div>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="extractTestCasesByTag()" style="flex: 1;">
+                            🔬 Extract Test Cases
+                        </button>
+                        <button class="btn btn-secondary" onclick="previewTestCases()" style="flex: 1;">
+                            👁️ Preview
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Setup file upload (optional)
+            setupFileUpload(modal);
+            
+            // Setup intent radio button styling
+            setupIntentSelection(modal);
+        }
+
+        function setupFileUpload(modal) {
+            const uploadArea = modal.querySelector('#trace-upload-area');
+            const fileInput = modal.querySelector('#trace-files');
+            const selectedFilesDiv = modal.querySelector('#selected-files');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                displaySelectedFiles(e.dataTransfer.files, selectedFilesDiv);
+            });
+            fileInput.addEventListener('change', (e) => {
+                displaySelectedFiles(e.target.files, selectedFilesDiv);
+            });
+        }
+
+        function displaySelectedFiles(files, container) {
+            const fileList = Array.from(files);
+            container.innerHTML = fileList.map(file => `
+                <div style="display: flex; align-items: center; padding: 8px; background: #e8f5e8; border-radius: 5px; margin: 5px 0;">
+                    <span>📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                </div>
+            `).join('');
+        }
+
+        function setupIntentSelection(modal) {
+            const intentRadios = modal.querySelectorAll('input[name="test-intent"]');
+            intentRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    // Remove previous selections
+                    intentRadios.forEach(r => {
+                        r.parentElement.style.borderColor = '#e9ecef';
+                        r.parentElement.style.backgroundColor = 'transparent';
+                    });
+                    
+                    // Highlight selected
+                    if (e.target.checked) {
+                        e.target.parentElement.style.borderColor = '#3498db';
+                        e.target.parentElement.style.backgroundColor = '#e3f2fd';
+                    }
+                });
+            });
+        }
+
+        async function extractTestCasesByTag() {
+            const selectedIntent = document.querySelector('input[name="test-intent"]:checked')?.value;
+            if (!selectedIntent) {
+                showNotification('Please select a test intent', 'error');
+                return;
+            }
+
+            const selectedTags = Array.from(document.querySelectorAll('#tag-selector input:checked'))
+                .map(input => input.value);
+            
+            const prId = document.getElementById('pr-select').value;
+            const fileInput = document.getElementById('trace-files');
+            const traceFile = fileInput.files[0] || null;
+
+            try {
+                const testCases = tagExtractor.extractTestCasesByTagAndIntent(selectedTags, selectedIntent, traceFile);
+                
+                // Close modal
+                document.querySelector('.modal').remove();
+                
+                // Add test cases to the PR
+                addExtractedTestCasesToPR(prId, testCases, selectedIntent);
+                
+                showNotification(`Extracted ${testCases.length} test cases for ${TEST_INTENTS[selectedIntent].name}!`);
+                
+            } catch (error) {
+                showNotification(`Error extracting test cases: ${error.message}`, 'error');
+            }
+        }
+
+        function previewTestCases() {
+            const selectedIntent = document.querySelector('input[name="test-intent"]:checked')?.value;
+            if (!selectedIntent) {
+                showNotification('Please select a test intent first', 'error');
+                return;
+            }
+
+            const selectedTags = Array.from(document.querySelectorAll('#tag-selector input:checked'))
+                .map(input => input.value);
+
+            try {
+                const testCases = tagExtractor.extractTestCasesByTagAndIntent(selectedTags, selectedIntent);
+                
+                const previewContent = testCases.map(test => `
+                    <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                        <div style="font-weight: 600; color: #2c3e50;">${test.name}</div>
+                        <div style="color: #6c757d; font-size: 0.9em; margin: 5px 0;">Tag: ${test.tag}</div>
+                        <div style="margin-top: 8px;">
+                            <strong>Steps:</strong>
+                            <ol style="margin: 5px 0 0 20px;">
+                                ${test.steps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                        <div style="color: #6c757d; font-size: 0.8em; margin-top: 8px;">
+                            Expected Duration: ${test.expectedDuration}ms
+                        </div>
+                    </div>
+                `).join('');
+
+                showNotification(`Preview: ${testCases.length} test cases would be extracted`);
+                
+                // Could show a detailed preview modal here
+                console.log('Test Cases Preview:', testCases);
+                
+            } catch (error) {
+                showNotification(`Error generating preview: ${error.message}`, 'error');
+            }
+        }
+
+        function addExtractedTestCasesToPR(prId, testCases, intent) {
+            const prCards = document.querySelectorAll('.pr-card');
+            
+            // For demo, add to the first PR card
+            if (prCards.length > 0) {
+                const card = prCards[0];
+                const testSection = card.querySelector('.test-section');
+                
+                if (testSection) {
+                    const extractedSection = document.createElement('div');
+                    extractedSection.className = 'test-section';
+                    extractedSection.innerHTML = `
+                        <div class="test-section-title">
+                            ${TEST_INTENTS[intent].icon} ${TEST_INTENTS[intent].name} - Extracted Test Cases
+                        </div>
+                    `;
+
+                    testCases.forEach(testCase => {
+                        const testItem = document.createElement('div');
+                        testItem.className = 'test-item';
+                        testItem.innerHTML = `
+                            <div class="test-info">
+                                <div class="test-name">${testCase.name}</div>
+                                <div class="test-meta">
+                                    <span>🏷️ ${testCase.tag}</span>
+                                    <span>⏱️ ~${testCase.expectedDuration}ms</span>
+                                    <span>📋 ${testCase.steps.length} steps</span>
+                                </div>
+                                <div class="test-steps" style="margin-top: 10px;">
+                                    <strong>Steps:</strong>
+                                    <ol style="margin-left: 20px; margin-top: 5px;">
+                                        ${testCase.steps.map(step => `<li style="margin-bottom: 3px;">${step}</li>`).join('')}
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="test-actions">
+                                <span class="badge badge-info">Tag-Extracted</span>
+                                <button class="btn btn-small btn-primary" onclick="executeTestCase('${testCase.id}')">Execute</button>
+                            </div>
+                        `;
+                        extractedSection.appendChild(testItem);
+                    });
+
+                    testSection.parentNode.insertBefore(extractedSection, testSection);
+                }
+            }
+        }
+
+        function executeTestCase(testCaseId) {
+            showNotification(`Executing test case: ${testCaseId}`);
+            // In real implementation, trigger test execution
         }
 
         function viewTrace(filename) {
