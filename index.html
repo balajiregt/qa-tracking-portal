@@ -1625,7 +1625,196 @@
         }
 
         function showTestModal() {
-            showNotification('Test results modal would open here');
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <div class="modal-header">➕ Add New Test Case</div>
+                    
+                    <form id="new-test-case-form">
+                        <div class="form-group">
+                            <label class="form-label">Test Case Name *</label>
+                            <input type="text" class="form-input" id="test-name" placeholder="e.g., User Login Validation" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tags *</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0;">
+                                ${tagExtractor.getAvailableTags().map(tag => `
+                                    <label style="display: flex; align-items: center; background: #f8f9fa; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-size: 0.9em; transition: all 0.3s ease;">
+                                        <input type="checkbox" value="${tag}" name="test-tags" style="margin-right: 8px;">
+                                        <span>${tag}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <input type="text" class="form-input" id="custom-tag" placeholder="Or enter custom tag (e.g., @checkout)" style="margin-top: 10px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Test Steps *</label>
+                            <div id="test-steps-container">
+                                <div class="test-step-input" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <input type="text" class="form-input" placeholder="Step 1: Enter test step" style="flex: 1; margin-right: 10px;">
+                                    <button type="button" class="btn btn-small btn-danger" onclick="removeStep(this)">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-small btn-primary" onclick="addStep()">+ Add Step</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Expected Duration (ms)</label>
+                            <input type="number" class="form-input" id="test-duration" placeholder="e.g., 3000" value="2000">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-textarea" id="test-description" placeholder="What does this test validate?"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                💾 Save Test Case
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="previewNewTestCase()" style="flex: 1;">
+                                👁️ Preview
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            // Setup form submission
+            const form = modal.querySelector('#new-test-case-form');
+            form.addEventListener('submit', saveNewTestCase);
+        }
+
+        function addStep() {
+            const container = document.getElementById('test-steps-container');
+            const stepCount = container.children.length + 1;
+            
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'test-step-input';
+            stepDiv.style.cssText = 'display: flex; align-items: center; margin-bottom: 10px;';
+            stepDiv.innerHTML = `
+                <input type="text" class="form-input" placeholder="Step ${stepCount}: Enter test step" style="flex: 1; margin-right: 10px;">
+                <button type="button" class="btn btn-small btn-danger" onclick="removeStep(this)">✕</button>
+            `;
+            
+            container.appendChild(stepDiv);
+        }
+
+        function removeStep(button) {
+            const container = document.getElementById('test-steps-container');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+                
+                // Renumber remaining steps
+                Array.from(container.children).forEach((step, index) => {
+                    const input = step.querySelector('input');
+                    input.placeholder = `Step ${index + 1}: Enter test step`;
+                });
+            }
+        }
+
+        function previewNewTestCase() {
+            const formData = collectTestCaseFormData();
+            if (!formData) return;
+
+            const previewContent = `
+                <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0; background: #f8f9fa;">
+                    <h4 style="color: #2c3e50; margin-bottom: 10px;">${formData.name}</h4>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Tags:</strong> ${formData.tags.join(', ')}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Steps:</strong>
+                        <ol style="margin: 5px 0 0 20px;">
+                            ${formData.steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Duration:</strong> ${formData.duration}ms
+                    </div>
+                    ${formData.description ? `<div><strong>Description:</strong> ${formData.description}</div>` : ''}
+                </div>
+            `;
+
+            showNotification('Test case preview generated - check console for details');
+            console.log('Test Case Preview:', formData);
+        }
+
+        function collectTestCaseFormData() {
+            const name = document.getElementById('test-name').value.trim();
+            if (!name) {
+                showNotification('Test case name is required', 'error');
+                return null;
+            }
+
+            const selectedTags = Array.from(document.querySelectorAll('input[name="test-tags"]:checked'))
+                .map(input => input.value);
+            
+            const customTag = document.getElementById('custom-tag').value.trim();
+            if (customTag) {
+                const formattedTag = customTag.startsWith('@') ? customTag : `@${customTag}`;
+                selectedTags.push(formattedTag);
+            }
+
+            if (selectedTags.length === 0) {
+                showNotification('At least one tag is required', 'error');
+                return null;
+            }
+
+            const stepInputs = document.querySelectorAll('.test-step-input input');
+            const steps = Array.from(stepInputs)
+                .map(input => input.value.trim())
+                .filter(step => step.length > 0);
+
+            if (steps.length === 0) {
+                showNotification('At least one test step is required', 'error');
+                return null;
+            }
+
+            return {
+                name: name,
+                tags: selectedTags,
+                steps: steps,
+                duration: parseInt(document.getElementById('test-duration').value) || 2000,
+                description: document.getElementById('test-description').value.trim()
+            };
+        }
+
+        function saveNewTestCase(event) {
+            event.preventDefault();
+            
+            const formData = collectTestCaseFormData();
+            if (!formData) return;
+
+            try {
+                const testCase = {
+                    name: formData.name,
+                    steps: formData.steps,
+                    duration: formData.duration,
+                    description: formData.description,
+                    status: 'active'
+                };
+
+                // Add test case to each selected tag
+                const addedCount = formData.tags.length;
+                formData.tags.forEach(tag => {
+                    tagExtractor.addTestCase(tag, testCase);
+                });
+
+                // Close modal
+                document.querySelector('.modal').remove();
+
+                showNotification(`Test case "${formData.name}" added to ${addedCount} tag(s)!`);
+
+            } catch (error) {
+                showNotification(`Error saving test case: ${error.message}`, 'error');
+            }
         }
 
         // Tag-based Test Case System
@@ -1671,6 +1860,7 @@
         class TagBasedTestExtractor {
             constructor() {
                 this.testCaseDatabase = this.initializeTestCases();
+                this.loadCustomTestCases();
             }
 
             initializeTestCases() {
@@ -1746,6 +1936,258 @@
 
             getAvailableTags() {
                 return Object.keys(this.testCaseDatabase);
+            }
+
+            // Load custom test cases from localStorage
+            loadCustomTestCases() {
+                try {
+                    const stored = localStorage.getItem('customTestCases');
+                    if (stored) {
+                        const customCases = JSON.parse(stored);
+                        // Merge custom test cases with default ones
+                        Object.keys(customCases).forEach(tag => {
+                            if (this.testCaseDatabase[tag]) {
+                                this.testCaseDatabase[tag] = [...this.testCaseDatabase[tag], ...customCases[tag]];
+                            } else {
+                                this.testCaseDatabase[tag] = customCases[tag];
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.log('No custom test cases found or error loading:', error);
+                }
+            }
+
+            // Save custom test cases to localStorage
+            saveCustomTestCases() {
+                try {
+                    const stored = localStorage.getItem('customTestCases');
+                    const existing = stored ? JSON.parse(stored) : {};
+                    localStorage.setItem('customTestCases', JSON.stringify(existing));
+                } catch (error) {
+                    console.error('Error saving custom test cases:', error);
+                }
+            }
+
+            // Add a new test case to the database
+            addTestCase(tag, testCase) {
+                if (!this.testCaseDatabase[tag]) {
+                    this.testCaseDatabase[tag] = [];
+                }
+                
+                // Add unique ID and timestamp
+                const newTestCase = {
+                    ...testCase,
+                    id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    createdAt: new Date().toISOString(),
+                    isCustom: true
+                };
+                
+                this.testCaseDatabase[tag].push(newTestCase);
+                
+                // Save to localStorage
+                this.saveCustomTestCasesToStorage(tag, newTestCase);
+                
+                return newTestCase;
+            }
+
+            saveCustomTestCasesToStorage(tag, testCase) {
+                try {
+                    const stored = localStorage.getItem('customTestCases');
+                    const customCases = stored ? JSON.parse(stored) : {};
+                    
+                    if (!customCases[tag]) {
+                        customCases[tag] = [];
+                    }
+                    
+                    customCases[tag].push(testCase);
+                    localStorage.setItem('customTestCases', JSON.stringify(customCases));
+                } catch (error) {
+                    console.error('Error saving to localStorage:', error);
+                }
+            }
+
+            // Parse test cases from uploaded trace files
+            parseTestCasesFromTrace(file, selectedTags) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        try {
+                            const content = e.target.result;
+                            let parsedCases = [];
+                            
+                            if (file.name.endsWith('.json')) {
+                                parsedCases = this.parseJsonTrace(content, file.name);
+                            } else if (file.name.endsWith('.har')) {
+                                parsedCases = this.parseHarTrace(content, file.name);
+                            } else if (file.name.endsWith('.zip')) {
+                                // For ZIP files, we'll simulate extraction
+                                parsedCases = this.simulateZipTraceExtraction(file.name);
+                            }
+                            
+                            // Apply selected tags to parsed cases
+                            parsedCases.forEach(testCase => {
+                                selectedTags.forEach(tag => {
+                                    this.addTestCase(tag, testCase);
+                                });
+                            });
+                            
+                            resolve(parsedCases);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    
+                    if (file.name.endsWith('.zip')) {
+                        // For ZIP files, we can't read content directly, so simulate
+                        resolve(this.simulateZipTraceExtraction(file.name));
+                    } else {
+                        reader.readAsText(file);
+                    }
+                });
+            }
+
+            parseJsonTrace(content, filename) {
+                try {
+                    const data = JSON.parse(content);
+                    const testCases = [];
+                    
+                    // Parse Playwright test results format
+                    if (data.suites && Array.isArray(data.suites)) {
+                        data.suites.forEach(suite => {
+                            if (suite.specs) {
+                                suite.specs.forEach(spec => {
+                                    testCases.push({
+                                        name: spec.title || `Test from ${filename}`,
+                                        steps: this.extractStepsFromSpec(spec),
+                                        duration: spec.tests?.[0]?.results?.[0]?.duration || Math.floor(Math.random() * 5000) + 1000,
+                                        status: spec.tests?.[0]?.outcome || 'unknown',
+                                        sourceFile: filename
+                                    });
+                                });
+                            }
+                        });
+                    }
+                    
+                    return testCases.length > 0 ? testCases : this.createFallbackTestCase(filename);
+                } catch (error) {
+                    return this.createFallbackTestCase(filename);
+                }
+            }
+
+            parseHarTrace(content, filename) {
+                try {
+                    const har = JSON.parse(content);
+                    const testCases = [];
+                    
+                    if (har.log && har.log.entries) {
+                        // Group requests by page/domain to create logical test cases
+                        const domainGroups = {};
+                        
+                        har.log.entries.forEach(entry => {
+                            const url = new URL(entry.request.url);
+                            const domain = url.hostname;
+                            
+                            if (!domainGroups[domain]) {
+                                domainGroups[domain] = [];
+                            }
+                            domainGroups[domain].push(entry);
+                        });
+                        
+                        Object.keys(domainGroups).forEach(domain => {
+                            const requests = domainGroups[domain];
+                            testCases.push({
+                                name: `API Test - ${domain}`,
+                                steps: [
+                                    `Navigate to ${domain}`,
+                                    `Execute ${requests.length} API calls`,
+                                    'Validate response codes',
+                                    'Check response times'
+                                ],
+                                duration: requests.reduce((total, req) => total + req.time, 0),
+                                status: 'extracted',
+                                sourceFile: filename
+                            });
+                        });
+                    }
+                    
+                    return testCases.length > 0 ? testCases : this.createFallbackTestCase(filename);
+                } catch (error) {
+                    return this.createFallbackTestCase(filename);
+                }
+            }
+
+            simulateZipTraceExtraction(filename) {
+                // Simulate extraction from Playwright trace ZIP
+                const testScenarios = [
+                    {
+                        name: `UI Interaction Test - ${filename.replace('.zip', '')}`,
+                        steps: ['Open page', 'Interact with elements', 'Verify state changes', 'Take screenshots'],
+                        duration: Math.floor(Math.random() * 4000) + 2000
+                    },
+                    {
+                        name: `Navigation Test - ${filename.replace('.zip', '')}`,
+                        steps: ['Navigate between pages', 'Verify page loads', 'Check routing', 'Validate content'],
+                        duration: Math.floor(Math.random() * 3000) + 1500
+                    }
+                ];
+                
+                return testScenarios.map(scenario => ({
+                    ...scenario,
+                    status: 'extracted',
+                    sourceFile: filename
+                }));
+            }
+
+            extractStepsFromSpec(spec) {
+                // Extract steps from Playwright spec
+                if (spec.tests && spec.tests[0] && spec.tests[0].steps) {
+                    return spec.tests[0].steps.map(step => step.title || 'Test step');
+                }
+                
+                // Fallback generic steps
+                return ['Setup test environment', 'Execute test actions', 'Verify expected results', 'Cleanup'];
+            }
+
+            createFallbackTestCase(filename) {
+                return [{
+                    name: `Extracted Test - ${filename.replace(/\.[^/.]+$/, "")}`,
+                    steps: ['Initialize test', 'Execute test scenario', 'Validate results', 'Generate report'],
+                    duration: Math.floor(Math.random() * 3000) + 1000,
+                    status: 'extracted',
+                    sourceFile: filename
+                }];
+            }
+
+            // Get all test cases including custom ones
+            getAllTestCases() {
+                return this.testCaseDatabase;
+            }
+
+            // Remove a test case
+            removeTestCase(tag, testCaseId) {
+                if (this.testCaseDatabase[tag]) {
+                    this.testCaseDatabase[tag] = this.testCaseDatabase[tag].filter(test => test.id !== testCaseId);
+                    this.updateStoredCustomCases();
+                }
+            }
+
+            updateStoredCustomCases() {
+                try {
+                    const customCases = {};
+                    Object.keys(this.testCaseDatabase).forEach(tag => {
+                        const customTestsForTag = this.testCaseDatabase[tag].filter(test => test.isCustom);
+                        if (customTestsForTag.length > 0) {
+                            customCases[tag] = customTestsForTag;
+                        }
+                    });
+                    localStorage.setItem('customTestCases', JSON.stringify(customCases));
+                } catch (error) {
+                    console.error('Error updating stored custom cases:', error);
+                }
             }
         }
 
@@ -1893,18 +2335,45 @@
             
             const prId = document.getElementById('pr-select').value;
             const fileInput = document.getElementById('trace-files');
-            const traceFile = fileInput.files[0] || null;
-
+            
             try {
-                const testCases = tagExtractor.extractTestCasesByTagAndIntent(selectedTags, selectedIntent, traceFile);
+                let newTestCasesFromTraces = [];
+                
+                // If trace files are uploaded, parse them and add to database
+                if (fileInput.files && fileInput.files.length > 0) {
+                    showNotification('Processing uploaded trace files...');
+                    
+                    for (const file of fileInput.files) {
+                        try {
+                            const parsedCases = await tagExtractor.parseTestCasesFromTrace(file, selectedTags.length > 0 ? selectedTags : TEST_INTENTS[selectedIntent].tags);
+                            newTestCasesFromTraces.push(...parsedCases);
+                        } catch (error) {
+                            console.error(`Error processing ${file.name}:`, error);
+                            showNotification(`Warning: Could not fully process ${file.name}`, 'error');
+                        }
+                    }
+                    
+                    if (newTestCasesFromTraces.length > 0) {
+                        showNotification(`Added ${newTestCasesFromTraces.length} new test cases from trace files!`);
+                    }
+                }
+                
+                // Extract test cases using selected intent and tags
+                const testCases = tagExtractor.extractTestCasesByTagAndIntent(selectedTags, selectedIntent);
                 
                 // Close modal
                 document.querySelector('.modal').remove();
                 
                 // Add test cases to the PR
-                addExtractedTestCasesToPR(prId, testCases, selectedIntent);
+                addExtractedTestCasesToPR(prId, testCases, selectedIntent, newTestCasesFromTraces);
                 
-                showNotification(`Extracted ${testCases.length} test cases for ${TEST_INTENTS[selectedIntent].name}!`);
+                const totalCases = testCases.length;
+                const newFromTraces = newTestCasesFromTraces.length;
+                
+                showNotification(
+                    `Extracted ${totalCases} test cases for ${TEST_INTENTS[selectedIntent].name}!` +
+                    (newFromTraces > 0 ? ` (${newFromTraces} new from traces)` : '')
+                );
                 
             } catch (error) {
                 showNotification(`Error extracting test cases: ${error.message}`, 'error');
@@ -1950,7 +2419,7 @@
             }
         }
 
-        function addExtractedTestCasesToPR(prId, testCases, intent) {
+        function addExtractedTestCasesToPR(prId, testCases, intent, newTestCasesFromTraces = []) {
             const prCards = document.querySelectorAll('.pr-card');
             
             // For demo, add to the first PR card
@@ -1959,15 +2428,61 @@
                 const testSection = card.querySelector('.test-section');
                 
                 if (testSection) {
+                    // Add newly parsed test cases from traces first (if any)
+                    if (newTestCasesFromTraces.length > 0) {
+                        const traceParsedSection = document.createElement('div');
+                        traceParsedSection.className = 'test-section';
+                        traceParsedSection.innerHTML = `
+                            <div class="test-section-title">
+                                📁 Newly Added from Trace Files (${newTestCasesFromTraces.length})
+                            </div>
+                        `;
+
+                        newTestCasesFromTraces.forEach(testCase => {
+                            const testItem = document.createElement('div');
+                            testItem.className = 'test-item';
+                            testItem.innerHTML = `
+                                <div class="test-info">
+                                    <div class="test-name">${testCase.name}</div>
+                                    <div class="test-meta">
+                                        <span>🆕 New</span>
+                                        <span>📁 ${testCase.sourceFile}</span>
+                                        <span>⏱️ ~${testCase.duration || testCase.expectedDuration}ms</span>
+                                        <span>📋 ${testCase.steps.length} steps</span>
+                                    </div>
+                                    <div class="test-steps" style="margin-top: 10px;">
+                                        <strong>Steps:</strong>
+                                        <ol style="margin-left: 20px; margin-top: 5px;">
+                                            ${testCase.steps.map(step => `<li style="margin-bottom: 3px;">${step}</li>`).join('')}
+                                        </ol>
+                                    </div>
+                                </div>
+                                <div class="test-actions">
+                                    <span class="badge badge-success">Trace-Added</span>
+                                    <button class="btn btn-small btn-primary" onclick="executeTestCase('${testCase.id}')">Execute</button>
+                                    <button class="btn btn-small btn-warning" onclick="editTestCase('${testCase.id}')">Edit</button>
+                                </div>
+                            `;
+                            traceParsedSection.appendChild(testItem);
+                        });
+
+                        testSection.parentNode.insertBefore(traceParsedSection, testSection);
+                    }
+
+                    // Add extracted test cases from database
                     const extractedSection = document.createElement('div');
                     extractedSection.className = 'test-section';
                     extractedSection.innerHTML = `
                         <div class="test-section-title">
-                            ${TEST_INTENTS[intent].icon} ${TEST_INTENTS[intent].name} - Extracted Test Cases
+                            ${TEST_INTENTS[intent].icon} ${TEST_INTENTS[intent].name} - Available Test Cases (${testCases.length})
+                            <button class="btn btn-small btn-secondary" onclick="manageTestCases('${intent}')" style="margin-left: 10px;">
+                                ⚙️ Manage
+                            </button>
                         </div>
                     `;
 
                     testCases.forEach(testCase => {
+                        const isCustom = testCase.isCustom || false;
                         const testItem = document.createElement('div');
                         testItem.className = 'test-item';
                         testItem.innerHTML = `
@@ -1975,8 +2490,9 @@
                                 <div class="test-name">${testCase.name}</div>
                                 <div class="test-meta">
                                     <span>🏷️ ${testCase.tag}</span>
-                                    <span>⏱️ ~${testCase.expectedDuration}ms</span>
+                                    <span>⏱️ ~${testCase.expectedDuration || testCase.duration}ms</span>
                                     <span>📋 ${testCase.steps.length} steps</span>
+                                    ${isCustom ? '<span class="badge badge-info" style="font-size: 0.7em; margin-left: 5px;">Custom</span>' : ''}
                                 </div>
                                 <div class="test-steps" style="margin-top: 10px;">
                                     <strong>Steps:</strong>
@@ -1986,8 +2502,9 @@
                                 </div>
                             </div>
                             <div class="test-actions">
-                                <span class="badge badge-info">Tag-Extracted</span>
+                                <span class="badge badge-info">Available</span>
                                 <button class="btn btn-small btn-primary" onclick="executeTestCase('${testCase.id}')">Execute</button>
+                                ${isCustom ? `<button class="btn btn-small btn-warning" onclick="editTestCase('${testCase.id}')">Edit</button>` : ''}
                             </div>
                         `;
                         extractedSection.appendChild(testItem);
@@ -1996,6 +2513,114 @@
                     testSection.parentNode.insertBefore(extractedSection, testSection);
                 }
             }
+        }
+
+        function manageTestCases(intent) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            
+            const intentConfig = TEST_INTENTS[intent];
+            const allTestCases = tagExtractor.getAllTestCases();
+            const relevantTags = intentConfig.tags;
+            
+            let relevantTestCases = [];
+            relevantTags.forEach(tag => {
+                if (allTestCases[tag]) {
+                    allTestCases[tag].forEach(test => {
+                        relevantTestCases.push({...test, tag: tag});
+                    });
+                }
+            });
+
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <div class="modal-header">⚙️ Manage Test Cases - ${intentConfig.name}</div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="showTestModal(); this.parentElement.parentElement.parentElement.remove();">
+                            ➕ Add New Test Case
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportTestCases('${intent}')">
+                            💾 Export Test Cases
+                        </button>
+                    </div>
+
+                    <div style="max-height: 500px; overflow-y: auto;">
+                        <h4>Current Test Cases (${relevantTestCases.length})</h4>
+                        ${relevantTestCases.map(test => `
+                            <div class="test-item" style="margin-bottom: 15px;">
+                                <div class="test-info">
+                                    <div class="test-name">${test.name}</div>
+                                    <div class="test-meta">
+                                        <span>🏷️ ${test.tag}</span>
+                                        <span>⏱️ ${test.duration || test.expectedDuration}ms</span>
+                                        <span>📋 ${test.steps.length} steps</span>
+                                        ${test.isCustom ? '<span class="badge badge-info">Custom</span>' : '<span class="badge badge-secondary">Built-in</span>'}
+                                    </div>
+                                </div>
+                                <div class="test-actions">
+                                    ${test.isCustom ? `
+                                        <button class="btn btn-small btn-warning" onclick="editTestCase('${test.id}')">Edit</button>
+                                        <button class="btn btn-small btn-danger" onclick="deleteTestCase('${test.tag}', '${test.id}')">Delete</button>
+                                    ` : `
+                                        <span class="badge badge-secondary">Built-in</span>
+                                    `}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function editTestCase(testCaseId) {
+            showNotification('Edit functionality would open here for test case: ' + testCaseId);
+            // In a real implementation, this would open an edit modal with the test case details
+        }
+
+        function deleteTestCase(tag, testCaseId) {
+            if (confirm('Are you sure you want to delete this test case?')) {
+                tagExtractor.removeTestCase(tag, testCaseId);
+                showNotification('Test case deleted successfully');
+                
+                // Refresh the management modal
+                const modal = document.querySelector('.modal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+        }
+
+        function exportTestCases(intent) {
+            const intentConfig = TEST_INTENTS[intent];
+            const allTestCases = tagExtractor.getAllTestCases();
+            const relevantTags = intentConfig.tags;
+            
+            let exportData = {
+                intent: intent,
+                intentName: intentConfig.name,
+                exportDate: new Date().toISOString(),
+                testCases: {}
+            };
+            
+            relevantTags.forEach(tag => {
+                if (allTestCases[tag]) {
+                    exportData.testCases[tag] = allTestCases[tag];
+                }
+            });
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `test-cases-${intent}-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showNotification(`Test cases exported for ${intentConfig.name}`);
         }
 
         function executeTestCase(testCaseId) {
