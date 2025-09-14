@@ -10,7 +10,6 @@
   to = "/index.html"
   status = 200
 
-# Functions temporarily disabled to deploy frontend first
-# [functions]
-#   external_node_modules = ["github-api", "@octokit/rest"]
-#   node_bundler = "esbuild"
+[functions]
+  external_node_modules = ["github-api", "@octokit/rest"]
+  node_bundler = "esbuild"

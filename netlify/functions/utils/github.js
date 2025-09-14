@@ -1,5 +1,5 @@
 // GitHub API utility functions
-const { Octokit } = require("@octokit/rest");
+import { Octokit } from "@octokit/rest";
 
 class GitHubAPI {
   constructor() {
@@ -203,4 +203,4 @@ class GitHubAPI {
   }
 }
 
-module.exports = GitHubAPI;
+export default GitHubAPI;

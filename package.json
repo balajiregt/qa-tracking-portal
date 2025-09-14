@@ -18,7 +18,9 @@
     "@heroicons/react": "^2.0.16",
     "lucide-react": "^0.263.1",
     "date-fns": "^2.29.3",
-    "clsx": "^1.2.1"
+    "clsx": "^1.2.1",
+    "@octokit/rest": "^20.0.0",
+    "github-api": "^3.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
