@@ -7,59 +7,53 @@ function Dashboard() {
   
   // Focus on PR Testing Progress with Branch-Specific Data
   const prsWithTestProgress = state.prs.map(pr => {
-    const associatedTests = state.testCases.filter(tc => 
-      pr.testCases?.includes(tc.id)
-    )
+    // Use actual test results from PR data
+    const testResults = pr.test_results || []
+    const totalTests = testResults.length
     
-    const totalTests = associatedTests.length
+    // Count test results by status
+    const passedTests = testResults.filter(tr => tr.status === 'passed').length
+    const failedTests = testResults.filter(tr => tr.status === 'failed').length
+    const pendingTests = totalTests - passedTests - failedTests
     
-    // Local branch results
-    const localPassedTests = associatedTests.filter(tc => tc.localResult === 'Pass').length
-    const localFailedTests = associatedTests.filter(tc => tc.localResult === 'Fail').length
-    const localPendingTests = associatedTests.filter(tc => tc.localResult === 'Pending' || !tc.localResult).length
-    
-    // Main branch results (expected to fail for new features)
-    const mainPassedTests = associatedTests.filter(tc => tc.mainResult === 'Pass').length
-    const mainFailedTests = associatedTests.filter(tc => tc.mainResult === 'Fail').length
-    const mainPendingTests = associatedTests.filter(tc => tc.mainResult === 'Pending' || !tc.mainResult).length
+    // Branch test counts from branch_comparison data
+    const featureBranchPassed = pr.branch_comparison?.feature_branch?.tests_passed || 0
+    const featureBranchFailed = pr.branch_comparison?.feature_branch?.tests_failed || 0
+    const mainBranchPassed = pr.branch_comparison?.main_branch?.tests_passed || 0
+    const mainBranchFailed = pr.branch_comparison?.main_branch?.tests_failed || 0
     
     // Overall progress calculation
-    const localProgress = totalTests > 0 ? (localPassedTests / totalTests) * 100 : 0
-    const testProgress = localProgress // Use local branch progress as main indicator
+    const progress = pr.progress || 0
+    const localProgress = totalTests > 0 ? (passedTests / totalTests) * 100 : progress
     
-    // Determine if ready to merge (all local tests pass, main tests fail as expected)
-    const readyToMerge = totalTests > 0 && 
-      localFailedTests === 0 && 
-      localPendingTests === 0 && 
-      localPassedTests === totalTests
+    // Determine if ready to merge based on status and merge_readiness
+    const readyToMerge = pr.status === 'ready' || pr.merge_readiness?.ready_for_merge || false
     
     return {
       ...pr,
-      associatedTests,
       totalTests,
-      // Local branch stats
-      localPassedTests,
-      localFailedTests,
-      localPendingTests,
-      // Main branch stats  
-      mainPassedTests,
-      mainFailedTests,
-      mainPendingTests,
+      // Test result stats
+      passedTests,
+      failedTests,
+      pendingTests,
+      // Branch stats  
+      localPassedTests: featureBranchPassed,
+      localFailedTests: featureBranchFailed,
+      localPendingTests: 0,
+      mainPassedTests: mainBranchPassed,
+      mainFailedTests: mainBranchFailed,
+      mainPendingTests: 0,
       // Overall progress
-      testProgress,
+      testProgress: progress,
       localProgress,
-      readyToMerge,
-      // Legacy compatibility
-      passedTests: localPassedTests,
-      failedTests: localFailedTests,
-      pendingTests: localPendingTests
+      readyToMerge
     }
   })
 
   // Filter PRs by status for different views
-  const openPRs = prsWithTestProgress.filter(pr => pr.status === 'Open')
-  const readyToMergePRs = prsWithTestProgress.filter(pr => pr.readyToMerge && pr.status === 'Open')
-  const blockedPRs = prsWithTestProgress.filter(pr => pr.failedTests > 0)
+  const openPRs = prsWithTestProgress.filter(pr => pr.status !== 'merged' && pr.status !== 'closed')
+  const readyToMergePRs = prsWithTestProgress.filter(pr => pr.status === 'ready')
+  const blockedPRs = prsWithTestProgress.filter(pr => pr.status === 'blocked')
   
   // Summary statistics
   const stats = {
@@ -172,17 +166,17 @@ function Dashboard() {
                 <div key={pr.id} className="bg-success-50 border border-success-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{pr.title}</h3>
+                      <h3 className="font-medium text-gray-900">{pr.name}</h3>
                       <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
                       <div className="flex items-center mt-2 space-x-2">
                         <span className="badge badge-success">{pr.localPassedTests}/{pr.totalTests} local tests passed</span>
                         <span className="badge badge-danger">{pr.mainFailedTests}/{pr.totalTests} main tests failed</span>
-                        {pr.assignee && (
-                          <span className="text-sm text-gray-500">Assignee: {pr.assignee}</span>
+                        {pr.developer && (
+                          <span className="text-sm text-gray-500">Developer: {pr.developer}</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        Progress: {Math.round(pr.localProgress)}% complete • Branch: {pr.branch || 'feature'}
+                        Progress: {Math.round(pr.localProgress)}% complete • Branch: {pr.branch_comparison?.feature_branch?.name || pr.name}
                       </div>
                     </div>
                     <div className="ml-4">
@@ -215,7 +209,7 @@ function Dashboard() {
                 <div key={pr.id} className="bg-danger-50 border border-danger-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{pr.title}</h3>
+                      <h3 className="font-medium text-gray-900">{pr.name}</h3>
                       <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
                       <div className="flex items-center mt-2 space-x-2">
                         <span className="badge badge-danger">{pr.localFailedTests} local tests failed</span>
@@ -223,12 +217,12 @@ function Dashboard() {
                           <span className="badge badge-success">{pr.localPassedTests} local tests passed</span>
                         )}
                         <span className="badge badge-secondary">{pr.totalTests} total tests</span>
-                        {pr.assignee && (
-                          <span className="text-sm text-gray-500">Assignee: {pr.assignee}</span>
+                        {pr.developer && (
+                          <span className="text-sm text-gray-500">Developer: {pr.developer}</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        Branch: {pr.branch || 'feature'} → {pr.baseBranch || 'main'}
+                        Branch: {pr.branch_comparison?.feature_branch?.name || pr.name} → {pr.branch_comparison?.main_branch?.name || 'main'}
                       </div>
                     </div>
                     <div className="ml-4">
@@ -244,28 +238,28 @@ function Dashboard() {
         )}
 
         {/* In Progress PRs */}
-        {openPRs.filter(pr => pr.totalTests > 0 && !pr.readyToMerge && pr.failedTests === 0).length > 0 && (
+        {openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-warning-700">⏳ Testing in Progress</h2>
               <span className="badge badge-warning">
-                {openPRs.filter(pr => pr.totalTests > 0 && !pr.readyToMerge && pr.failedTests === 0).length} PRs
+                {openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').length} PRs
               </span>
             </div>
             
             <div className="space-y-4">
-              {openPRs.filter(pr => pr.totalTests > 0 && !pr.readyToMerge && pr.failedTests === 0).map((pr) => (
+              {openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').map((pr) => (
                 <div key={pr.id} className="bg-warning-50 border border-warning-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{pr.title}</h3>
+                      <h3 className="font-medium text-gray-900">{pr.name}</h3>
                       <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
                       <div className="flex items-center mt-2 space-x-2">
                         <span className="badge badge-success">{pr.localPassedTests} local passed</span>
                         <span className="badge badge-warning">{pr.localPendingTests} local pending</span>
                         <span className="badge badge-secondary">{pr.totalTests} total</span>
-                        {pr.assignee && (
-                          <span className="text-sm text-gray-500">Assignee: {pr.assignee}</span>
+                        {pr.developer && (
+                          <span className="text-sm text-gray-500">Developer: {pr.developer}</span>
                         )}
                       </div>
                       <div className="mt-2">
@@ -279,7 +273,7 @@ function Dashboard() {
                           </div>
                           <span className="text-xs text-gray-500 min-w-0">{Math.round(pr.localProgress)}%</span>
                         </div>
-                        <p className="text-xs text-gray-500">Branch: {pr.branch || 'feature'} → {pr.baseBranch || 'main'}</p>
+                        <p className="text-xs text-gray-500">Branch: {pr.branch_comparison?.feature_branch?.name || pr.name} → {pr.branch_comparison?.main_branch?.name || 'main'}</p>
                       </div>
                     </div>
                     <div className="ml-4">
