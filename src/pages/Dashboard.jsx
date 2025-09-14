@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
 
 function Dashboard() {
-  const { state } = useQA()
+  const { state, actions } = useQA()
   const [selectedPR, setSelectedPR] = useState(null)
+  const [showTestAssociation, setShowTestAssociation] = useState(false)
+  const [selectedTestCases, setSelectedTestCases] = useState([])
   
   // Focus on PR Testing Progress with Branch-Specific Data
   const prsWithTestProgress = state.prs.map(pr => {
@@ -342,7 +344,11 @@ function Dashboard() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setSelectedPR(null)}
+                  onClick={() => {
+                    setSelectedPR(null)
+                    setShowTestAssociation(false)
+                    setSelectedTestCases([])
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   ✕
@@ -351,14 +357,13 @@ function Dashboard() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <Link
-                  to={`/test-cases?pr=${selectedPR.id}`}
+                <button
+                  onClick={() => setShowTestAssociation(true)}
                   className="btn btn-primary flex items-center justify-center"
-                  onClick={() => setSelectedPR(null)}
                 >
                   <span className="mr-2">➕</span>
                   Add Test Case
-                </Link>
+                </button>
                 <Link
                   to={`/upload-traces?pr=${selectedPR.id}`}
                   className="btn btn-secondary flex items-center justify-center"
@@ -368,6 +373,129 @@ function Dashboard() {
                   Add Traces
                 </Link>
               </div>
+
+              {/* Test Case Association */}
+              {showTestAssociation && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900">Associate Test Cases</h3>
+                    <button
+                      onClick={() => setShowTestAssociation(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="card p-4 border-2 border-dashed border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm text-gray-600">
+                        Select test cases to track for this PR ({selectedTestCases.length} selected)
+                      </p>
+                      <div className="text-xs text-gray-500 flex items-center space-x-3">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          = Local Branch
+                        </span>
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+                          = Main Branch
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {state.testCases && state.testCases.length > 0 ? (
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {state.testCases.map((testCase) => (
+                          <div
+                            key={testCase.id}
+                            className="flex items-center p-3 border rounded-lg hover:bg-gray-50"
+                          >
+                            <input
+                              type="checkbox"
+                              id={`test-${testCase.id}`}
+                              checked={selectedTestCases.includes(testCase.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTestCases(prev => [...prev, testCase.id])
+                                } else {
+                                  setSelectedTestCases(prev => prev.filter(id => id !== testCase.id))
+                                }
+                              }}
+                              className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                            />
+                            <label
+                              htmlFor={`test-${testCase.id}`}
+                              className="ml-3 flex-1 cursor-pointer"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900">
+                                    {testCase.intent}
+                                  </p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <span className="text-sm text-gray-600">
+                                      {testCase.tags || '@regression@smoke@auth'}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {testCase.source}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-4 ml-4">
+                                  {/* Local Branch Result */}
+                                  <div className="text-center min-w-[60px]">
+                                    <div className="text-xs text-gray-500 mb-1">Local</div>
+                                    <span className="badge badge-warning text-xs">Pending</span>
+                                  </div>
+                                  
+                                  {/* Main Branch Result */}
+                                  <div className="text-center min-w-[80px]">
+                                    <div className="text-xs text-gray-500 mb-1">Main</div>
+                                    <span className="badge badge-warning text-xs">Expected Fail</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <span className="text-4xl">🧪</span>
+                        <p className="mt-2">No test cases available</p>
+                        <p className="text-sm">Create test cases first to associate them with this PR</p>
+                      </div>
+                    )}
+                    
+                    {state.testCases && state.testCases.length > 0 && (
+                      <div className="flex justify-end mt-4 space-x-2">
+                        <button
+                          onClick={() => {
+                            setShowTestAssociation(false)
+                            setSelectedTestCases([])
+                          }}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            // TODO: Implement test case association logic
+                            actions.showNotification(`Associated ${selectedTestCases.length} test cases with ${selectedPR.name}`, 'success')
+                            setShowTestAssociation(false)
+                            setSelectedTestCases([])
+                          }}
+                          className="btn btn-primary btn-sm"
+                          disabled={selectedTestCases.length === 0}
+                        >
+                          Associate {selectedTestCases.length} Test Cases
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Branch Comparison */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
