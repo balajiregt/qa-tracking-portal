@@ -8,6 +8,7 @@ function TestCases() {
   const [showModal, setShowModal] = useState(false)
   const [editingTestCase, setEditingTestCase] = useState(null)
   const [formData, setFormData] = useState({
+    name: '',
     intent: '',
     tags: '',
     source: '',
@@ -55,7 +56,20 @@ function TestCases() {
       if (editingTestCase) {
         await actions.updateTestCaseAsync(editingTestCase.id, formData)
       } else {
-        await actions.createTestCase(formData)
+        // Transform form data to match API expectations
+        const apiData = {
+          name: formData.name,
+          tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          description: formData.details,
+          intent: formData.intent,
+          duration: 2000, // Default duration
+          bddSteps: [
+            { type: 'given', text: `Given ${formData.testSteps}`, formatted: `Given ${formData.testSteps}` },
+            { type: 'when', text: 'When user performs the action', formatted: 'When user performs the action' },
+            { type: 'then', text: `Then ${formData.expectedResults}`, formatted: `Then ${formData.expectedResults}` }
+          ]
+        }
+        await actions.createTestCase(apiData)
       }
       resetForm()
       setShowModal(false)
@@ -67,6 +81,7 @@ function TestCases() {
   const handleEdit = (testCase) => {
     setEditingTestCase(testCase)
     setFormData({
+      name: testCase.name || '',
       intent: testCase.intent || '',
       tags: testCase.tags || '',
       source: testCase.source || '',
@@ -92,6 +107,7 @@ function TestCases() {
 
   const resetForm = () => {
     setFormData({
+      name: '',
       intent: '',
       tags: '',
       source: '',
@@ -308,6 +324,21 @@ function TestCases() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Test Case Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  className="input"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter a descriptive test case name"
+                />
+              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Intent *
