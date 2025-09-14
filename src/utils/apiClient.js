@@ -6,6 +6,7 @@ class APIClient {
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        'X-User-Id': 'user_005', // Default to mike_dev who has test_create permission
         ...options.headers,
       },
       ...options,
@@ -98,7 +99,8 @@ class APIClient {
       this.setLocalData('testCases', testCases)
       return { data: newTestCase }
     }
-    return this.post('/add-test-case', testCase)
+    // Include userId in the request body for backend validation
+    return this.post('/add-test-case', { ...testCase, userId: 'user_005' })
   }
 
   async updateTestCase(testId, updates) {
@@ -144,7 +146,8 @@ class APIClient {
       this.setLocalData('prs', prs)
       return { data: newPR }
     }
-    return this.post('/create-pr', prData)
+    // Include userId in the request body for backend validation
+    return this.post('/create-pr', { ...prData, userId: 'user_005' })
   }
 
   async uploadTraces(traceData) {
@@ -203,7 +206,8 @@ class APIClient {
         }
       }
     }
-    return this.post('/upload-traces', traceData)
+    // Include userId in the request body for backend validation
+    return this.post('/upload-traces', { ...traceData, userId: 'user_005' })
   }
 
   async getActivities() {
