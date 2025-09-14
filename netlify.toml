@@ -1,6 +1,5 @@
 [build]
   command = "npm run build"
-  functions = "netlify/functions"
   publish = "dist"
 
 [build.environment]
@@ -11,6 +10,7 @@
   to = "/index.html"
   status = 200
 
-[functions]
-  external_node_modules = ["github-api"]
-  node_bundler = "esbuild"
+# Functions temporarily disabled to deploy frontend first
+# [functions]
+#   external_node_modules = ["github-api", "@octokit/rest"]
+#   node_bundler = "esbuild"
