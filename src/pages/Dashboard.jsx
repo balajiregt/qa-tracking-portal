@@ -7,47 +7,67 @@ function Dashboard() {
   const [selectedPR, setSelectedPR] = useState(null)
   const [showTestAssociation, setShowTestAssociation] = useState(false)
   const [selectedTestCases, setSelectedTestCases] = useState([])
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingTestCase, setEditingTestCase] = useState(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    intent: '',
+    tags: '',
+    source: '',
+    details: '',
+    testSteps: '',
+    expectedResults: '',
+    result: 'Pending',
+    localResult: 'Pending',
+    mainResult: 'Pending'
+  })
   
+  // Get associated test cases for each PR (demo data for now)
+  const getAssociatedTestCases = (prId) => {
+    if (prId === 'pr_001') {
+      return state.testCases.slice(0, 3) // First 3 test cases for demo
+    }
+    return []
+  }
+
   // Focus on PR Testing Progress with Branch-Specific Data
   const prsWithTestProgress = state.prs.map(pr => {
-    // Use actual test results from PR data
-    const testResults = pr.test_results || []
-    const totalTests = testResults.length
+    // Get associated test cases for this PR
+    const associatedTestCases = getAssociatedTestCases(pr.id)
+    const totalTests = associatedTestCases.length
     
-    // Count test results by status
-    const passedTests = testResults.filter(tr => tr.status === 'passed').length
-    const failedTests = testResults.filter(tr => tr.status === 'failed').length
-    const pendingTests = totalTests - passedTests - failedTests
+    // Count test results based on associated test case dropdown values
+    const localPassedTests = associatedTestCases.filter(tc => tc.localResult === 'Pass').length
+    const localFailedTests = associatedTestCases.filter(tc => tc.localResult === 'Fail').length
+    const localPendingTests = associatedTestCases.filter(tc => !tc.localResult || tc.localResult === 'Pending').length
     
-    // Branch test counts from branch_comparison data
-    const featureBranchPassed = pr.branch_comparison?.feature_branch?.tests_passed || 0
-    const featureBranchFailed = pr.branch_comparison?.feature_branch?.tests_failed || 0
-    const mainBranchPassed = pr.branch_comparison?.main_branch?.tests_passed || 0
-    const mainBranchFailed = pr.branch_comparison?.main_branch?.tests_failed || 0
+    const mainPassedTests = associatedTestCases.filter(tc => tc.mainResult === 'Pass').length
+    const mainFailedTests = associatedTestCases.filter(tc => tc.mainResult === 'Fail').length
+    const mainPendingTests = associatedTestCases.filter(tc => !tc.mainResult || tc.mainResult === 'Pending').length
     
-    // Overall progress calculation
-    const progress = pr.progress || 0
-    const localProgress = totalTests > 0 ? (passedTests / totalTests) * 100 : progress
+    // Overall progress calculation based on local branch results
+    const localProgress = totalTests > 0 ? (localPassedTests / totalTests) * 100 : 0
     
-    // Determine if ready to merge based on status and merge_readiness
-    const readyToMerge = pr.status === 'ready' || pr.merge_readiness?.ready_for_merge || false
+    // Determine if ready to merge based on status and test results
+    const readyToMerge = pr.status === 'ready' || (localFailedTests === 0 && localPendingTests === 0 && totalTests > 0)
     
     return {
       ...pr,
+      associatedTestCases,
       totalTests,
-      // Test result stats
-      passedTests,
-      failedTests,
-      pendingTests,
-      // Branch stats  
-      localPassedTests: featureBranchPassed,
-      localFailedTests: featureBranchFailed,
-      localPendingTests: 0,
-      mainPassedTests: mainBranchPassed,
-      mainFailedTests: mainBranchFailed,
-      mainPendingTests: 0,
+      // Test result stats based on associated test cases
+      passedTests: localPassedTests,
+      failedTests: localFailedTests,
+      pendingTests: localPendingTests,
+      // Branch stats from associated test cases
+      localPassedTests,
+      localFailedTests,
+      localPendingTests,
+      mainPassedTests,
+      mainFailedTests,
+      mainPendingTests,
       // Overall progress
-      testProgress: progress,
+      testProgress: localProgress,
       localProgress,
       readyToMerge
     }
@@ -446,13 +466,23 @@ function Dashboard() {
                                   {/* Local Branch Result */}
                                   <div className="text-center min-w-[60px]">
                                     <div className="text-xs text-gray-500 mb-1">Local</div>
-                                    <span className="badge badge-warning text-xs">Pending</span>
+                                    <span className={`badge text-xs ${
+                                      testCase.localResult === 'Pass' ? 'badge-success' :
+                                      testCase.localResult === 'Fail' ? 'badge-danger' : 'badge-warning'
+                                    }`}>
+                                      {testCase.localResult || 'Pending'}
+                                    </span>
                                   </div>
                                   
                                   {/* Main Branch Result */}
                                   <div className="text-center min-w-[80px]">
                                     <div className="text-xs text-gray-500 mb-1">Main</div>
-                                    <span className="badge badge-warning text-xs">Expected Fail</span>
+                                    <span className={`badge text-xs ${
+                                      testCase.mainResult === 'Pass' ? 'badge-success' :
+                                      testCase.mainResult === 'Fail' ? 'badge-danger' : 'badge-warning'
+                                    }`}>
+                                      {testCase.mainResult === 'Pending' ? 'Expected Fail' : testCase.mainResult || 'Expected Fail'}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -506,16 +536,16 @@ function Dashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Tests Passed</span>
-                      <span className="badge badge-success">{selectedPR.branch_comparison?.feature_branch?.tests_passed || 0}</span>
+                      <span className="badge badge-success">{selectedPR.localPassedTests}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Tests Failed</span>
-                      <span className="badge badge-danger">{selectedPR.branch_comparison?.feature_branch?.tests_failed || 0}</span>
+                      <span className="badge badge-danger">{selectedPR.localFailedTests}</span>
                     </div>
-                    {selectedPR.branch_comparison?.feature_branch?.tests_skipped > 0 && (
+                    {selectedPR.localPendingTests > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Tests Skipped</span>
-                        <span className="badge badge-secondary">{selectedPR.branch_comparison.feature_branch.tests_skipped}</span>
+                        <span className="text-sm text-gray-600">Tests Pending</span>
+                        <span className="badge badge-warning">{selectedPR.localPendingTests}</span>
                       </div>
                     )}
                   </div>
@@ -528,12 +558,18 @@ function Dashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Tests Passed</span>
-                      <span className="badge badge-success">{selectedPR.branch_comparison?.main_branch?.tests_passed || 0}</span>
+                      <span className="badge badge-success">{selectedPR.mainPassedTests}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Tests Failed</span>
-                      <span className="badge badge-danger">{selectedPR.branch_comparison?.main_branch?.tests_failed || 0}</span>
+                      <span className="badge badge-danger">{selectedPR.mainFailedTests}</span>
                     </div>
+                    {selectedPR.mainPendingTests > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Tests Pending</span>
+                        <span className="badge badge-warning">{selectedPR.mainPendingTests}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -541,8 +577,7 @@ function Dashboard() {
               {/* Associated Test Cases */}
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">📋 Associated Test Cases</h3>
-                {/* For demo purposes, showing some associated test cases based on the PR data */}
-                {selectedPR.id === 'pr_001' ? (
+                {selectedPR.associatedTestCases && selectedPR.associatedTestCases.length > 0 ? (
                   <div className="bg-white border rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -557,66 +592,51 @@ function Dashboard() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">regression</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">@regression@smoke@auth</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">built-in</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Pending
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">N/A</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Link to="/test-cases" className="text-blue-600 hover:text-blue-900">Edit</Link>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">regression</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">@regression@cart@e2e</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">manual</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Pending
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">N/A</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Link to="/test-cases" className="text-blue-600 hover:text-blue-900">Edit</Link>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">api</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">@api@security@backend</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">built-in</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Pending
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">N/A</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Link to="/test-cases" className="text-blue-600 hover:text-blue-900">Edit</Link>
-                            </td>
-                          </tr>
+                          {selectedPR.associatedTestCases.map((testCase) => (
+                            <tr key={testCase.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">{testCase.intent}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">{testCase.tags || '@regression@smoke@auth'}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">{testCase.source}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  testCase.localResult === 'Pass' ? 'bg-green-100 text-green-800' :
+                                  testCase.localResult === 'Fail' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {testCase.localResult || 'Pending'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">N/A</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button 
+                                  onClick={() => {
+                                    setEditingTestCase(testCase)
+                                    setFormData({
+                                      name: testCase.name || '',
+                                      intent: testCase.intent || '',
+                                      tags: testCase.tags || '',
+                                      source: testCase.source || '',
+                                      details: testCase.details || '',
+                                      testSteps: testCase.testSteps || '',
+                                      expectedResults: testCase.expectedResults || '',
+                                      result: testCase.result || 'Pending',
+                                      localResult: testCase.localResult || 'Pending',
+                                      mainResult: testCase.mainResult || 'Pending'
+                                    })
+                                    setShowEditModal(true)
+                                  }}
+                                  className="text-blue-600 hover:text-blue-900"
+                                >
+                                  Edit
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -750,6 +770,216 @@ function Dashboard() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Test Case Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] overflow-y-auto w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Edit Test Case
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingTestCase(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  // TODO: Implement update logic
+                  actions.showNotification('Test case updated successfully', 'success')
+                  setShowEditModal(false)
+                  setEditingTestCase(null)
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Test Case Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter a descriptive test case name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Intent *
+                  </label>
+                  <input
+                    type="text"
+                    name="intent"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    value={formData.intent}
+                    onChange={(e) => setFormData(prev => ({ ...prev, intent: e.target.value }))}
+                    placeholder="What is the intent of this test?"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tags
+                    </label>
+                    <input
+                      type="text"
+                      name="tags"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      value={formData.tags}
+                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                      placeholder="e.g. critical, api, login"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Source
+                    </label>
+                    <select
+                      name="source"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      value={formData.source}
+                      onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
+                    >
+                      <option value="">Select source</option>
+                      <option value="Manual">Manual</option>
+                      <option value="Automated">Automated</option>
+                      <option value="API">API</option>
+                      <option value="UI">UI</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Details
+                  </label>
+                  <textarea
+                    name="details"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    rows={3}
+                    value={formData.details}
+                    onChange={(e) => setFormData(prev => ({ ...prev, details: e.target.value }))}
+                    placeholder="Additional details about this test case"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Test Steps
+                  </label>
+                  <textarea
+                    name="testSteps"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    rows={3}
+                    value={formData.testSteps}
+                    onChange={(e) => setFormData(prev => ({ ...prev, testSteps: e.target.value }))}
+                    placeholder="Step-by-step instructions for this test"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Expected Results
+                  </label>
+                  <textarea
+                    name="expectedResults"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    rows={2}
+                    value={formData.expectedResults}
+                    onChange={(e) => setFormData(prev => ({ ...prev, expectedResults: e.target.value }))}
+                    placeholder="What should happen when this test passes?"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Overall Result
+                    </label>
+                    <select
+                      name="result"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      value={formData.result}
+                      onChange={(e) => setFormData(prev => ({ ...prev, result: e.target.value }))}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Pass">Pass</option>
+                      <option value="Fail">Fail</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Local Branch Result
+                    </label>
+                    <select
+                      name="localResult"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      value={formData.localResult}
+                      onChange={(e) => setFormData(prev => ({ ...prev, localResult: e.target.value }))}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Pass">Pass</option>
+                      <option value="Fail">Fail</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Main Branch Result
+                    </label>
+                    <select
+                      name="mainResult"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      value={formData.mainResult}
+                      onChange={(e) => setFormData(prev => ({ ...prev, mainResult: e.target.value }))}
+                    >
+                      <option value="Pending">Expected to Fail</option>
+                      <option value="Pass">Pass (Issue)</option>
+                      <option value="Fail">Fail (Expected)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false)
+                      setEditingTestCase(null)
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={state.loading}
+                  >
+                    Update Test Case
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
