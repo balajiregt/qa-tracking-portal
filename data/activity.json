@@ -1,10 +1,29 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-01-13T10:00:00Z",
-    "totalCount": 12
+    "lastUpdated": "2025-09-14T11:00:45.200Z",
+    "totalCount": 7
   },
   "activities": [
+    {
+      "id": "act_1757847645200",
+      "type": "test_case_added",
+      "action": "custom_test_created",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-14T11:00:45.200Z",
+      "details": {
+        "test_case_id": "tc_custom_1757847644661",
+        "test_name": "TC_001_new_login",
+        "tags": [
+          "login"
+        ],
+        "intent": "e2e",
+        "bdd_format": true,
+        "steps_count": 3
+      },
+      "message": "Mike Rodriguez added custom test case: TC_001_new_login",
+      "icon": "📝"
+    },
     {
       "id": "act_001",
       "type": "test_execution",
@@ -23,21 +42,21 @@
       "icon": "✅"
     },
     {
-      "id": "act_002", 
+      "id": "act_002",
       "type": "trace_upload",
       "action": "files_uploaded",
       "user": "Alice",
       "timestamp": "2025-01-13T09:00:00Z",
       "details": {
         "pr_id": "pr_002",
-        "pr_name": "feature/user-authentication-fix", 
+        "pr_name": "feature/user-authentication-fix",
         "files": [
           {
             "name": "login-success.zip",
             "size": 2048576
           },
           {
-            "name": "login-failure.zip", 
+            "name": "login-failure.zip",
             "size": 3145728
           }
         ],
@@ -52,7 +71,7 @@
       "type": "pr_status_change",
       "action": "status_updated",
       "user": "David",
-      "timestamp": "2025-01-13T08:30:00Z", 
+      "timestamp": "2025-01-13T08:30:00Z",
       "details": {
         "pr_id": "pr_001",
         "pr_name": "feature/shopping-cart-improvements",
@@ -70,7 +89,7 @@
       "user": "Bob",
       "timestamp": "2025-01-13T07:00:00Z",
       "details": {
-        "pr_id": "pr_003", 
+        "pr_id": "pr_003",
         "pr_name": "hotfix/payment-gateway-timeout",
         "issue": "Environment configuration issue",
         "description": "Payment sandbox is unreachable",
@@ -97,13 +116,17 @@
     {
       "id": "act_006",
       "type": "test_case_added",
-      "action": "custom_test_created", 
+      "action": "custom_test_created",
       "user": "mike_dev",
       "timestamp": "2025-01-12T14:30:00Z",
       "details": {
         "test_case_id": "tc_002",
         "test_name": "Shopping Cart Add Item",
-        "tags": ["@regression", "@cart", "@e2e"],
+        "tags": [
+          "@regression",
+          "@cart",
+          "@e2e"
+        ],
         "intent": "regression",
         "bdd_format": true
       },
@@ -114,7 +137,7 @@
   "activity_types": [
     "pr_created",
     "pr_status_change",
-    "test_execution", 
+    "test_execution",
     "test_case_added",
     "trace_upload",
     "issue_reported",
@@ -123,7 +146,7 @@
   ],
   "users": [
     "Alice",
-    "Bob", 
+    "Bob",
     "Carol",
     "David",
     "Emma",
