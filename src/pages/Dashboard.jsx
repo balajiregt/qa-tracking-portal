@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
 
@@ -21,6 +21,7 @@ function Dashboard() {
     localResult: 'Pending',
     mainResult: 'Pending'
   })
+
   
   // Get associated test cases for each PR (demo data for now)
   const getAssociatedTestCases = (prId) => {
@@ -72,6 +73,16 @@ function Dashboard() {
       readyToMerge
     }
   })
+
+  // Recalculate selected PR data when test cases change
+  useEffect(() => {
+    if (selectedPR) {
+      const updatedSelectedPR = prsWithTestProgress.find(pr => pr.id === selectedPR.id)
+      if (updatedSelectedPR && JSON.stringify(updatedSelectedPR) !== JSON.stringify(selectedPR)) {
+        setSelectedPR(updatedSelectedPR)
+      }
+    }
+  }, [state.testCases])
 
   // Filter PRs by status for different views
   const openPRs = prsWithTestProgress.filter(pr => pr.status !== 'merged' && pr.status !== 'closed')
@@ -796,12 +807,27 @@ function Dashboard() {
               </div>
 
               <form 
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
-                  // TODO: Implement update logic
-                  actions.showNotification('Test case updated successfully', 'success')
-                  setShowEditModal(false)
-                  setEditingTestCase(null)
+                  try {
+                    // Update the test case with new data
+                    const updatedTestCase = {
+                      ...editingTestCase,
+                      ...formData
+                    }
+                    
+                    // Update in the context
+                    actions.updateTestCase(updatedTestCase)
+                    
+                    actions.showNotification('Test case updated successfully', 'success')
+                    setShowEditModal(false)
+                    setEditingTestCase(null)
+                    
+                    // The useEffect will handle recalculating the PR data automatically
+                  } catch (error) {
+                    console.error('Error updating test case:', error)
+                    actions.showNotification('Failed to update test case', 'error')
+                  }
                 }}
                 className="space-y-4"
               >

@@ -14,10 +14,7 @@ function TestCases() {
     source: '',
     details: '',
     testSteps: '',
-    expectedResults: '',
-    result: 'Pending',
-    localResult: 'Pending',
-    mainResult: 'Pending'
+    expectedResults: ''
   })
 
   // Check if we should open the modal from URL params
@@ -87,10 +84,7 @@ function TestCases() {
       source: testCase.source || '',
       details: testCase.details || '',
       testSteps: testCase.testSteps || '',
-      expectedResults: testCase.expectedResults || '',
-      result: testCase.result || 'Pending',
-      localResult: testCase.localResult || 'Pending',
-      mainResult: testCase.mainResult || 'Pending'
+      expectedResults: testCase.expectedResults || ''
     })
     setShowModal(true)
   }
@@ -113,10 +107,7 @@ function TestCases() {
       source: '',
       details: '',
       testSteps: '',
-      expectedResults: '',
-      result: 'Pending',
-      localResult: 'Pending',
-      mainResult: 'Pending'
+      expectedResults: ''
     })
     setEditingTestCase(null)
   }
@@ -218,9 +209,6 @@ function TestCases() {
                     Source
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Result
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -250,17 +238,6 @@ function TestCases() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {testCase.source}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {testCase.result === 'Pass' && (
-                        <span className="badge badge-success">Pass</span>
-                      )}
-                      {testCase.result === 'Fail' && (
-                        <span className="badge badge-danger">Fail</span>
-                      )}
-                      {(!testCase.result || testCase.result === 'Pending') && (
-                        <span className="badge badge-warning">Pending</span>
-                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {testCase.timestamp 
@@ -429,55 +406,6 @@ function TestCases() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Overall Result
-                  </label>
-                  <select
-                    name="result"
-                    className="select"
-                    value={formData.result}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Pass">Pass</option>
-                    <option value="Fail">Fail</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Local Branch Result
-                  </label>
-                  <select
-                    name="localResult"
-                    className="select"
-                    value={formData.localResult}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Pass">Pass</option>
-                    <option value="Fail">Fail</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Main Branch Result
-                  </label>
-                  <select
-                    name="mainResult"
-                    className="select"
-                    value={formData.mainResult}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Pending">Expected to Fail</option>
-                    <option value="Pass">Pass (Issue)</option>
-                    <option value="Fail">Fail (Expected)</option>
-                  </select>
-                </div>
-              </div>
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button
