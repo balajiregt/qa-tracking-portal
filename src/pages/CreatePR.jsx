@@ -36,7 +36,13 @@ function CreatePR() {
     e.preventDefault()
     
     const prData = {
-      ...formData,
+      name: formData.title, // API expects 'name' not 'title'
+      developer: formData.assignee || 'user_005', // API expects 'developer' field
+      description: formData.description,
+      priority: formData.priority.toLowerCase(), // API expects lowercase
+      environment: 'staging', // Default environment
+      branch: formData.branch,
+      baseBranch: formData.baseBranch,
       testCases: selectedTestCases,
       status: 'Open',
       createdAt: new Date().toISOString(),
