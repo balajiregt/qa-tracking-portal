@@ -1,0 +1,230 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z",
+    "totalCount": 3
+  },
+  "issues": [
+    {
+      "id": "issue_001",
+      "pr_id": "pr_003",
+      "test_case_id": "tc_payment_001",
+      "test_name": "Payment Gateway Integration",
+      "type": "environment",
+      "severity": "critical", 
+      "title": "Payment sandbox unreachable",
+      "description": "Payment sandbox is down. Cannot test transaction flows. All payment-related tests are blocked.",
+      "reported_by": "Bob",
+      "reported_at": "2025-01-13T07:00:00Z",
+      "status": "open",
+      "assigned_to": "DevOps Team",
+      "escalation_level": 2,
+      "impact": {
+        "affected_prs": ["pr_003"],
+        "affected_tests": 5,
+        "estimated_delay": "4-8 hours",
+        "business_impact": "High - blocks payment feature testing"
+      },
+      "resolution_steps": [
+        "Contact DevOps team immediately",
+        "Check payment sandbox status dashboard", 
+        "Restart sandbox services if needed",
+        "Verify connectivity from QA environment",
+        "Run smoke tests once restored"
+      ],
+      "updates": [
+        {
+          "id": "update_001",
+          "timestamp": "2025-01-13T07:00:00Z",
+          "user": "Bob",
+          "message": "Discovered payment sandbox is unreachable during test setup",
+          "action": "reported",
+          "details": {
+            "error_message": "Connection timeout: Unable to reach sandbox.payments.com:443",
+            "last_successful_connection": "2025-01-12T23:45:00Z"
+          }
+        },
+        {
+          "id": "update_002",
+          "timestamp": "2025-01-13T08:00:00Z",
+          "user": "Bob", 
+          "message": "Escalated to DevOps team - marked as critical priority",
+          "action": "escalated",
+          "details": {
+            "escalation_level": 2,
+            "notification_sent_to": ["devops-team@company.com", "qa-lead@company.com"]
+          }
+        },
+        {
+          "id": "update_003",
+          "timestamp": "2025-01-13T08:30:00Z",
+          "user": "DevOps Team",
+          "message": "Acknowledged issue - investigating sandbox infrastructure",
+          "action": "acknowledged", 
+          "details": {
+            "assigned_to": "John (DevOps)",
+            "incident_ticket": "INC-2025-001234"
+          }
+        }
+      ],
+      "workarounds": [],
+      "related_issues": [],
+      "tags": ["payment", "sandbox", "environment", "critical"],
+      "estimated_resolution": "2025-01-13T12:00:00Z"
+    },
+    {
+      "id": "issue_002",
+      "pr_id": "pr_002",
+      "test_case_id": "tc_001",
+      "test_name": "Login Flow Testing",
+      "type": "technical",
+      "severity": "high",
+      "title": "Session timeout after 3 seconds",
+      "description": "User sessions are timing out unexpectedly after only 3 seconds, making login testing difficult.",
+      "reported_by": "Alice",
+      "reported_at": "2025-01-13T09:00:00Z", 
+      "status": "in_progress",
+      "assigned_to": "Backend Team",
+      "escalation_level": 1,
+      "impact": {
+        "affected_prs": ["pr_002"],
+        "affected_tests": 3,
+        "estimated_delay": "2-4 hours", 
+        "business_impact": "Medium - affects auth testing"
+      },
+      "resolution_steps": [
+        "Check session configuration in auth service",
+        "Review recent changes to session management",
+        "Increase session timeout for QA environment",
+        "Test with extended timeout settings"
+      ],
+      "updates": [
+        {
+          "id": "update_004",
+          "timestamp": "2025-01-13T09:00:00Z",
+          "user": "Alice",
+          "message": "Noticed sessions timing out during login flow testing",
+          "action": "reported",
+          "details": {
+            "expected_timeout": "300 seconds",
+            "actual_timeout": "3 seconds",
+            "environment": "QA"
+          }
+        },
+        {
+          "id": "update_005", 
+          "timestamp": "2025-01-13T09:30:00Z",
+          "user": "Backend Team",
+          "message": "Investigating session timeout configuration",
+          "action": "investigating",
+          "details": {
+            "assigned_to": "Sarah (Backend)",
+            "priority": "high"
+          }
+        }
+      ],
+      "workarounds": [
+        "Use API tokens instead of session-based auth for testing",
+        "Refresh session every 2 seconds during test execution"
+      ],
+      "related_issues": [],
+      "tags": ["authentication", "session", "timeout", "qa-environment"],
+      "estimated_resolution": "2025-01-13T13:00:00Z"
+    },
+    {
+      "id": "issue_003",
+      "pr_id": "pr_001",
+      "test_case_id": null,
+      "test_name": null,
+      "type": "resource", 
+      "severity": "low",
+      "title": "BrowserStack license limit reached",
+      "description": "Cannot run cross-browser tests due to concurrent user limit on BrowserStack account.",
+      "reported_by": "Carol",
+      "reported_at": "2025-01-13T06:30:00Z",
+      "status": "resolved",
+      "assigned_to": "QA Lead",
+      "escalation_level": 0,
+      "impact": {
+        "affected_prs": ["pr_001", "pr_002"],
+        "affected_tests": 2,
+        "estimated_delay": "1 hour",
+        "business_impact": "Low - can use local browsers temporarily"
+      },
+      "resolution_steps": [
+        "Check current BrowserStack usage",
+        "Free up unused sessions", 
+        "Consider upgrading license if needed"
+      ],
+      "updates": [
+        {
+          "id": "update_006",
+          "timestamp": "2025-01-13T06:30:00Z",
+          "user": "Carol",
+          "message": "Cannot start BrowserStack session - limit reached",
+          "action": "reported",
+          "details": {
+            "current_sessions": "5/5",
+            "waiting_queue": 2
+          }
+        },
+        {
+          "id": "update_007",
+          "timestamp": "2025-01-13T07:00:00Z",
+          "user": "QA Lead",
+          "message": "Freed up unused sessions, issue resolved",
+          "action": "resolved",
+          "details": {
+            "sessions_freed": 3,
+            "available_sessions": "3/5"
+          }
+        }
+      ],
+      "workarounds": [
+        "Use local browser installations for basic testing",
+        "Schedule cross-browser tests during off-peak hours"
+      ],
+      "related_issues": [],
+      "tags": ["browserstack", "resource-limit", "cross-browser"],
+      "estimated_resolution": "2025-01-13T07:00:00Z",
+      "resolved_at": "2025-01-13T07:00:00Z"
+    }
+  ],
+  "issue_statistics": {
+    "total_issues": 3,
+    "open": 1,
+    "in_progress": 1,
+    "resolved": 1,
+    "by_severity": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 1
+    },
+    "by_type": {
+      "environment": 1,
+      "technical": 1, 
+      "resource": 1,
+      "dependency": 0
+    },
+    "average_resolution_time": "3.5 hours"
+  },
+  "escalation_rules": {
+    "critical": {
+      "auto_escalate_after": "1 hour",
+      "notification_levels": ["qa-lead", "engineering-manager", "devops-lead"]
+    },
+    "high": {
+      "auto_escalate_after": "4 hours", 
+      "notification_levels": ["qa-lead", "team-lead"]
+    },
+    "medium": {
+      "auto_escalate_after": "1 day",
+      "notification_levels": ["qa-lead"]
+    },
+    "low": {
+      "auto_escalate_after": "3 days",
+      "notification_levels": ["reporter"]
+    }
+  }
+}

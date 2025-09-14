@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z",
+    "totalCount": 8
+  },
+  "test_results": [
+    {
+      "id": "tr_001",
+      "pr_id": "pr_001", 
+      "test_case_id": "tc_001",
+      "test_name": "User Login Flow",
+      "tester": "Alice",
+      "status": "passed",
+      "actual_duration": 2480,
+      "expected_duration": 2500,
+      "executed_at": "2025-01-13T08:30:00Z",
+      "environment": "staging",
+      "browser": "Chrome 120",
+      "trace_files": [
+        {
+          "filename": "login-flow-success.zip",
+          "size": 2048576,
+          "uploaded_at": "2025-01-13T08:35:00Z"
+        }
+      ],
+      "screenshots": 4,
+      "actions_performed": 12,
+      "notes": "Login flow completed successfully, all assertions passed"
+    },
+    {
+      "id": "tr_002",
+      "pr_id": "pr_001",
+      "test_case_id": "tc_002", 
+      "test_name": "Shopping Cart Add Item",
+      "tester": "David",
+      "status": "passed",
+      "actual_duration": 1750,
+      "expected_duration": 1800,
+      "executed_at": "2025-01-13T09:15:00Z",
+      "environment": "staging",
+      "browser": "Firefox 121",
+      "trace_files": [
+        {
+          "filename": "add-to-cart.zip",
+          "size": 1536000,
+          "uploaded_at": "2025-01-13T09:20:00Z"
+        }
+      ],
+      "screenshots": 3,
+      "actions_performed": 8,
+      "notes": "Cart functionality working as expected"
+    },
+    {
+      "id": "tr_003",
+      "pr_id": "pr_002",
+      "test_case_id": "tc_001",
+      "test_name": "User Login Flow",
+      "tester": "Alice", 
+      "status": "failed",
+      "actual_duration": 5200,
+      "expected_duration": 2500,
+      "executed_at": "2025-01-13T07:45:00Z",
+      "environment": "qa",
+      "browser": "Chrome 120",
+      "trace_files": [
+        {
+          "filename": "login-failure.zip",
+          "size": 3072000,
+          "uploaded_at": "2025-01-13T07:50:00Z"
+        }
+      ],
+      "screenshots": 6,
+      "actions_performed": 15,
+      "notes": "Session timeout after 3 seconds, investigating auth service",
+      "failure_reason": "Session timeout - auth service response too slow",
+      "error_messages": [
+        "TypeError: Cannot read property 'token' of undefined",
+        "Network timeout after 5000ms"
+      ]
+    }
+  ],
+  "summary": {
+    "total_tests": 8,
+    "passed": 5,
+    "failed": 2, 
+    "skipped": 1,
+    "pass_rate": 62.5,
+    "avg_duration": 2890,
+    "last_execution": "2025-01-13T09:15:00Z"
+  }
+}

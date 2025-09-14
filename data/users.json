@@ -1,0 +1,319 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z",
+    "totalCount": 8
+  },
+  "users": [
+    {
+      "id": "user_001",
+      "username": "alice",
+      "display_name": "Alice Johnson",
+      "email": "alice@company.com",
+      "role": "qa_engineer",
+      "team": "QA",
+      "avatar_url": "https://github.com/alice.png",
+      "status": "active",
+      "timezone": "America/New_York",
+      "joined_at": "2024-01-15T09:00:00Z",
+      "last_active": "2025-01-13T09:30:00Z",
+      "specialties": ["functional", "ui", "e2e", "regression"],
+      "certifications": ["ISTQB", "Selenium"],
+      "current_assignments": 2,
+      "max_concurrent_assignments": 5,
+      "performance_stats": {
+        "tests_completed": 45,
+        "success_rate": 92.5,
+        "avg_completion_time": 2100,
+        "issues_found": 12
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "staging",
+        "preferred_browsers": ["Chrome", "Firefox"]
+      }
+    },
+    {
+      "id": "user_002", 
+      "username": "bob",
+      "display_name": "Bob Wilson",
+      "email": "bob@company.com",
+      "role": "qa_engineer",
+      "team": "QA",
+      "avatar_url": "https://github.com/bob.png",
+      "status": "active",
+      "timezone": "America/Los_Angeles",
+      "joined_at": "2024-03-10T09:00:00Z",
+      "last_active": "2025-01-13T08:45:00Z",
+      "specialties": ["api", "security", "performance", "backend"],
+      "certifications": ["Security+", "API Testing"],
+      "current_assignments": 1,
+      "max_concurrent_assignments": 4,
+      "performance_stats": {
+        "tests_completed": 38,
+        "success_rate": 89.2,
+        "avg_completion_time": 1850,
+        "issues_found": 18
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": false,
+        "preferred_environment": "qa",
+        "preferred_browsers": ["Chrome", "Firefox", "Safari"]
+      }
+    },
+    {
+      "id": "user_003",
+      "username": "carol",
+      "display_name": "Carol Davis",
+      "email": "carol@company.com", 
+      "role": "senior_qa_engineer",
+      "team": "QA",
+      "avatar_url": "https://github.com/carol.png",
+      "status": "active",
+      "timezone": "Europe/London",
+      "joined_at": "2023-08-20T09:00:00Z",
+      "last_active": "2025-01-13T10:00:00Z",
+      "specialties": ["regression", "smoke", "browser-testing", "mobile"],
+      "certifications": ["ISTQB Advanced", "Mobile Testing"],
+      "current_assignments": 3,
+      "max_concurrent_assignments": 6,
+      "performance_stats": {
+        "tests_completed": 112,
+        "success_rate": 94.8,
+        "avg_completion_time": 1980,
+        "issues_found": 28
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "staging",
+        "preferred_browsers": ["Chrome", "Firefox", "Safari", "Edge"]
+      }
+    },
+    {
+      "id": "user_004",
+      "username": "david",
+      "display_name": "David Chen",
+      "email": "david@company.com",
+      "role": "qa_engineer",
+      "team": "QA", 
+      "avatar_url": "https://github.com/david.png",
+      "status": "active",
+      "timezone": "Asia/Singapore",
+      "joined_at": "2024-06-01T09:00:00Z",
+      "last_active": "2025-01-13T09:15:00Z",
+      "specialties": ["functional", "integration", "mobile", "accessibility"],
+      "certifications": ["WCAG", "Mobile Testing"],
+      "current_assignments": 1,
+      "max_concurrent_assignments": 4,
+      "performance_stats": {
+        "tests_completed": 34,
+        "success_rate": 91.2,
+        "avg_completion_time": 2250,
+        "issues_found": 9
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "staging",
+        "preferred_browsers": ["Chrome", "Safari"]
+      }
+    },
+    {
+      "id": "user_005",
+      "username": "mike_dev",
+      "display_name": "Mike Rodriguez",
+      "email": "mike@company.com",
+      "role": "developer",
+      "team": "Engineering",
+      "avatar_url": "https://github.com/mike.png", 
+      "status": "active",
+      "timezone": "America/New_York",
+      "joined_at": "2023-11-15T09:00:00Z",
+      "last_active": "2025-01-13T08:30:00Z",
+      "specialties": ["frontend", "javascript", "react", "e2e"],
+      "certifications": ["AWS Certified", "React Certified"],
+      "current_assignments": 0,
+      "max_concurrent_assignments": 2,
+      "performance_stats": {
+        "prs_created": 23,
+        "test_cases_added": 8,
+        "avg_pr_completion_time": 72
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "dev",
+        "preferred_browsers": ["Chrome", "Firefox"]
+      }
+    },
+    {
+      "id": "user_006",
+      "username": "sarah_dev", 
+      "display_name": "Sarah Thompson",
+      "email": "sarah@company.com",
+      "role": "developer",
+      "team": "Engineering",
+      "avatar_url": "https://github.com/sarah.png",
+      "status": "active",
+      "timezone": "America/Los_Angeles",
+      "joined_at": "2024-02-01T09:00:00Z",
+      "last_active": "2025-01-13T07:00:00Z",
+      "specialties": ["backend", "api", "security", "python"],
+      "certifications": ["Security+", "Python Certified"],
+      "current_assignments": 0,
+      "max_concurrent_assignments": 2,
+      "performance_stats": {
+        "prs_created": 18,
+        "test_cases_added": 5,
+        "avg_pr_completion_time": 68
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": false,
+        "preferred_environment": "qa",
+        "preferred_browsers": ["Chrome"]
+      }
+    },
+    {
+      "id": "user_007",
+      "username": "alex_dev",
+      "display_name": "Alex Kumar",
+      "email": "alex@company.com",
+      "role": "senior_developer",
+      "team": "Engineering", 
+      "avatar_url": "https://github.com/alex.png",
+      "status": "active",
+      "timezone": "Asia/Kolkata",
+      "joined_at": "2023-05-10T09:00:00Z",
+      "last_active": "2025-01-13T06:00:00Z",
+      "specialties": ["fullstack", "devops", "performance", "architecture"],
+      "certifications": ["AWS Solutions Architect", "Docker Certified"],
+      "current_assignments": 0,
+      "max_concurrent_assignments": 3,
+      "performance_stats": {
+        "prs_created": 31,
+        "test_cases_added": 12,
+        "avg_pr_completion_time": 48
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "staging",
+        "preferred_browsers": ["Chrome", "Firefox"]
+      }
+    },
+    {
+      "id": "user_008",
+      "username": "emma_dev",
+      "display_name": "Emma Foster",
+      "email": "emma@company.com",
+      "role": "ui_developer",
+      "team": "Design Engineering",
+      "avatar_url": "https://github.com/emma.png",
+      "status": "active",
+      "timezone": "Europe/London",
+      "joined_at": "2024-09-01T09:00:00Z",
+      "last_active": "2025-01-13T06:30:00Z",
+      "specialties": ["ui", "css", "design-systems", "accessibility"],
+      "certifications": ["Design Systems", "WCAG"],
+      "current_assignments": 0,
+      "max_concurrent_assignments": 2,
+      "performance_stats": {
+        "prs_created": 8,
+        "test_cases_added": 3,
+        "avg_pr_completion_time": 56
+      },
+      "preferences": {
+        "notification_email": true,
+        "notification_slack": true,
+        "preferred_environment": "dev", 
+        "preferred_browsers": ["Chrome", "Safari", "Firefox"]
+      }
+    }
+  ],
+  "teams": [
+    {
+      "id": "team_qa",
+      "name": "QA Team",
+      "description": "Quality Assurance Engineers",
+      "lead": "user_003",
+      "members": ["user_001", "user_002", "user_003", "user_004"],
+      "specialties": ["functional", "regression", "api", "ui", "performance"]
+    },
+    {
+      "id": "team_engineering",
+      "name": "Engineering Team", 
+      "description": "Software Developers",
+      "lead": "user_007",
+      "members": ["user_005", "user_006", "user_007"],
+      "specialties": ["frontend", "backend", "fullstack", "devops"]
+    },
+    {
+      "id": "team_design_eng",
+      "name": "Design Engineering",
+      "description": "UI/UX Developers",
+      "lead": "user_008",
+      "members": ["user_008"],
+      "specialties": ["ui", "design-systems", "accessibility"]
+    }
+  ],
+  "roles": {
+    "qa_engineer": {
+      "name": "QA Engineer",
+      "permissions": ["test_execute", "test_assign", "issue_report", "trace_upload"],
+      "can_approve_merge": false,
+      "can_assign_tests": true,
+      "can_escalate_issues": true
+    },
+    "senior_qa_engineer": {
+      "name": "Senior QA Engineer", 
+      "permissions": ["test_execute", "test_assign", "issue_report", "trace_upload", "test_approve", "team_manage"],
+      "can_approve_merge": true,
+      "can_assign_tests": true,
+      "can_escalate_issues": true
+    },
+    "developer": {
+      "name": "Developer",
+      "permissions": ["pr_create", "test_create", "trace_upload"],
+      "can_approve_merge": false,
+      "can_assign_tests": false,
+      "can_escalate_issues": true
+    },
+    "senior_developer": {
+      "name": "Senior Developer",
+      "permissions": ["pr_create", "test_create", "trace_upload", "test_assign"],
+      "can_approve_merge": true,
+      "can_assign_tests": true,
+      "can_escalate_issues": true
+    },
+    "ui_developer": {
+      "name": "UI Developer",
+      "permissions": ["pr_create", "test_create", "trace_upload"],
+      "can_approve_merge": false,
+      "can_assign_tests": false,
+      "can_escalate_issues": true
+    }
+  },
+  "authentication": {
+    "current_user": "user_001",
+    "session_timeout": 3600,
+    "last_login": "2025-01-13T09:00:00Z",
+    "login_method": "github_oauth"
+  },
+  "user_statistics": {
+    "total_users": 8,
+    "active_users": 8,
+    "qa_engineers": 4,
+    "developers": 4,
+    "average_workload": 1.5,
+    "most_active_user": "user_003",
+    "team_distribution": {
+      "QA": 4,
+      "Engineering": 3, 
+      "Design Engineering": 1
+    }
+  }
+}

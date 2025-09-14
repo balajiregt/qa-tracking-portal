@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z"
+  },
+  "app_settings": {
+    "name": "QA Test Tracking System",
+    "version": "1.0.0",
+    "description": "Complete PR Testing Management with Playwright Trace Support",
+    "default_environment": "staging",
+    "default_priority": "medium",
+    "auto_refresh_interval": 30000,
+    "max_file_size": 10485760,
+    "supported_file_types": [".zip", ".json", ".har"],
+    "max_trace_files_per_upload": 10
+  },
+  "user_preferences": {
+    "theme": "light",
+    "notifications_enabled": true,
+    "auto_assign_tests": false,
+    "show_completed_prs": true,
+    "dashboard_refresh_rate": "30s",
+    "default_test_duration": 2000
+  },
+  "team_settings": {
+    "available_testers": [
+      {
+        "name": "Alice",
+        "email": "alice@company.com",
+        "specialties": ["functional", "ui", "e2e"],
+        "active": true
+      },
+      {
+        "name": "Bob", 
+        "email": "bob@company.com",
+        "specialties": ["api", "security", "performance"],
+        "active": true
+      },
+      {
+        "name": "Carol",
+        "email": "carol@company.com", 
+        "specialties": ["regression", "smoke", "browser-testing"],
+        "active": true
+      },
+      {
+        "name": "David",
+        "email": "david@company.com",
+        "specialties": ["functional", "integration", "mobile"],
+        "active": true
+      }
+    ],
+    "environments": [
+      {
+        "name": "dev",
+        "url": "https://dev.company.com",
+        "active": true
+      },
+      {
+        "name": "qa",
+        "url": "https://qa.company.com", 
+        "active": true
+      },
+      {
+        "name": "staging",
+        "url": "https://staging.company.com",
+        "active": true
+      },
+      {
+        "name": "local",
+        "url": "http://localhost:3000",
+        "active": true
+      }
+    ]
+  },
+  "test_configuration": {
+    "default_tags": [
+      "@regression",
+      "@smoke",
+      "@e2e", 
+      "@api",
+      "@ui",
+      "@performance"
+    ],
+    "priority_levels": [
+      "urgent",
+      "high", 
+      "medium",
+      "low"
+    ],
+    "test_intents": {
+      "regression": {
+        "name": "Regression Testing",
+        "description": "Full regression test suite",
+        "default_tags": ["@regression", "@smoke", "@critical"]
+      },
+      "e2e": {
+        "name": "End-to-End Testing",
+        "description": "Complete user journey testing", 
+        "default_tags": ["@e2e", "@integration", "@flow"]
+      },
+      "smoke": {
+        "name": "Smoke Testing",
+        "description": "Quick validation of core functionality",
+        "default_tags": ["@smoke", "@sanity", "@quick"]
+      },
+      "api": {
+        "name": "API Testing",
+        "description": "Backend API and integration testing",
+        "default_tags": ["@api", "@backend", "@integration"]
+      },
+      "ui": {
+        "name": "UI Testing", 
+        "description": "User interface and visual testing",
+        "default_tags": ["@ui", "@visual", "@frontend"]
+      },
+      "performance": {
+        "name": "Performance Testing",
+        "description": "Load and performance validation",
+        "default_tags": ["@performance", "@load", "@stress"]
+      }
+    }
+  },
+  "integration": {
+    "github": {
+      "enabled": true,
+      "repository": "balajiregt/qa-tracking-portal",
+      "branch": "main",
+      "auto_commit": true,
+      "commit_message_template": "QA Portal: {action} - {details}"
+    },
+    "playwright": {
+      "enabled": true,
+      "supported_formats": [".zip", ".json"],
+      "auto_extract_tests": true
+    }
+  }
+}

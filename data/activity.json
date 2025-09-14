@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z",
+    "totalCount": 12
+  },
+  "activities": [
+    {
+      "id": "act_001",
+      "type": "test_execution",
+      "action": "test_passed",
+      "user": "Alice",
+      "timestamp": "2025-01-13T09:15:00Z",
+      "details": {
+        "pr_id": "pr_001",
+        "pr_name": "feature/shopping-cart-improvements",
+        "test_case_id": "tc_001",
+        "test_name": "User Login Flow",
+        "duration": 2480,
+        "status": "passed"
+      },
+      "message": "Alice completed test execution for User Login Flow",
+      "icon": "✅"
+    },
+    {
+      "id": "act_002", 
+      "type": "trace_upload",
+      "action": "files_uploaded",
+      "user": "Alice",
+      "timestamp": "2025-01-13T09:00:00Z",
+      "details": {
+        "pr_id": "pr_002",
+        "pr_name": "feature/user-authentication-fix", 
+        "files": [
+          {
+            "name": "login-success.zip",
+            "size": 2048576
+          },
+          {
+            "name": "login-failure.zip", 
+            "size": 3145728
+          }
+        ],
+        "total_files": 2,
+        "total_size": 5194304
+      },
+      "message": "Alice uploaded trace files for login flow testing",
+      "icon": "📎"
+    },
+    {
+      "id": "act_003",
+      "type": "pr_status_change",
+      "action": "status_updated",
+      "user": "David",
+      "timestamp": "2025-01-13T08:30:00Z", 
+      "details": {
+        "pr_id": "pr_001",
+        "pr_name": "feature/shopping-cart-improvements",
+        "old_status": "testing",
+        "new_status": "ready",
+        "progress": 100
+      },
+      "message": "David completed functional testing and marked PR ready",
+      "icon": "🚀"
+    },
+    {
+      "id": "act_004",
+      "type": "issue_reported",
+      "action": "test_blocked",
+      "user": "Bob",
+      "timestamp": "2025-01-13T07:00:00Z",
+      "details": {
+        "pr_id": "pr_003", 
+        "pr_name": "hotfix/payment-gateway-timeout",
+        "issue": "Environment configuration issue",
+        "description": "Payment sandbox is unreachable",
+        "priority": "urgent"
+      },
+      "message": "Bob reported environment issue blocking payment tests",
+      "icon": "⚠️"
+    },
+    {
+      "id": "act_005",
+      "type": "pr_created",
+      "action": "pr_added",
+      "user": "emma_dev",
+      "timestamp": "2025-01-13T06:30:00Z",
+      "details": {
+        "pr_id": "pr_004",
+        "pr_name": "feature/dark-mode-toggle",
+        "priority": "low",
+        "environment": "dev"
+      },
+      "message": "Emma created new PR entry for dark mode feature",
+      "icon": "➕"
+    },
+    {
+      "id": "act_006",
+      "type": "test_case_added",
+      "action": "custom_test_created", 
+      "user": "mike_dev",
+      "timestamp": "2025-01-12T14:30:00Z",
+      "details": {
+        "test_case_id": "tc_002",
+        "test_name": "Shopping Cart Add Item",
+        "tags": ["@regression", "@cart", "@e2e"],
+        "intent": "regression",
+        "bdd_format": true
+      },
+      "message": "Mike added custom test case for shopping cart functionality",
+      "icon": "📝"
+    }
+  ],
+  "activity_types": [
+    "pr_created",
+    "pr_status_change",
+    "test_execution", 
+    "test_case_added",
+    "trace_upload",
+    "issue_reported",
+    "pr_assigned",
+    "test_assigned"
+  ],
+  "users": [
+    "Alice",
+    "Bob", 
+    "Carol",
+    "David",
+    "Emma",
+    "mike_dev",
+    "sarah_dev",
+    "alex_dev",
+    "emma_dev"
+  ]
+}

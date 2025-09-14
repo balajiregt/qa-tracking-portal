@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z"
+  },
+  "current_session": {
+    "session_id": "sess_20250113_001",
+    "user_id": "user_001",
+    "username": "alice",
+    "display_name": "Alice Johnson",
+    "role": "qa_engineer",
+    "team": "QA",
+    "login_time": "2025-01-13T09:00:00Z",
+    "last_activity": "2025-01-13T09:55:00Z",
+    "expires_at": "2025-01-13T13:00:00Z",
+    "login_method": "github_oauth",
+    "ip_address": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "permissions": ["test_execute", "test_assign", "issue_report", "trace_upload"],
+    "preferences": {
+      "theme": "light",
+      "notifications": true,
+      "auto_refresh": true,
+      "timezone": "America/New_York"
+    }
+  },
+  "recent_sessions": [
+    {
+      "session_id": "sess_20250113_001",
+      "user_id": "user_001",
+      "username": "alice", 
+      "login_time": "2025-01-13T09:00:00Z",
+      "logout_time": null,
+      "status": "active",
+      "duration_seconds": 3300,
+      "actions_performed": 12,
+      "last_action": "Updated test progress for Login Flow Testing"
+    },
+    {
+      "session_id": "sess_20250113_002",
+      "user_id": "user_002",
+      "username": "bob",
+      "login_time": "2025-01-13T08:30:00Z",
+      "logout_time": null,
+      "status": "active", 
+      "duration_seconds": 4200,
+      "actions_performed": 8,
+      "last_action": "Escalated payment sandbox issue"
+    },
+    {
+      "session_id": "sess_20250112_015",
+      "user_id": "user_004",
+      "username": "david",
+      "login_time": "2025-01-12T16:00:00Z", 
+      "logout_time": "2025-01-12T18:30:00Z",
+      "status": "completed",
+      "duration_seconds": 9000,
+      "actions_performed": 25,
+      "last_action": "Marked shopping cart PR as ready for merge"
+    }
+  ],
+  "active_users": [
+    {
+      "user_id": "user_001",
+      "username": "alice",
+      "display_name": "Alice Johnson",
+      "status": "online",
+      "current_activity": "Testing login flow",
+      "last_seen": "2025-01-13T09:55:00Z",
+      "active_assignments": 2
+    },
+    {
+      "user_id": "user_002", 
+      "username": "bob",
+      "display_name": "Bob Wilson",
+      "status": "online",
+      "current_activity": "Investigating payment issue",
+      "last_seen": "2025-01-13T09:50:00Z",
+      "active_assignments": 1
+    },
+    {
+      "user_id": "user_003",
+      "username": "carol",
+      "display_name": "Carol Davis", 
+      "status": "away",
+      "current_activity": "In meeting",
+      "last_seen": "2025-01-13T09:30:00Z",
+      "active_assignments": 3
+    }
+  ],
+  "user_activity_summary": {
+    "total_active_sessions": 2,
+    "total_users_today": 5,
+    "peak_concurrent_users": 4,
+    "average_session_duration": "2.5 hours",
+    "most_active_user": {
+      "user_id": "user_001",
+      "username": "alice",
+      "actions_today": 12,
+      "time_spent": "3.5 hours"
+    }
+  },
+  "authentication_config": {
+    "session_timeout": 14400,
+    "max_concurrent_sessions": 3,
+    "require_2fa": false,
+    "allowed_login_methods": ["github_oauth", "google_oauth"],
+    "password_policy": {
+      "min_length": 8,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true
+    }
+  }
+}

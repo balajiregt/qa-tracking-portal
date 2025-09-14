@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-13T10:00:00Z",
+    "totalCount": 8
+  },
+  "assignments": [
+    {
+      "id": "assign_001",
+      "pr_id": "pr_002",
+      "test_case_id": "tc_001",
+      "test_name": "Login Flow Testing", 
+      "assigned_to": "Alice",
+      "assigned_at": "2025-01-13T08:00:00Z",
+      "status": "in_progress",
+      "priority": "high",
+      "estimated_duration": 2500,
+      "actual_duration": null,
+      "started_at": "2025-01-13T08:30:00Z",
+      "completed_at": null,
+      "due_date": "2025-01-13T12:00:00Z",
+      "progress": 75,
+      "environment": "qa",
+      "browser": "Chrome 120",
+      "progress_updates": [
+        {
+          "id": "update_001",
+          "timestamp": "2025-01-13T08:30:00Z",
+          "message": "Started login flow testing - setting up test environment",
+          "progress": 10,
+          "user": "Alice"
+        },
+        {
+          "id": "update_002", 
+          "timestamp": "2025-01-13T09:00:00Z",
+          "message": "Completed basic login scenarios, investigating session timeout",
+          "progress": 50,
+          "user": "Alice"
+        },
+        {
+          "id": "update_003",
+          "timestamp": "2025-01-13T09:30:00Z", 
+          "message": "Found session timeout issue, documenting failure steps",
+          "progress": 75,
+          "user": "Alice"
+        }
+      ],
+      "requirements": ["QA environment access", "Test user accounts"],
+      "dependencies": [],
+      "notes": "Session timeout occurring after 3 seconds - needs investigation"
+    },
+    {
+      "id": "assign_002",
+      "pr_id": "pr_002",
+      "test_case_id": "tc_002",
+      "test_name": "Password Reset Flow",
+      "assigned_to": "Bob",
+      "assigned_at": "2025-01-13T09:00:00Z",
+      "status": "in_progress",
+      "priority": "medium", 
+      "estimated_duration": 1800,
+      "actual_duration": null,
+      "started_at": "2025-01-13T09:15:00Z",
+      "completed_at": null,
+      "due_date": "2025-01-13T15:00:00Z",
+      "progress": 30,
+      "environment": "qa",
+      "browser": "Firefox 121",
+      "progress_updates": [
+        {
+          "id": "update_004",
+          "timestamp": "2025-01-13T09:15:00Z",
+          "message": "Started password reset testing",
+          "progress": 10,
+          "user": "Bob"
+        },
+        {
+          "id": "update_005",
+          "timestamp": "2025-01-13T09:45:00Z",
+          "message": "Testing email delivery for password reset",
+          "progress": 30,
+          "user": "Bob"  
+        }
+      ],
+      "requirements": ["Email server access", "Test email accounts"],
+      "dependencies": ["Email service availability"],
+      "notes": "Testing email delivery mechanism"
+    },
+    {
+      "id": "assign_003",
+      "pr_id": "pr_002", 
+      "test_case_id": "tc_003",
+      "test_name": "Cross-Browser Compatibility",
+      "assigned_to": "Carol",
+      "assigned_at": "2025-01-13T08:30:00Z",
+      "status": "pending",
+      "priority": "medium",
+      "estimated_duration": 3600,
+      "actual_duration": null,
+      "started_at": null,
+      "completed_at": null,
+      "due_date": "2025-01-13T16:00:00Z",
+      "progress": 0,
+      "environment": "qa",
+      "browser": "Multiple",
+      "progress_updates": [],
+      "requirements": ["Multiple browser installations", "BrowserStack access"],
+      "dependencies": ["Alice's login flow tests completion"],
+      "notes": "Waiting for login flow issues to be resolved before starting"
+    },
+    {
+      "id": "assign_004",
+      "pr_id": "pr_004",
+      "test_case_id": "tc_planned_001",
+      "test_name": "UI Theme Switching",
+      "assigned_to": null,
+      "assigned_at": null,
+      "status": "unassigned", 
+      "priority": "medium",
+      "estimated_duration": 1800,
+      "actual_duration": null,
+      "started_at": null,
+      "completed_at": null,
+      "due_date": "2025-01-14T17:00:00Z",
+      "progress": 0,
+      "environment": "dev",
+      "browser": "Chrome",
+      "progress_updates": [],
+      "requirements": ["UI testing environment", "Multiple browsers"],
+      "dependencies": [],
+      "notes": "Ready for assignment - UI tests for dark mode toggle"
+    },
+    {
+      "id": "assign_005",
+      "pr_id": "pr_004",
+      "test_case_id": "tc_planned_002", 
+      "test_name": "Persistence Across Sessions",
+      "assigned_to": null,
+      "assigned_at": null,
+      "status": "unassigned",
+      "priority": "low",
+      "estimated_duration": 2400,
+      "actual_duration": null,
+      "started_at": null,
+      "completed_at": null,
+      "due_date": "2025-01-15T12:00:00Z",
+      "progress": 0,
+      "environment": "dev",
+      "browser": "Multiple",
+      "progress_updates": [],
+      "requirements": ["Multiple browser sessions", "Storage testing"],
+      "dependencies": ["UI Theme Switching test completion"],
+      "notes": "Test theme preference persistence across browser sessions"
+    }
+  ],
+  "assignment_statistics": {
+    "total_assignments": 5,
+    "unassigned": 2,
+    "assigned": 0,
+    "in_progress": 2, 
+    "completed": 1,
+    "overdue": 0,
+    "by_tester": {
+      "Alice": 1,
+      "Bob": 1,
+      "Carol": 1,
+      "unassigned": 2
+    }
+  }
+}
