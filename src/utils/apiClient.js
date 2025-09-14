@@ -84,8 +84,14 @@ class APIClient {
     if (this.isDevelopment()) {
       return { data: this.getLocalData('testCases') }
     }
-    const result = await this.get('/get-data?dataType=test-cases')
-    return { data: result.data?.test_cases || [] }
+    try {
+      const result = await this.get('/get-data', { dataType: 'test-cases' })
+      console.log('getAllTestCases result:', result)
+      return { data: result.data?.test_cases || [] }
+    } catch (error) {
+      console.error('getAllTestCases error:', error)
+      return { data: [] }
+    }
   }
 
   async addTestCase(testCase) {
@@ -132,8 +138,14 @@ class APIClient {
     if (this.isDevelopment()) {
       return { data: this.getLocalData('prs') }
     }
-    const result = await this.get('/get-data?dataType=prs')
-    return { data: result.data?.prs || [] }
+    try {
+      const result = await this.get('/get-data', { dataType: 'prs' })
+      console.log('getAllPRs result:', result)
+      return { data: result.data?.prs || [] }
+    } catch (error) {
+      console.error('getAllPRs error:', error)
+      return { data: [] }
+    }
   }
 
   async createPR(prData) {
@@ -213,8 +225,14 @@ class APIClient {
   }
 
   async getActivities() {
-    const result = await this.get('/get-data?dataType=activity')
-    return { data: result.data?.activities || [] }
+    try {
+      const result = await this.get('/get-data', { dataType: 'activity' })
+      console.log('getActivities result:', result)
+      return { data: result.data?.activities || [] }
+    } catch (error) {
+      console.error('getActivities error:', error)
+      return { data: [] }
+    }
   }
 
   async getAnalytics(timeRange = 30) {
