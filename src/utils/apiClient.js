@@ -38,7 +38,29 @@ class APIClient {
       url.searchParams.append(key, params[key])
     )
     
-    return this.request(url.pathname + url.search, { method: 'GET' })
+    // Don't call this.request as it would double up the API_BASE
+    const config = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': 'user_005', // Default to mike_dev who has test_create permission
+      },
+    }
+
+    try {
+      const response = await fetch(url.toString(), config)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`API Error (${response.status}): ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('API request failed:', error)
+      throw error
+    }
   }
 
   async post(endpoint, data = {}) {
