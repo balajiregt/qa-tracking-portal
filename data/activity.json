@@ -1,10 +1,29 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-14T11:00:45.200Z",
-    "totalCount": 7
+    "lastUpdated": "2025-09-14T11:10:05.534Z",
+    "totalCount": 8
   },
   "activities": [
+    {
+      "id": "act_1757848205533",
+      "type": "test_case_added",
+      "action": "custom_test_created",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-14T11:10:05.533Z",
+      "details": {
+        "test_case_id": "tc_custom_1757848205116",
+        "test_name": "TC_001_new_login",
+        "tags": [
+          "login"
+        ],
+        "intent": "e2e",
+        "bdd_format": true,
+        "steps_count": 3
+      },
+      "message": "Mike Rodriguez added custom test case: TC_001_new_login",
+      "icon": "📝"
+    },
     {
       "id": "act_1757847645200",
       "type": "test_case_added",
