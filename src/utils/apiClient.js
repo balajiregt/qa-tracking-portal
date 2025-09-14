@@ -84,7 +84,8 @@ class APIClient {
     if (this.isDevelopment()) {
       return { data: this.getLocalData('testCases') }
     }
-    return this.get('/test-cases')
+    const result = await this.get('/get-data?dataType=test-cases')
+    return { data: result.data?.test_cases || [] }
   }
 
   async addTestCase(testCase) {
@@ -131,7 +132,8 @@ class APIClient {
     if (this.isDevelopment()) {
       return { data: this.getLocalData('prs') }
     }
-    return this.get('/prs')
+    const result = await this.get('/get-data?dataType=prs')
+    return { data: result.data?.prs || [] }
   }
 
   async createPR(prData) {
@@ -211,7 +213,8 @@ class APIClient {
   }
 
   async getActivities() {
-    return this.get('/activities')
+    const result = await this.get('/get-data?dataType=activity')
+    return { data: result.data?.activities || [] }
   }
 
   async getAnalytics(timeRange = 30) {

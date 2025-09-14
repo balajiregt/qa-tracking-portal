@@ -252,7 +252,13 @@ export function QAProvider({ children }) {
       try {
         actions.setLoading(true)
         const result = await apiClient.addTestCase(testCaseData)
+        
+        // Add to local state and reload all data to ensure consistency
         actions.addTestCase(result.data)
+        
+        // Reload all data from server to ensure UI shows latest data
+        await actions.loadAllData()
+        
         actions.showNotification('Test case created successfully', 'success')
         return result.data
       } catch (error) {
@@ -305,7 +311,13 @@ export function QAProvider({ children }) {
       try {
         actions.setLoading(true)
         const result = await apiClient.createPR(prData)
+        
+        // Add to local state and reload all data to ensure consistency
         actions.addPR(result.data)
+        
+        // Reload all data from server to ensure UI shows latest data
+        await actions.loadAllData()
+        
         actions.showNotification('PR created successfully', 'success')
         return result.data
       } catch (error) {
