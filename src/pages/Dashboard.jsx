@@ -7,6 +7,8 @@ function Dashboard() {
   const [selectedPR, setSelectedPR] = useState(null)
   const [showTestAssociation, setShowTestAssociation] = useState(false)
   const [selectedTestCases, setSelectedTestCases] = useState([])
+  const [blockedReason, setBlockedReason] = useState('')
+  const [showBlockedReasonEdit, setShowBlockedReasonEdit] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingTestCase, setEditingTestCase] = useState(null)
   const [formData, setFormData] = useState({
@@ -49,13 +51,27 @@ function Dashboard() {
     // Overall progress calculation based on local branch results
     const localProgress = totalTests > 0 ? (localPassedTests / totalTests) * 100 : 0
     
-    // Determine if ready to merge based on status and test results
-    const readyToMerge = pr.status === 'ready' || (localFailedTests === 0 && localPendingTests === 0 && totalTests > 0)
+    // Automatically calculate status based on test results
+    let calculatedStatus
+    if (pr.blocked_reason || localFailedTests > 0) {
+      calculatedStatus = 'blocked'
+    } else if (totalTests > 0 && localPendingTests === 0 && localPassedTests === totalTests) {
+      calculatedStatus = 'ready'
+    } else if (totalTests > 0) {
+      calculatedStatus = 'testing'
+    } else {
+      calculatedStatus = 'new'
+    }
+    
+    // Determine if ready to merge based on calculated status
+    const readyToMerge = calculatedStatus === 'ready'
     
     return {
       ...pr,
       associatedTestCases,
       totalTests,
+      // Use calculated status instead of manual status
+      status: calculatedStatus,
       // Test result stats based on associated test cases
       passedTests: localPassedTests,
       failedTests: localFailedTests,
@@ -379,6 +395,8 @@ function Dashboard() {
                     setSelectedPR(null)
                     setShowTestAssociation(false)
                     setSelectedTestCases([])
+                    setBlockedReason('')
+                    setShowBlockedReasonEdit(false)
                   }}
                   className="text-gray-400 hover:text-gray-600"
                 >
@@ -387,7 +405,7 @@ function Dashboard() {
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <button
                   onClick={() => setShowTestAssociation(true)}
                   className="btn btn-primary flex items-center justify-center"
@@ -403,7 +421,95 @@ function Dashboard() {
                   <span className="mr-2">📎</span>
                   Add Traces
                 </Link>
+                {selectedPR.status !== 'blocked' && (
+                  <button
+                    onClick={() => {
+                      setBlockedReason('')
+                      setShowBlockedReasonEdit(true)
+                    }}
+                    className="btn btn-danger flex items-center justify-center"
+                  >
+                    <span className="mr-2">🚫</span>
+                    Block PR
+                  </button>
+                )}
+                {selectedPR.status === 'blocked' && selectedPR.blocked_reason && (
+                  <button
+                    onClick={() => {
+                      // Remove blocked reason to unblock
+                      const updatedPR = { ...selectedPR, blocked_reason: '' }
+                      setSelectedPR(updatedPR)
+                      actions.showNotification('PR unblocked successfully', 'success')
+                    }}
+                    className="btn btn-success flex items-center justify-center"
+                  >
+                    <span className="mr-2">✅</span>
+                    Unblock PR
+                  </button>
+                )}
               </div>
+
+              {/* Blocked Reason Management */}
+              {selectedPR.status === 'blocked' && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">🚫 Blocked Reason</h3>
+                    <button
+                      onClick={() => {
+                        setBlockedReason(selectedPR.blocked_reason || '')
+                        setShowBlockedReasonEdit(!showBlockedReasonEdit)
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      {showBlockedReasonEdit ? 'Cancel' : (selectedPR.blocked_reason ? 'Edit' : 'Add Reason')}
+                    </button>
+                  </div>
+                  
+                  {showBlockedReasonEdit ? (
+                    <div className="space-y-3">
+                      <textarea
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        rows={3}
+                        value={blockedReason}
+                        onChange={(e) => setBlockedReason(e.target.value)}
+                        placeholder="Explain why this PR is blocked..."
+                      />
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => {
+                            setShowBlockedReasonEdit(false)
+                            setBlockedReason('')
+                          }}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Update PR with blocked reason - this will trigger status recalculation
+                            const updatedPR = { ...selectedPR, blocked_reason: blockedReason }
+                            setSelectedPR(updatedPR)
+                            actions.showNotification('PR blocked successfully', 'success')
+                            setShowBlockedReasonEdit(false)
+                          }}
+                          className="btn btn-danger btn-sm"
+                          disabled={!blockedReason.trim()}
+                        >
+                          Save Blocked Reason
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      {selectedPR.blocked_reason ? (
+                        <p className="text-red-800">{selectedPR.blocked_reason}</p>
+                      ) : (
+                        <p className="text-red-600 italic">No blocked reason specified</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Test Case Association */}
               {showTestAssociation && (
