@@ -465,7 +465,7 @@ function Dashboard() {
               </div>
 
               {/* Blocked Reason Management */}
-              {selectedPR.status === 'blocked' && (
+              {(selectedPR.status === 'blocked' || showBlockedReasonEdit) && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-gray-900">🚫 Blocked Reason</h3>
