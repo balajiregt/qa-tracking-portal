@@ -186,6 +186,21 @@ class APIClient {
     return this.post('/create-pr', { ...prData, userId: 'user_005' })
   }
 
+  async updatePR(prData) {
+    if (this.isDevelopment()) {
+      const prs = this.getLocalData('prs')
+      const index = prs.findIndex(pr => pr.id === prData.id)
+      if (index !== -1) {
+        prs[index] = { ...prs[index], ...prData, updated_at: new Date().toISOString() }
+        this.setLocalData('prs', prs)
+        return { data: prs[index] }
+      }
+      throw new Error('PR not found')
+    }
+    // Include userId in the request body for backend validation
+    return this.put('/update-pr', { ...prData, userId: 'user_005' })
+  }
+
   async uploadTraces(traceData) {
     if (this.isDevelopment()) {
       // Simulate trace upload processing

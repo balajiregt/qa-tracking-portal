@@ -24,12 +24,10 @@ function Dashboard() {
   })
 
   
-  // Get associated test cases for each PR (demo data for now)
+  // Get associated test cases for each PR
   const getAssociatedTestCases = (prId) => {
-    if (prId === 'pr_001') {
-      return state.testCases.slice(0, 3) // First 3 test cases for demo
-    }
-    return []
+    const pr = state.prs.find(p => p.id === prId)
+    return pr?.associatedTestCases || []
   }
 
   // Focus on PR Testing Progress with Branch-Specific Data
@@ -438,18 +436,16 @@ function Dashboard() {
                 )}
                 {selectedPR.status === 'blocked' && selectedPR.blocked_reason && (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       try {
                         // Update the PR in the global state by removing blocked_reason
                         const updatedPR = { ...selectedPR, blocked_reason: '' }
                         
                         // Update the PR in the context/backend
-                        actions.updatePR(updatedPR)
+                        await actions.updatePRAsync(updatedPR)
                         
                         // Update local modal state
                         setSelectedPR(updatedPR)
-                        
-                        actions.showNotification('PR unblocked successfully', 'success')
                       } catch (error) {
                         console.error('Error unblocking PR:', error)
                         actions.showNotification('Failed to unblock PR', 'error')
@@ -499,16 +495,15 @@ function Dashboard() {
                           Cancel
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             try {
                               // Update local modal state
                               const updatedPR = { ...selectedPR, blocked_reason: blockedReason }
                               
                               // Update the PR in the context/backend
-                              actions.updatePR(updatedPR)
+                              await actions.updatePRAsync(updatedPR)
                               setSelectedPR(updatedPR)
                               
-                              actions.showNotification('PR blocked successfully', 'success')
                               setShowBlockedReasonEdit(false)
                             } catch (error) {
                               console.error('Error blocking PR:', error)
@@ -650,7 +645,7 @@ function Dashboard() {
                           Cancel
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             try {
                               // Get the selected test cases from state
                               const testCasesToAssociate = state.testCases.filter(tc => 
@@ -668,13 +663,12 @@ function Dashboard() {
                                 ]
                               }
                               
-                              // Update the PR in global state
-                              actions.updatePR(updatedPR)
+                              // Update the PR in backend and global state
+                              await actions.updatePRAsync(updatedPR)
                               
                               // Update local modal state
                               setSelectedPR(updatedPR)
                               
-                              actions.showNotification(`Associated ${selectedTestCases.length} test cases with ${selectedPR.name}`, 'success')
                               setShowTestAssociation(false)
                               setSelectedTestCases([])
                             } catch (error) {

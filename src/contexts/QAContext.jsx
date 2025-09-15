@@ -327,6 +327,28 @@ export function QAProvider({ children }) {
       }
     },
 
+    async updatePRAsync(prData) {
+      try {
+        actions.setLoading(true)
+        const result = await apiClient.updatePR(prData)
+        
+        // Update local state
+        actions.updatePR(result.data)
+        
+        // Reload all data from server to ensure UI shows latest data
+        await actions.loadAllData()
+        
+        actions.showNotification('PR updated successfully', 'success')
+        return result.data
+      } catch (error) {
+        actions.setError(error.message)
+        actions.showNotification(`Failed to update PR: ${error.message}`, 'error')
+        throw error
+      } finally {
+        actions.setLoading(false)
+      }
+    },
+
     async uploadTraces(traceData) {
       try {
         actions.setLoading(true)
