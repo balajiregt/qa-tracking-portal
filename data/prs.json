@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:23:54.829Z",
+    "lastUpdated": "2025-09-15T14:24:06.435Z",
     "totalCount": 6
   },
   "prs": [
@@ -182,10 +182,10 @@
       "description": "Fixed authentication issues and improved security",
       "priority": "high",
       "environment": "qa",
-      "status": "testing",
+      "status": "blocked",
       "progress": 60,
       "created_at": "2025-01-13T06:00:00Z",
-      "updated_at": "2025-09-15T14:23:54.829Z",
+      "updated_at": "2025-09-15T14:24:06.435Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/auth-fix",
@@ -391,7 +391,7 @@
       "readyToMerge": false,
       "userId": "user_005",
       "updated_by": "Mike Rodriguez",
-      "blocked_reason": "testr"
+      "blocked_reason": ""
     },
     {
       "id": "pr_003",
