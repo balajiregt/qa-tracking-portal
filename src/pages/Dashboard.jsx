@@ -651,10 +651,36 @@ function Dashboard() {
                         </button>
                         <button
                           onClick={() => {
-                            // TODO: Implement test case association logic
-                            actions.showNotification(`Associated ${selectedTestCases.length} test cases with ${selectedPR.name}`, 'success')
-                            setShowTestAssociation(false)
-                            setSelectedTestCases([])
+                            try {
+                              // Get the selected test cases from state
+                              const testCasesToAssociate = state.testCases.filter(tc => 
+                                selectedTestCases.includes(tc.id)
+                              )
+                              
+                              // Create updated PR with associated test cases
+                              const updatedPR = {
+                                ...selectedPR,
+                                associatedTestCases: [
+                                  ...(selectedPR.associatedTestCases || []),
+                                  ...testCasesToAssociate.filter(tc => 
+                                    !selectedPR.associatedTestCases?.some(existing => existing.id === tc.id)
+                                  )
+                                ]
+                              }
+                              
+                              // Update the PR in global state
+                              actions.updatePR(updatedPR)
+                              
+                              // Update local modal state
+                              setSelectedPR(updatedPR)
+                              
+                              actions.showNotification(`Associated ${selectedTestCases.length} test cases with ${selectedPR.name}`, 'success')
+                              setShowTestAssociation(false)
+                              setSelectedTestCases([])
+                            } catch (error) {
+                              console.error('Error associating test cases:', error)
+                              actions.showNotification('Failed to associate test cases', 'error')
+                            }
                           }}
                           className="btn btn-primary btn-sm"
                           disabled={selectedTestCases.length === 0}

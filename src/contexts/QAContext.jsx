@@ -140,10 +140,7 @@ function qaReducer(state, action) {
     case QA_ACTIONS.ADD_NOTIFICATION:
       return {
         ...state,
-        notifications: [...state.notifications, {
-          id: Date.now(),
-          ...action.payload
-        }]
+        notifications: [...state.notifications, action.payload]
       }
     
     case QA_ACTIONS.REMOVE_NOTIFICATION:
@@ -204,12 +201,13 @@ export function QAProvider({ children }) {
     
     // UI actions
     showNotification: (message, type = 'info') => {
-      const notification = { message, type }
+      const id = Date.now()
+      const notification = { id, message, type }
       dispatch({ type: QA_ACTIONS.ADD_NOTIFICATION, payload: notification })
       
       // Auto remove after 5 seconds
       setTimeout(() => {
-        actions.removeNotification(notification.id)
+        actions.removeNotification(id)
       }, 5000)
     },
     removeNotification: (id) => dispatch({ type: QA_ACTIONS.REMOVE_NOTIFICATION, payload: id }),
