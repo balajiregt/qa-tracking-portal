@@ -964,14 +964,26 @@ function Dashboard() {
                       ...formData
                     }
                     
-                    // Update in the context
-                    actions.updateTestCase(updatedTestCase)
+                    // Update the associated test case in the PR (for Local/Main branch results)
+                    const updatedAssociatedTestCases = selectedPR.associatedTestCases.map(tc =>
+                      tc.id === editingTestCase.id ? updatedTestCase : tc
+                    )
                     
-                    actions.showNotification('Test case updated successfully', 'success')
+                    // Update the PR with the modified test case results
+                    const updatedPR = {
+                      ...selectedPR,
+                      associatedTestCases: updatedAssociatedTestCases
+                    }
+                    
+                    // Update the PR in backend and global state
+                    await actions.updatePRAsync(updatedPR)
+                    
+                    // Update local modal state
+                    setSelectedPR(updatedPR)
+                    
                     setShowEditModal(false)
                     setEditingTestCase(null)
                     
-                    // The useEffect will handle recalculating the PR data automatically
                   } catch (error) {
                     console.error('Error updating test case:', error)
                     actions.showNotification('Failed to update test case', 'error')
