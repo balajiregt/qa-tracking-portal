@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:21:12.255Z",
+    "lastUpdated": "2025-09-15T14:21:35.212Z",
     "totalCount": 6
   },
   "prs": [
@@ -12,10 +12,10 @@
       "description": "Enhanced shopping cart functionality with improved UX",
       "priority": "medium",
       "environment": "staging",
-      "status": "ready",
+      "status": "new",
       "progress": 100,
       "created_at": "2025-01-12T08:30:00Z",
-      "updated_at": "2025-01-13T09:15:00Z",
+      "updated_at": "2025-09-15T14:21:35.212Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/shopping-cart",
@@ -62,7 +62,118 @@
         "qa_approval_date": "2025-01-13T09:15:00Z",
         "merge_requested_at": null,
         "can_proceed_to_merge": true
-      }
+      },
+      "associatedTestCases": [
+        {
+          "id": "tc_001",
+          "name": "User Login Flow",
+          "description": "Complete user login process validation",
+          "tags": [
+            "@regression",
+            "@smoke",
+            "@auth"
+          ],
+          "intent": "regression",
+          "type": "functional",
+          "priority": "high",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the user is on the login page",
+              "formatted": "Given the user is on the login page"
+            },
+            {
+              "type": "when",
+              "text": "the user enters valid credentials",
+              "formatted": "When the user enters valid credentials"
+            },
+            {
+              "type": "and",
+              "text": "clicks the login button",
+              "formatted": "And clicks the login button"
+            },
+            {
+              "type": "then",
+              "text": "the user should be redirected to dashboard",
+              "formatted": "Then the user should be redirected to dashboard"
+            }
+          ],
+          "steps": [
+            "Given the user is on the login page",
+            "When the user enters valid credentials",
+            "And clicks the login button",
+            "Then the user should be redirected to dashboard"
+          ],
+          "expected_duration": 2500,
+          "created_at": "2025-01-10T10:00:00Z",
+          "updated_at": "2025-01-10T10:00:00Z",
+          "created_by": "system",
+          "is_custom": false,
+          "source": "built-in"
+        },
+        {
+          "id": "tc_002",
+          "name": "Shopping Cart Add Item",
+          "description": "Verify items can be added to shopping cart successfully",
+          "tags": [
+            "@regression",
+            "@cart",
+            "@e2e"
+          ],
+          "intent": "regression",
+          "type": "functional",
+          "priority": "medium",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the user is on the product page",
+              "formatted": "Given the user is on the product page"
+            },
+            {
+              "type": "when",
+              "text": "the user clicks add to cart",
+              "formatted": "When the user clicks add to cart"
+            },
+            {
+              "type": "then",
+              "text": "the item should be added to the cart",
+              "formatted": "Then the item should be added to the cart"
+            },
+            {
+              "type": "and",
+              "text": "the cart count should increase by 1",
+              "formatted": "And the cart count should increase by 1"
+            }
+          ],
+          "steps": [
+            "Given the user is on the product page",
+            "When the user clicks add to cart",
+            "Then the item should be added to the cart",
+            "And the cart count should increase by 1"
+          ],
+          "expected_duration": 1800,
+          "created_at": "2025-01-12T14:30:00Z",
+          "updated_at": "2025-01-12T14:30:00Z",
+          "created_by": "mike_dev",
+          "is_custom": true,
+          "source": "manual"
+        }
+      ],
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "pendingTests": 0,
+      "localPassedTests": 0,
+      "localFailedTests": 0,
+      "localPendingTests": 0,
+      "mainPassedTests": 0,
+      "mainFailedTests": 0,
+      "mainPendingTests": 0,
+      "testProgress": 0,
+      "localProgress": 0,
+      "readyToMerge": false,
+      "userId": "user_005",
+      "updated_by": "Mike Rodriguez"
     },
     {
       "id": "pr_002",
