@@ -14,62 +14,73 @@ function Analytics() {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - timeRange)
 
-    const recentTestCases = testCases.filter(tc => {
-      const testDate = new Date(tc.timestamp || tc.createdAt)
-      return testDate >= cutoffDate
-    })
-
     const recentPRs = prs.filter(pr => {
-      const prDate = new Date(pr.createdAt)
+      const prDate = new Date(pr.created_at || pr.createdAt)
       return prDate >= cutoffDate
     })
 
-    // Test case statistics
-    const totalTests = recentTestCases.length
-    const passedTests = recentTestCases.filter(tc => tc.result === 'Pass').length
-    const failedTests = recentTestCases.filter(tc => tc.result === 'Fail').length
-    const pendingTests = recentTestCases.filter(tc => !tc.result || tc.result === 'Pending').length
+    // Collect all test results from PR associations
+    const allTestResults = []
+    recentPRs.forEach(pr => {
+      if (pr.associatedTestCases && pr.associatedTestCases.length > 0) {
+        pr.associatedTestCases.forEach(testCase => {
+          allTestResults.push({
+            ...testCase,
+            prId: pr.id,
+            prName: pr.name,
+            prStatus: pr.status,
+            prPriority: pr.priority
+          })
+        })
+      }
+    })
+
+    // Test case statistics based on PR associations
+    const totalTests = allTestResults.length
+    const passedTests = allTestResults.filter(tc => tc.localResult === 'Pass').length
+    const failedTests = allTestResults.filter(tc => tc.localResult === 'Fail' || tc.mainResult === 'Fail').length
+    const pendingTests = allTestResults.filter(tc => (!tc.localResult || tc.localResult === 'Pending') && (!tc.mainResult || tc.mainResult === 'Pending')).length
     const passRate = totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) : 0
 
     // PR statistics
     const totalPRs = recentPRs.length
-    const openPRs = recentPRs.filter(pr => pr.status === 'Open').length
-    const mergedPRs = recentPRs.filter(pr => pr.status === 'Merged').length
-    const closedPRs = recentPRs.filter(pr => pr.status === 'Closed').length
+    const openPRs = recentPRs.filter(pr => ['new', 'testing', 'blocked'].includes(pr.status)).length
+    const readyPRs = recentPRs.filter(pr => pr.status === 'ready').length
+    const blockedPRs = recentPRs.filter(pr => pr.status === 'blocked').length
 
-    // Test coverage by source
-    const testsBySource = testCases.reduce((acc, tc) => {
+    // Test coverage by source from PR associations
+    const testsBySource = allTestResults.reduce((acc, tc) => {
       const source = tc.source || 'Unknown'
       acc[source] = (acc[source] || 0) + 1
       return acc
     }, {})
 
-    // Test results trend (mock data for visualization)
+    // Test results trend based on PR test activity
     const trendData = []
     for (let i = timeRange; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
       
-      const dayTests = recentTestCases.filter(tc => {
-        const testDate = new Date(tc.timestamp || tc.createdAt)
+      const dayTests = allTestResults.filter(tc => {
+        const testDate = new Date(tc.created_at || tc.createdAt)
         return testDate.toDateString() === date.toDateString()
       })
       
       trendData.push({
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        passed: dayTests.filter(tc => tc.result === 'Pass').length,
-        failed: dayTests.filter(tc => tc.result === 'Fail').length,
+        passed: dayTests.filter(tc => tc.localResult === 'Pass' || tc.mainResult === 'Pass').length,
+        failed: dayTests.filter(tc => tc.localResult === 'Fail' || tc.mainResult === 'Fail').length,
         total: dayTests.length
       })
     }
 
-    // Top failing tags
-    const failingTests = testCases.filter(tc => tc.result === 'Fail')
-    const tagStats = failingTests.reduce((acc, tc) => {
-      if (tc.tags) {
-        const tags = tc.tags.split(',').map(tag => tag.trim())
-        tags.forEach(tag => {
-          acc[tag] = (acc[tag] || 0) + 1
+    // Top failing tags from PR test results
+    const failingTestResults = allTestResults.filter(tc => tc.localResult === 'Fail' || tc.mainResult === 'Fail')
+    const tagStats = failingTestResults.reduce((acc, tc) => {
+      if (tc.tags && Array.isArray(tc.tags)) {
+        tc.tags.forEach(tag => {
+          const cleanTag = tag.replace('@', '').trim()
+          acc[cleanTag] = (acc[cleanTag] || 0) + 1
         })
       }
       return acc
@@ -87,8 +98,8 @@ function Analytics() {
       passRate,
       totalPRs,
       openPRs,
-      mergedPRs,
-      closedPRs,
+      readyPRs,
+      blockedPRs,
       testsBySource,
       trendData,
       topFailingTags
@@ -257,25 +268,25 @@ function Analytics() {
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-semibold text-success-600">{analytics.mergedPRs}</p>
-                <p className="text-sm text-gray-600">Merged</p>
+                <p className="text-2xl font-semibold text-success-600">{analytics.readyPRs}</p>
+                <p className="text-sm text-gray-600">Ready</p>
                 <div className="mt-2">
                   <div className="bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-success-500 h-2 rounded-full"
-                      style={{ width: `${(analytics.mergedPRs / analytics.totalPRs) * 100}%` }}
+                      style={{ width: `${(analytics.readyPRs / analytics.totalPRs) * 100}%` }}
                     ></div>
                   </div>
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-semibold text-gray-600">{analytics.closedPRs}</p>
-                <p className="text-sm text-gray-600">Closed</p>
+                <p className="text-2xl font-semibold text-danger-600">{analytics.blockedPRs}</p>
+                <p className="text-sm text-gray-600">Blocked</p>
                 <div className="mt-2">
                   <div className="bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-gray-500 h-2 rounded-full"
-                      style={{ width: `${(analytics.closedPRs / analytics.totalPRs) * 100}%` }}
+                      className="bg-danger-500 h-2 rounded-full"
+                      style={{ width: `${(analytics.blockedPRs / analytics.totalPRs) * 100}%` }}
                     ></div>
                   </div>
                 </div>

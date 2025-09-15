@@ -182,11 +182,11 @@ function Dashboard() {
             Create PR
           </Link>
           <Link
-            to="/analytics"
+            to="/failing-tests"
             className="btn btn-secondary btn-lg flex items-center justify-center"
           >
-            <span className="mr-2">📈</span>
-            View Analytics
+            <span className="mr-2">❌</span>
+            Failing Tests
           </Link>
         </div>
       </div>
