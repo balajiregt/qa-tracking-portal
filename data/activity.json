@@ -1,10 +1,26 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T15:27:13.382Z",
-    "totalCount": 29
+    "lastUpdated": "2025-09-15T16:26:53.083Z",
+    "totalCount": 30
   },
   "activities": [
+    {
+      "id": "act_1757953613082",
+      "type": "pr_created",
+      "action": "pr_added",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-15T16:26:53.082Z",
+      "details": {
+        "pr_id": "pr_1757953612522",
+        "pr_name": "pr10_track_time",
+        "developer": "user_005",
+        "priority": "medium",
+        "environment": "staging"
+      },
+      "message": "Mike Rodriguez created new PR: pr10_track_time",
+      "icon": "➕"
+    },
     {
       "id": "act_1757950033381",
       "type": "pr_updated",
