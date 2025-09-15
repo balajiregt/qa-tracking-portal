@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:37:07.199Z",
+    "lastUpdated": "2025-09-15T15:25:35.723Z",
     "totalCount": 6
   },
   "prs": [
@@ -186,7 +186,7 @@
       "status": "testing",
       "progress": 60,
       "created_at": "2025-01-13T06:00:00Z",
-      "updated_at": "2025-09-15T14:37:07.199Z",
+      "updated_at": "2025-09-15T15:25:35.723Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/auth-fix",
@@ -468,19 +468,24 @@
           "updated_at": "2025-01-12T14:30:00Z",
           "created_by": "mike_dev",
           "is_custom": true,
-          "source": "manual"
+          "source": "manual",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Fail",
+          "mainResult": "Pending"
         }
       ],
-      "totalTests": 4,
+      "totalTests": 6,
       "passedTests": 0,
       "failedTests": 0,
-      "pendingTests": 4,
+      "pendingTests": 6,
       "localPassedTests": 0,
       "localFailedTests": 0,
-      "localPendingTests": 4,
+      "localPendingTests": 6,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
-      "mainPendingTests": 4,
+      "mainPendingTests": 6,
       "testProgress": 0,
       "localProgress": 0,
       "readyToMerge": false,
