@@ -1,8 +1,8 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T15:27:12.753Z",
-    "totalCount": 6
+    "lastUpdated": "2025-09-15T16:26:52.522Z",
+    "totalCount": 7
   },
   "prs": [
     {
@@ -842,6 +842,46 @@
       "branch_comparison": {
         "feature_branch": {
           "name": "pr1/bug-fix",
+          "tests_passed": 0,
+          "tests_failed": 0,
+          "tests_skipped": 0
+        },
+        "main_branch": {
+          "name": "main",
+          "tests_passed": 0,
+          "tests_failed": 0
+        }
+      },
+      "assigned_testers": [],
+      "test_results": [],
+      "merge_readiness": {
+        "ready_for_merge": false,
+        "merge_requirements_met": [],
+        "merge_blockers": [
+          "No tests executed",
+          "No QA approval"
+        ],
+        "approved_by": [],
+        "qa_approval_date": null,
+        "merge_requested_at": null,
+        "can_proceed_to_merge": false
+      }
+    },
+    {
+      "id": "pr_1757953612522",
+      "name": "pr10_track_time",
+      "developer": "user_005",
+      "description": "",
+      "priority": "medium",
+      "environment": "staging",
+      "status": "new",
+      "progress": 0,
+      "created_at": "2025-09-15T16:26:52.522Z",
+      "updated_at": "2025-09-15T16:26:52.522Z",
+      "created_by": "user_005",
+      "branch_comparison": {
+        "feature_branch": {
+          "name": "pr10_track_time",
           "tests_passed": 0,
           "tests_failed": 0,
           "tests_skipped": 0
