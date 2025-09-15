@@ -258,7 +258,12 @@ function Dashboard() {
                 <div key={pr.id} className="bg-danger-50 border border-danger-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                        <span className="badge badge-danger">
+                          {pr.status}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
                       <div className="flex items-center mt-2 space-x-2">
                         <span className="badge badge-danger">{pr.localFailedTests} local tests failed</span>
@@ -277,13 +282,10 @@ function Dashboard() {
                     <div className="ml-4">
                       <button 
                         onClick={() => setSelectedPR(pr)}
-                        className="btn btn-primary btn-sm mr-2"
+                        className="btn btn-primary btn-sm"
                       >
                         View Details
                       </button>
-                      <Link to="/test-cases" className="btn btn-danger btn-sm">
-                        Fix Tests
-                      </Link>
                     </div>
                   </div>
                 </div>
@@ -307,7 +309,12 @@ function Dashboard() {
                 <div key={pr.id} className="bg-warning-50 border border-warning-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                        <span className={`badge ${pr.status === 'testing' ? 'badge-warning' : 'badge-secondary'}`}>
+                          {pr.status}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
                       <div className="flex items-center mt-2 space-x-2">
                         <span className="badge badge-success">{pr.localPassedTests} local passed</span>
@@ -334,13 +341,10 @@ function Dashboard() {
                     <div className="ml-4">
                       <button 
                         onClick={() => setSelectedPR(pr)}
-                        className="btn btn-primary btn-sm mr-2"
+                        className="btn btn-primary btn-sm"
                       >
                         View Details
                       </button>
-                      <Link to="/test-cases" className="btn btn-warning btn-sm">
-                        Continue Testing
-                      </Link>
                     </div>
                   </div>
                 </div>
