@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:33:08.782Z",
+    "lastUpdated": "2025-09-15T14:33:44.982Z",
     "totalCount": 6
   },
   "prs": [
@@ -545,7 +545,7 @@
       "status": "testing",
       "progress": 0,
       "created_at": "2025-01-13T09:30:00Z",
-      "updated_at": "2025-09-15T14:33:08.782Z",
+      "updated_at": "2025-09-15T14:33:44.982Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/dark-mode",
@@ -659,21 +659,26 @@
           "updated_at": "2025-01-12T14:30:00Z",
           "created_by": "mike_dev",
           "is_custom": true,
-          "source": "manual"
+          "source": "manual",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Pass",
+          "mainResult": "Pending"
         }
       ],
       "totalTests": 2,
-      "passedTests": 0,
+      "passedTests": 1,
       "failedTests": 0,
-      "pendingTests": 2,
-      "localPassedTests": 0,
+      "pendingTests": 1,
+      "localPassedTests": 1,
       "localFailedTests": 0,
-      "localPendingTests": 2,
+      "localPendingTests": 1,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
       "mainPendingTests": 2,
-      "testProgress": 0,
-      "localProgress": 0,
+      "testProgress": 50,
+      "localProgress": 50,
       "readyToMerge": false,
       "userId": "user_005",
       "updated_by": "Mike Rodriguez"
