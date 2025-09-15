@@ -1,10 +1,26 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-14T15:15:04.999Z",
-    "totalCount": 11
+    "lastUpdated": "2025-09-15T13:55:01.926Z",
+    "totalCount": 12
   },
   "activities": [
+    {
+      "id": "act_1757944501926",
+      "type": "pr_created",
+      "action": "pr_added",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-15T13:55:01.926Z",
+      "details": {
+        "pr_id": "pr_1757944501333",
+        "pr_name": "pr1/bug-fix",
+        "developer": "user_005",
+        "priority": "medium",
+        "environment": "staging"
+      },
+      "message": "Mike Rodriguez created new PR: pr1/bug-fix",
+      "icon": "➕"
+    },
     {
       "id": "act_1757862904999",
       "type": "pr_created",
