@@ -1,10 +1,55 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:34:15.733Z",
-    "totalCount": 26
+    "lastUpdated": "2025-09-15T14:37:07.768Z",
+    "totalCount": 27
   },
   "activities": [
+    {
+      "id": "act_1757947027768",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-15T14:37:07.768Z",
+      "details": {
+        "pr_id": "pr_002",
+        "pr_name": "feature/user-authentication-fix",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by",
+          "blocked_reason"
+        ],
+        "developer": "sarah_dev",
+        "priority": "high"
+      },
+      "message": "Mike Rodriguez updated PR: feature/user-authentication-fix",
+      "icon": "📋"
+    },
     {
       "id": "act_1757946855732",
       "type": "pr_updated",
