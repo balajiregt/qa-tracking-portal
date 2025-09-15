@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:24:39.271Z",
+    "lastUpdated": "2025-09-15T14:25:03.761Z",
     "totalCount": 6
   },
   "prs": [
@@ -12,10 +12,10 @@
       "description": "Enhanced shopping cart functionality with improved UX",
       "priority": "medium",
       "environment": "staging",
-      "status": "new",
+      "status": "testing",
       "progress": 100,
       "created_at": "2025-01-12T08:30:00Z",
-      "updated_at": "2025-09-15T14:22:05.681Z",
+      "updated_at": "2025-09-15T14:25:03.761Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/shopping-cart",
@@ -159,21 +159,22 @@
           "source": "manual"
         }
       ],
-      "totalTests": 0,
+      "totalTests": 2,
       "passedTests": 0,
       "failedTests": 0,
-      "pendingTests": 0,
+      "pendingTests": 2,
       "localPassedTests": 0,
       "localFailedTests": 0,
-      "localPendingTests": 0,
+      "localPendingTests": 2,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
-      "mainPendingTests": 0,
+      "mainPendingTests": 2,
       "testProgress": 0,
       "localProgress": 0,
       "readyToMerge": false,
       "userId": "user_005",
-      "updated_by": "Mike Rodriguez"
+      "updated_by": "Mike Rodriguez",
+      "blocked_reason": "test2"
     },
     {
       "id": "pr_002",
