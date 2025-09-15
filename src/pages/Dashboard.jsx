@@ -19,7 +19,6 @@ function Dashboard() {
     details: '',
     testSteps: '',
     expectedResults: '',
-    result: 'Pending',
     localResult: 'Pending',
     mainResult: 'Pending'
   })
@@ -765,7 +764,6 @@ function Dashboard() {
                                       details: testCase.details || '',
                                       testSteps: testCase.testSteps || '',
                                       expectedResults: testCase.expectedResults || '',
-                                      result: testCase.result || 'Pending',
                                       localResult: testCase.localResult || 'Pending',
                                       mainResult: testCase.mainResult || 'Pending'
                                     })
@@ -1066,23 +1064,7 @@ function Dashboard() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Overall Result
-                    </label>
-                    <select
-                      name="result"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                      value={formData.result}
-                      onChange={(e) => setFormData(prev => ({ ...prev, result: e.target.value }))}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                    </select>
-                  </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Local Branch Result
