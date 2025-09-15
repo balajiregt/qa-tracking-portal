@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T14:32:33.677Z",
+    "lastUpdated": "2025-09-15T14:33:08.782Z",
     "totalCount": 6
   },
   "prs": [
@@ -542,10 +542,10 @@
       "description": "Added dark mode theme toggle functionality",
       "priority": "low",
       "environment": "dev",
-      "status": "new",
+      "status": "testing",
       "progress": 0,
       "created_at": "2025-01-13T09:30:00Z",
-      "updated_at": "2025-09-15T14:32:33.677Z",
+      "updated_at": "2025-09-15T14:33:08.782Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/dark-mode",
@@ -607,7 +607,12 @@
           "updated_at": "2025-01-10T10:00:00Z",
           "created_by": "system",
           "is_custom": false,
-          "source": "built-in"
+          "source": "built-in",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Pass",
+          "mainResult": "Pending"
         },
         {
           "id": "tc_002",
@@ -657,16 +662,16 @@
           "source": "manual"
         }
       ],
-      "totalTests": 0,
+      "totalTests": 2,
       "passedTests": 0,
       "failedTests": 0,
-      "pendingTests": 0,
+      "pendingTests": 2,
       "localPassedTests": 0,
       "localFailedTests": 0,
-      "localPendingTests": 0,
+      "localPendingTests": 2,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
-      "mainPendingTests": 0,
+      "mainPendingTests": 2,
       "testProgress": 0,
       "localProgress": 0,
       "readyToMerge": false,
