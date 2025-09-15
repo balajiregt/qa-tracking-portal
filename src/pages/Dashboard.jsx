@@ -222,18 +222,10 @@ function Dashboard() {
                     <div className="ml-4">
                       <button 
                         onClick={() => setSelectedPR(pr)}
-                        className="btn btn-primary btn-sm mr-2"
+                        className="btn btn-primary btn-sm"
                       >
                         View Details
                       </button>
-                      {pr.prUrl ? (
-                        <a href={pr.prUrl} target="_blank" rel="noopener noreferrer" 
-                           className="btn btn-success btn-sm">
-                          Merge →
-                        </a>
-                      ) : (
-                        <button className="btn btn-success btn-sm">Ready</button>
-                      )}
                     </div>
                   </div>
                 </div>
