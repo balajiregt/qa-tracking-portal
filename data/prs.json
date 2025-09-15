@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T15:25:35.723Z",
+    "lastUpdated": "2025-09-15T15:27:12.753Z",
     "totalCount": 6
   },
   "prs": [
@@ -183,10 +183,10 @@
       "description": "Fixed authentication issues and improved security",
       "priority": "high",
       "environment": "qa",
-      "status": "testing",
+      "status": "blocked",
       "progress": 60,
       "created_at": "2025-01-13T06:00:00Z",
-      "updated_at": "2025-09-15T15:25:35.723Z",
+      "updated_at": "2025-09-15T15:27:12.753Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/auth-fix",
@@ -257,7 +257,12 @@
           "updated_at": "2025-09-14T11:00:44.661Z",
           "created_by": "Mike Rodriguez",
           "is_custom": true,
-          "source": "manual"
+          "source": "manual",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Fail",
+          "mainResult": "Pending"
         },
         {
           "id": "tc_custom_1757848205116",
@@ -478,11 +483,11 @@
       ],
       "totalTests": 6,
       "passedTests": 0,
-      "failedTests": 0,
-      "pendingTests": 6,
+      "failedTests": 1,
+      "pendingTests": 5,
       "localPassedTests": 0,
-      "localFailedTests": 0,
-      "localPendingTests": 6,
+      "localFailedTests": 1,
+      "localPendingTests": 5,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
       "mainPendingTests": 6,
