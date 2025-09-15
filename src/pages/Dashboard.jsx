@@ -440,10 +440,21 @@ function Dashboard() {
                 {selectedPR.status === 'blocked' && selectedPR.blocked_reason && (
                   <button
                     onClick={() => {
-                      // Remove blocked reason to unblock
-                      const updatedPR = { ...selectedPR, blocked_reason: '' }
-                      setSelectedPR(updatedPR)
-                      actions.showNotification('PR unblocked successfully', 'success')
+                      try {
+                        // Update the PR in the global state by removing blocked_reason
+                        const updatedPR = { ...selectedPR, blocked_reason: '' }
+                        
+                        // Update the PR in the context/backend
+                        actions.updatePR(updatedPR)
+                        
+                        // Update local modal state
+                        setSelectedPR(updatedPR)
+                        
+                        actions.showNotification('PR unblocked successfully', 'success')
+                      } catch (error) {
+                        console.error('Error unblocking PR:', error)
+                        actions.showNotification('Failed to unblock PR', 'error')
+                      }
                     }}
                     className="btn btn-success flex items-center justify-center"
                   >
@@ -490,11 +501,20 @@ function Dashboard() {
                         </button>
                         <button
                           onClick={() => {
-                            // Update PR with blocked reason - this will trigger status recalculation
-                            const updatedPR = { ...selectedPR, blocked_reason: blockedReason }
-                            setSelectedPR(updatedPR)
-                            actions.showNotification('PR blocked successfully', 'success')
-                            setShowBlockedReasonEdit(false)
+                            try {
+                              // Update local modal state
+                              const updatedPR = { ...selectedPR, blocked_reason: blockedReason }
+                              
+                              // Update the PR in the context/backend
+                              actions.updatePR(updatedPR)
+                              setSelectedPR(updatedPR)
+                              
+                              actions.showNotification('PR blocked successfully', 'success')
+                              setShowBlockedReasonEdit(false)
+                            } catch (error) {
+                              console.error('Error blocking PR:', error)
+                              actions.showNotification('Failed to block PR', 'error')
+                            }
                           }}
                           className="btn btn-danger btn-sm"
                           disabled={!blockedReason.trim()}
