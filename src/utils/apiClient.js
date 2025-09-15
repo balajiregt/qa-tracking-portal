@@ -86,7 +86,9 @@ class APIClient {
 
   // Development mode fallback using localStorage
   isDevelopment() {
-    return window.location.hostname === 'localhost'
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname.includes('netlify.app') ||
+           !window.location.hostname.includes('.')  // For local builds
   }
 
   getLocalData(key) {
