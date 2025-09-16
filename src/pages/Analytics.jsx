@@ -106,32 +106,34 @@ function Analytics() {
     const completedPRsCount = completedPRs.length
     const blockedPRsCount = recentPRs.filter(pr => pr.status === 'blocked').length
     
-    // Calculate averages
-    const avgTotalTime = completionTimes.length > 0 
-      ? Math.round(completionTimes.reduce((sum, pr) => sum + pr.totalDuration, 0) / completionTimes.length)
+    // Calculate averages from all PRs (both completed and in-progress)
+    const allPRTimes = [...completionTimes, ...inProgressTimes]
+    
+    const avgTotalTime = allPRTimes.length > 0 
+      ? Math.round(allPRTimes.reduce((sum, pr) => sum + pr.totalDuration, 0) / allPRTimes.length)
       : 0
     
-    const avgPureQATime = completionTimes.length > 0 
-      ? Math.round(completionTimes.reduce((sum, pr) => sum + pr.pureQATime, 0) / completionTimes.length)
+    const avgPureQATime = allPRTimes.length > 0 
+      ? Math.round(allPRTimes.reduce((sum, pr) => sum + pr.pureQATime, 0) / allPRTimes.length)
       : 0
     
-    const avgBlockedTime = completionTimes.length > 0 
-      ? Math.round(completionTimes.reduce((sum, pr) => sum + pr.blockedTime, 0) / completionTimes.length)
+    const avgBlockedTime = allPRTimes.length > 0 
+      ? Math.round(allPRTimes.reduce((sum, pr) => sum + pr.blockedTime, 0) / allPRTimes.length)
       : 0
     
-    const avgBlockedPercentage = completionTimes.length > 0 
-      ? Math.round(completionTimes.reduce((sum, pr) => sum + pr.blockedPercentage, 0) / completionTimes.length)
+    const avgBlockedPercentage = allPRTimes.length > 0 
+      ? Math.round(allPRTimes.reduce((sum, pr) => sum + pr.blockedPercentage, 0) / allPRTimes.length)
       : 0
     
-    // Find extremes
-    const longestTotalPR = completionTimes.length > 0 
-      ? completionTimes.reduce((longest, current) => 
+    // Find extremes from all PRs
+    const longestTotalPR = allPRTimes.length > 0 
+      ? allPRTimes.reduce((longest, current) => 
           current.totalDuration > longest.totalDuration ? current : longest
         )
       : null
     
-    const longestPureQAPR = completionTimes.length > 0 
-      ? completionTimes.reduce((longest, current) => 
+    const longestPureQAPR = allPRTimes.length > 0 
+      ? allPRTimes.reduce((longest, current) => 
           current.pureQATime > longest.pureQATime ? current : longest
         )
       : null
@@ -148,8 +150,8 @@ function Analytics() {
         )
       : null
     
-    const mostBlockedPR = completionTimes.length > 0 
-      ? completionTimes.reduce((mostBlocked, current) => 
+    const mostBlockedPR = allPRTimes.length > 0 
+      ? allPRTimes.reduce((mostBlocked, current) => 
           current.blockedPercentage > mostBlocked.blockedPercentage ? current : mostBlocked
         )
       : null
