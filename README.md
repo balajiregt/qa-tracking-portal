@@ -1,173 +1,303 @@
-# QA Test Tracking Portal
+# QA Tracking Portal
 
-A comprehensive QA test tracking system with automated test case extraction, BDD support, and real-time team collaboration.
+A modern QA test tracking system with PR-centric workflow, advanced analytics, and real-time collaboration designed for agile development teams.
 
-## Features
+## 🎯 Unique Value Proposition
 
-- **PR Management**: Track pull requests with automated test case assignment
-- **BDD Test Cases**: Create and manage test cases using Given/When/Then format
-- **Test Assignment**: Assign tests to team members with workload management
-- **Progress Tracking**: Real-time test execution progress and status updates
-- **Issue Escalation**: Handle blocking issues with escalation workflows
-- **Trace Integration**: Extract test cases from Playwright trace files
-- **Activity Logging**: Complete audit trail of all system activities
-- **Role-Based Access**: User permissions based on roles and teams
+**The only QA platform designed for modern development workflows - where QA testing integrates seamlessly with PR lifecycle**
 
-## Architecture
+## ✨ Key Features
 
-- **Frontend**: Vanilla HTML/CSS/JavaScript (hosted on GitHub Pages)
-- **Backend**: Netlify Serverless Functions
-- **Data Storage**: JSON files in GitHub repository
-- **Authentication**: GitHub API integration
+### PR-Centric QA Workflow
+- **Pull Request Integration**: Native PR tracking with automated test case association
+- **Status Synchronization**: Real-time PR status updates based on test completion
+- **Developer-QA Bridge**: Seamless handoff from development to QA testing
+- **Environment Management**: Multi-environment support (dev, staging, production)
 
-## Setup Instructions
+### Advanced Analytics & Insights
+- **Time-Based Analytics**: Pure QA time vs. blocked time tracking
+- **Performance Metrics**: Team efficiency, completion rates, and blocking analysis
+- **Trend Analysis**: PR activity trends and completion patterns
+- **Custom Dashboards**: Real-time insights into QA performance
+
+### BDD Test Management
+- **Given/When/Then Format**: Full BDD support with structured test steps
+- **Tag-Based Organization**: Flexible test categorization (@regression, @smoke, @e2e)
+- **Intent Classification**: Test types (regression, smoke, integration, e2e)
+- **Custom Test Cases**: User-generated test cases with full BDD formatting
+
+### Team Collaboration
+- **Real-time Updates**: Live progress tracking and status notifications
+- **Test Assignment**: Intelligent test distribution and workload management
+- **Issue Tracking**: Blocking issue escalation with detailed tracking
+- **Activity Logging**: Complete audit trail of all QA activities
+
+### Integration & Automation
+- **Playwright Trace Integration**: Extract test cases from trace files automatically
+- **GitHub Integration**: Deep integration with GitHub workflow and API
+- **Failing Tests Dashboard**: Centralized view of all failing tests across PRs
+- **Quick Actions**: Fast access to frequently used QA operations
+
+## 🏗️ Architecture
+
+- **Frontend**: React 18 with Vite, Tailwind CSS, React Router
+- **Backend**: Netlify Serverless Functions (Node.js)
+- **Data Storage**: JSON files in GitHub repository with automated backup
+- **Authentication**: GitHub API integration with user session management
+- **Deployment**: Netlify hosting with continuous deployment
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- GitHub account with repository access
+- Netlify account (for deployment)
 
 ### 1. Repository Setup
 ```bash
-git clone <your-repo>
+git clone https://github.com/your-username/qa-tracking-portal.git
 cd qa-tracking-portal
 npm install
 ```
 
 ### 2. Environment Configuration
 ```bash
+# Copy environment template
 cp .env.example .env
-# Edit .env with your GitHub credentials
+
+# Edit .env with your configuration
+VITE_GITHUB_TOKEN=your_github_personal_access_token
+VITE_GITHUB_REPO=your-username/qa-tracking-portal
+VITE_GITHUB_OWNER=your-username
 ```
 
 ### 3. GitHub Token Setup
-1. Go to GitHub Settings > Developer settings > Personal access tokens
-2. Create a token with these permissions:
-   - `repo` (full repository access)
-   - `user:read` (read user data)
-3. Add token to your `.env` file
+1. Go to GitHub Settings → Developer settings → Personal access tokens (classic)
+2. Generate new token with these permissions:
+   - `repo` (Full control of private repositories)
+   - `user:read` (Read user profile data)
+   - `workflow` (Update GitHub Action workflows)
+3. Add token to your `.env` file as `VITE_GITHUB_TOKEN`
 
-### 4. Deploy to Netlify
-1. Connect your GitHub repository to Netlify
-2. Set build command: `echo 'Static site'`
-3. Set publish directory: `.` (root)
-4. Add environment variables from `.env` to Netlify dashboard
+### 4. Local Development
+```bash
+# Start development server
+npm run dev
 
-### 5. GitHub Pages Setup
-1. Enable GitHub Pages in repository settings
-2. Set source to main branch
-3. Your site will be available at: `https://<username>.github.io/<repo-name>`
+# Open browser at http://localhost:5173
+```
 
-## API Endpoints
+### 5. Deploy to Netlify
+```bash
+# Build the project
+npm run build
 
-### Data Retrieval
-- `GET /api/get-data?dataType=prs` - Get all PRs
-- `GET /api/get-data?dataType=test-cases` - Get test cases
-- `GET /api/get-data?dataType=users` - Get users (filtered by role)
+# Deploy to Netlify
+npm run deploy
+
+# Or connect GitHub repo to Netlify for auto-deployment
+# Build command: npm run build
+# Publish directory: dist
+```
+
+## 🔌 API Endpoints
+
+### Core Data Operations
+```javascript
+// Batch data loading
+GET /.netlify/functions/batchDataLoad
+Response: { prs: [...], testCases: [...], users: [...], activity: [...] }
+
+// Get current user profile
+GET /.netlify/functions/getCurrentUser
+Response: { id, name, email, role, permissions }
+```
 
 ### PR Management
-- `POST /api/create-pr` - Create new PR
-- `PUT /api/merge-pr` - Approve/merge/reject PR
-
-### Test Management
-- `POST /api/add-test-case` - Create test case with BDD steps
-- `POST /api/assign-test` - Assign test to user
-- `PUT /api/update-test-progress` - Update test execution status
-
-### File Upload
-- `POST /api/upload-traces` - Upload Playwright traces and extract test cases
-
-### Issue Management
-- `PUT /api/escalate-issue` - Escalate blocking issues
-
-## Usage
-
-### Creating Test Cases
 ```javascript
-// BDD format with Given/When/Then steps
-const testCase = {
-  name: "User Login Validation",
-  tags: ["@regression", "@login", "@ui"],
+// Create new PR with test case association
+POST /.netlify/functions/createPR
+Body: {
+  name: "feature/new-functionality",
+  developer: "john_dev",
+  description: "Add new feature",
+  priority: "medium",
+  environment: "staging"
+}
+
+// Update PR status and progress
+PUT /.netlify/functions/updatePR
+Body: {
+  id: "pr_001",
+  status: "testing|blocked|ready",
+  progress: 75,
+  blocked_reason: "API dependency issue"
+}
+```
+
+### Test Case Management
+```javascript
+// Create BDD test case
+POST /.netlify/functions/addTestCase
+Body: {
+  name: "User Login Flow",
+  description: "Validate complete login process",
+  tags: ["@regression", "@auth"],
   intent: "regression",
-  bddSteps: [
+  bdd_steps: [
     { type: "given", text: "user is on login page" },
     { type: "when", text: "user enters valid credentials" },
-    { type: "then", text: "user should be logged in successfully" }
+    { type: "then", text: "user should be logged in" }
   ]
-};
-```
+}
 
-### Test Assignment
-```javascript
-// Assign test with validation of user capacity
-const assignment = {
+// Associate test case with PR
+PUT /.netlify/functions/associateTestCase
+Body: {
+  prId: "pr_001",
   testCaseId: "tc_001",
-  prId: "pr_001", 
-  assignedTo: "john_qa",
-  dueDate: "2024-01-15T10:00:00Z",
-  priority: "high"
-};
+  localResult: "Pass|Fail|Pending",
+  mainResult: "Pass|Fail|Pending"
+}
 ```
 
-### Progress Updates
+### File Upload & Processing
 ```javascript
-// Update test execution progress
-const update = {
-  assignmentId: "assign_001",
-  action: "complete", // start, update_progress, complete, fail, block
-  progress: 100,
-  testResult: {
-    status: "passed",
-    duration: 1500,
-    notes: "All assertions passed"
-  }
-};
+// Upload and extract test cases from Playwright traces
+POST /.netlify/functions/uploadTraces
+Body: FormData with trace files
+Response: { extracted_test_cases: [...], processing_summary: {...} }
 ```
 
-## User Roles & Permissions
+## 📋 User Guide
 
-| Role | Permissions |
+### Dashboard Overview
+The main dashboard provides:
+- **Active PRs**: Current pull requests in testing
+- **Quick Actions**: Fast access to Analytics, Failing Tests, Create PR, Add Test Case
+- **PR Status Cards**: Visual status indicators with progress tracking
+- **Test Association**: Direct test case management from PR view
+
+### PR-Centric Workflow
+1. **Create PR**: Add new pull request with developer and environment info
+2. **Associate Tests**: Add relevant test cases to PR (built-in or custom)
+3. **Execute Tests**: Run tests on both local branch and main branch
+4. **Track Progress**: Monitor completion percentages and blocking issues
+5. **Complete QA**: Mark tests as passed/failed, update PR status to ready
+
+### Test Case Management
+```javascript
+// Create custom BDD test case
+{
+  name: "User Registration Flow",
+  description: "Complete user signup process",
+  tags: ["@regression", "@user", "@e2e"],
+  intent: "regression",
+  type: "functional",
+  priority: "high",
+  bdd_steps: [
+    { type: "given", text: "user is on registration page" },
+    { type: "when", text: "user fills out registration form" },
+    { type: "and", text: "clicks submit button" },
+    { type: "then", text: "user account should be created" }
+  ]
+}
+```
+
+### Analytics & Insights
+- **Time Tracking**: Pure QA time vs blocked time analysis
+- **Performance Metrics**: Team efficiency and completion rates  
+- **Trend Analysis**: Historical PR activity and patterns
+- **Completion Records**: Longest cycles, fastest completions, most blocked PRs
+- **Team Performance**: Developer-specific QA metrics
+
+### Quick Actions
+- **Analytics**: View detailed QA performance metrics
+- **Failing Tests**: See all failed tests across PRs with context
+- **Create PR**: Add new pull request for QA tracking
+- **Add Test Case**: Create custom BDD test cases
+
+## 👥 User Roles & Capabilities
+
+| Role | Capabilities |
 |------|-------------|
-| QA Engineer | Execute tests, create test cases, update progress |
-| Senior QA Engineer | All QA + assign tests, escalate issues |
-| Developer | Create PRs, view assigned tests |
-| Senior Developer | All Developer + approve PRs |
-| Admin | Full system access |
+| **QA Engineer** | Execute tests, update test results, create custom test cases, view analytics |
+| **QA Lead** | All QA Engineer + assign tests, manage QA workflow, escalate blocking issues |
+| **Developer** | Create PRs, view test results, update PR status, collaborate on test failures |
+| **Tech Lead** | All Developer + approve PRs, manage team assignments, oversee QA process |
+| **Admin** | Full system access, user management, system configuration, data management |
 
-## Data Structure
+## 🗂️ Data Architecture
 
-The system uses JSON files for data persistence:
+The system uses GitHub-backed JSON storage for reliability and version control:
 
-- `data/prs.json` - Pull request tracking
-- `data/test-cases.json` - Test case definitions with BDD steps
-- `data/test-assignments.json` - Test assignment and progress tracking
-- `data/test-results.json` - Test execution results
-- `data/users.json` - User management and permissions
-- `data/issues.json` - Issue tracking and escalation
-- `data/activity.json` - System activity audit log
-- `data/sessions.json` - User session management
-- `data/settings.json` - Application configuration
+### Core Data Files
+- **`data/prs.json`** - PR tracking with test associations, status, and analytics
+- **`data/test-cases.json`** - BDD test definitions with tags and metadata  
+- **`data/users.json`** - User profiles, roles, and authentication data
+- **`data/activity.json`** - Complete audit trail of system activities
+- **`data/settings.json`** - Application configuration and preferences
 
-## Development
+### Data Flow
+```
+GitHub Repository (Source of Truth)
+    ↓
+Netlify Functions (API Layer)  
+    ↓
+React Frontend (State Management)
+    ↓
+User Interface (Real-time Updates)
+```
+
+## 🛠️ Development
+
+### Tech Stack
+- **Frontend**: React 18, Vite, Tailwind CSS, React Router
+- **Backend**: Netlify Functions (Node.js serverless)
+- **Data**: GitHub API + JSON file storage
+- **Deployment**: Netlify with auto-deployment from GitHub
+- **Development**: Vite dev server with hot module replacement
 
 ### Local Development
 ```bash
-npm run dev  # Start Netlify dev server
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Start with Netlify functions
+npm run netlify-dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-### Testing Functions Locally
+### Environment Variables
 ```bash
-netlify functions:invoke create-pr --payload '{"name":"Test PR","developer":"john"}'
+VITE_GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+VITE_GITHUB_REPO=username/qa-tracking-portal  
+VITE_GITHUB_OWNER=username
+VITE_API_BASE_URL=/.netlify/functions
 ```
 
-### Deployment
-```bash
-npm run deploy  # Deploy to Netlify
+### Project Structure
 ```
+qa-tracking-portal/
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── contexts/       # React Context providers
+│   ├── pages/          # Route components
+│   ├── utils/          # Helper functions and API client
+│   └── App.jsx         # Main application component
+├── netlify/functions/  # Serverless API endpoints
+├── data/              # JSON data files
+└── public/            # Static assets
+```
+**Built with ❤️ for modern QA teams**
 
-## Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## License
-
-This project is licensed under the MIT License.
+*Transform your development workflow with PR-centric QA tracking that actually works.*
