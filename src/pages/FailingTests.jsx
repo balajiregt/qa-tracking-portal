@@ -68,7 +68,7 @@ function FailingTests() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-6">
           <div className="flex items-center">
             <div className="p-2 bg-danger-100 rounded-lg">
@@ -89,20 +89,6 @@ function FailingTests() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Affected PRs</p>
               <p className="text-2xl font-semibold text-warning-600">{Object.keys(testsByPR).length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-primary-100 rounded-lg">
-              <span className="text-2xl">🚨</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Critical Issues</p>
-              <p className="text-2xl font-semibold text-primary-600">
-                {failingTests.filter(t => t.bothFailing || t.pr.priority === 'high' || t.pr.priority === 'urgent').length}
-              </p>
             </div>
           </div>
         </div>
