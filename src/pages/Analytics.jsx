@@ -404,26 +404,32 @@ function Analytics() {
               <div className="bg-red-50 p-4 rounded-lg border border-red-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-red-900">{analytics.longestInProgressPR.prName}</p>
-                    <p className="text-sm text-red-600">Developer: {analytics.longestInProgressPR.developer}</p>
-                    <p className="text-sm text-red-600">Status: {analytics.longestInProgressPR.status}</p>
+                    <p className="font-medium text-red-900">{analytics.longestInProgressPR.prName || 'Unknown PR'}</p>
+                    <p className="text-sm text-red-600">Developer: {analytics.longestInProgressPR.developer || 'Unknown'}</p>
+                    <p className="text-sm text-red-600">Status: {analytics.longestInProgressPR.status || 'Unknown'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-red-600">{analytics.longestInProgressPR.formattedDuration}</p>
-                    <p className="text-xs text-red-500">In progress</p>
+                    <div className="space-y-1">
+                      <p className="text-lg font-bold text-red-600">{analytics.longestInProgressPR.formattedTotalDuration || '0h'}</p>
+                      <p className="text-sm text-red-500">({analytics.longestInProgressPR.formattedPureQATime || '0h'} QA)</p>
+                      <p className="text-xs text-red-400">{analytics.longestInProgressPR.blockedPercentage || 0}% blocked</p>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              {analytics.inProgressTimes.slice(1, 4).map((pr, index) => (
-                <div key={pr.prId} className="flex items-center justify-between py-2 border-b border-gray-100">
+              {analytics.inProgressTimes?.slice(1, 4).map((pr, index) => (
+                <div key={pr.prId || index} className="flex items-center justify-between py-2 border-b border-gray-100">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{pr.prName}</p>
-                    <p className="text-xs text-gray-500">{pr.developer} • {pr.status}</p>
+                    <p className="text-sm font-medium text-gray-900">{pr.prName || 'Unknown PR'}</p>
+                    <p className="text-xs text-gray-500">{pr.developer || 'Unknown'} • {pr.status || 'Unknown'}</p>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">{pr.formattedDuration}</span>
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-gray-600">{pr.formattedTotalDuration || '0h'}</span>
+                    <p className="text-xs text-gray-400">({pr.formattedPureQATime || '0h'} QA)</p>
+                  </div>
                 </div>
-              ))}
+              )) || []}
             </div>
           ) : (
             <div className="text-center py-8">
@@ -440,26 +446,44 @@ function Analytics() {
               <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-yellow-900">Longest Completed</p>
-                    <p className="text-sm text-yellow-700">{analytics.longestCompletedPR.prName}</p>
-                    <p className="text-xs text-yellow-600">{analytics.longestCompletedPR.developer}</p>
+                    <p className="font-medium text-yellow-900">Longest Total Cycle</p>
+                    <p className="text-sm text-yellow-700">{analytics.longestTotalPR.prName}</p>
+                    <p className="text-xs text-yellow-600">{analytics.longestTotalPR.developer}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-yellow-600">{analytics.longestCompletedPR.formattedDuration}</p>
+                    <p className="text-lg font-bold text-yellow-600">{analytics.longestTotalPR.formattedTotalDuration}</p>
+                    <p className="text-sm text-yellow-500">({analytics.longestTotalPR.formattedPureQATime} QA)</p>
                   </div>
                 </div>
               </div>
               
-              {analytics.fastestCompletedPR && (
+              {analytics.fastestPureQAPR && (
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-green-900">Fastest Completed</p>
-                      <p className="text-sm text-green-700">{analytics.fastestCompletedPR.prName}</p>
-                      <p className="text-xs text-green-600">{analytics.fastestCompletedPR.developer}</p>
+                      <p className="font-medium text-green-900">Fastest Pure QA</p>
+                      <p className="text-sm text-green-700">{analytics.fastestPureQAPR.prName}</p>
+                      <p className="text-xs text-green-600">{analytics.fastestPureQAPR.developer}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-green-600">{analytics.fastestPureQAPR.formattedPureQATime}</p>
+                      <p className="text-lg font-bold text-green-600">{analytics.fastestPureQAPR.formattedPureQATime}</p>
+                      <p className="text-sm text-green-500">({analytics.fastestPureQAPR.blockedPercentage}% blocked)</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {analytics.mostBlockedPR && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-red-900">Most Blocked PR</p>
+                      <p className="text-sm text-red-700">{analytics.mostBlockedPR.prName || 'Unknown PR'}</p>
+                      <p className="text-xs text-red-600">{analytics.mostBlockedPR.developer || 'Unknown'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-red-600">{analytics.mostBlockedPR.blockedPercentage || 0}%</p>
+                      <p className="text-sm text-red-500">({analytics.mostBlockedPR.formattedBlockedTime || '0h'} blocked)</p>
                     </div>
                   </div>
                 </div>
@@ -468,11 +492,12 @@ function Analytics() {
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-blue-900">Average Completion</p>
-                    <p className="text-sm text-blue-700">Based on {analytics.completedPRsCount} completed PRs</p>
+                    <p className="font-medium text-blue-900">Average Efficiency</p>
+                    <p className="text-sm text-blue-700">Based on {analytics.completedPRsCount} completed QA cycles</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-blue-600">{analytics.formattedAvgPureQATime}</p>
+                    <p className="text-lg font-bold text-blue-600">{analytics.formattedAvgPureQATime}</p>
+                    <p className="text-sm text-blue-500">({analytics.avgBlockedPercentage}% avg blocked)</p>
                   </div>
                 </div>
               </div>
