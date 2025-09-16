@@ -14,7 +14,7 @@
       "environment": "staging",
       "status": "testing",
       "progress": 100,
-      "created_at": "2025-01-12T08:30:00Z",
+      "created_at": "2025-09-06T08:30:00Z",
       "updated_at": "2025-09-15T14:25:03.761Z",
       "branch_comparison": {
         "feature_branch": {
@@ -185,7 +185,7 @@
       "environment": "qa",
       "status": "blocked",
       "progress": 60,
-      "created_at": "2025-01-13T06:00:00Z",
+      "created_at": "2025-09-08T06:00:00Z",
       "updated_at": "2025-09-15T15:27:12.753Z",
       "branch_comparison": {
         "feature_branch": {
@@ -507,7 +507,7 @@
       "environment": "staging",
       "status": "blocked",
       "progress": 20,
-      "created_at": "2025-01-13T04:00:00Z",
+      "created_at": "2025-09-04T04:00:00Z",
       "updated_at": "2025-09-15T14:23:25.921Z",
       "branch_comparison": {
         "feature_branch": {
@@ -648,7 +648,7 @@
       "environment": "dev",
       "status": "testing",
       "progress": 0,
-      "created_at": "2025-01-13T09:30:00Z",
+      "created_at": "2025-09-11T09:30:00Z",
       "updated_at": "2025-09-15T14:34:15.099Z",
       "branch_comparison": {
         "feature_branch": {

@@ -382,6 +382,34 @@ function Dashboard() {
                       <span className="text-sm text-gray-500">Developer: {selectedPR.developer}</span>
                     )}
                   </div>
+                  <div className="flex items-center mt-2 space-x-4 text-xs text-gray-500">
+                    <span>
+                      <strong>Created:</strong> {new Date(selectedPR.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    <span>
+                      <strong>Updated:</strong> {new Date(selectedPR.updated_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    <span>
+                      <strong>Duration:</strong> {(() => {
+                        const start = new Date(selectedPR.created_at)
+                        const end = new Date(selectedPR.updated_at)
+                        const hours = Math.round((end - start) / (1000 * 60 * 60))
+                        return hours < 24 ? `${hours}h` : `${Math.floor(hours / 24)}d ${hours % 24}h`
+                      })()}
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={() => {

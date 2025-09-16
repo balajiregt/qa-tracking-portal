@@ -175,8 +175,9 @@ class APIClient {
       const prs = this.getLocalData('prs')
       const newPR = {
         ...prData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString()
+        id: `pr_${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
       prs.push(newPR)
       this.setLocalData('prs', prs)
