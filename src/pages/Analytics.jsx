@@ -6,8 +6,16 @@ function Analytics() {
 
   // Calculate analytics data
   const analytics = useMemo(() => {
-    const prs = state.prs
-    const timeRange = state.filters.analytics.timeRange
+    try {
+      const prs = state.prs || []
+      const timeRange = state.filters?.analytics?.timeRange || 30
+      
+      console.log('Analytics Debug:', {
+        prsCount: prs.length,
+        timeRange,
+        hasFilters: !!state.filters,
+        hasAnalyticsFilters: !!state.filters?.analytics
+      })
 
     // Filter data based on time range
     const cutoffDate = new Date()
@@ -239,10 +247,64 @@ function Analytics() {
       trendData,
       topPerformers
     }
-  }, [state.testCases, state.prs, state.filters.analytics.timeRange])
+    } catch (error) {
+      console.error('Analytics calculation error:', error)
+      return {
+        totalPRs: 0,
+        completedPRsCount: 0,
+        blockedPRsCount: 0,
+        inProgressCount: 0,
+        avgTotalTime: 0,
+        avgPureQATime: 0,
+        avgBlockedTime: 0,
+        avgBlockedPercentage: 0,
+        formattedAvgTotalTime: '0h',
+        formattedAvgPureQATime: '0h',
+        formattedAvgBlockedTime: '0h',
+        longestTotalPR: null,
+        longestPureQAPR: null,
+        fastestPureQAPR: null,
+        mostBlockedPR: null,
+        longestInProgressPR: null,
+        completionTimes: [],
+        inProgressTimes: [],
+        trendData: [],
+        topPerformers: []
+      }
+    }
+  }, [state.testCases, state.prs, state.filters?.analytics?.timeRange])
 
   const handleTimeRangeChange = (range) => {
     actions.updateFilters('analytics', { timeRange: parseInt(range) })
+  }
+
+  // Loading state
+  if (state.loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
+          <p className="text-gray-500">Loading analytics...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (state.error) {
+    return (
+      <div className="card p-6 text-center">
+        <span className="text-4xl mb-4 block">⚠️</span>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Error</h3>
+        <p className="text-gray-500 mb-4">{state.error}</p>
+        <button 
+          onClick={() => actions.clearError()}
+          className="btn btn-primary"
+        >
+          Retry
+        </button>
+      </div>
+    )
   }
 
   return (
