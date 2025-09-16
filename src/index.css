@@ -116,6 +116,35 @@
   .badge-secondary {
     @apply bg-gray-100 text-gray-800;
   }
+  
+  /* Toggle Switch */
+  .toggle {
+    @apply relative inline-block w-10 h-6;
+  }
+  
+  .toggle input {
+    @apply opacity-0 w-0 h-0;
+  }
+  
+  .slider {
+    @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-full transition-all duration-300;
+  }
+  
+  .slider:before {
+    @apply absolute content-[''] h-4 w-4 left-1 bottom-1 bg-white rounded-full transition-all duration-300;
+  }
+  
+  input:checked + .slider {
+    @apply bg-primary-600;
+  }
+  
+  input:focus + .slider {
+    @apply ring-2 ring-primary-500;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(16px);
+  }
 }
 
 /* Custom scrollbar */

@@ -17,6 +17,10 @@ function TestCases() {
     expectedResults: ''
   })
 
+  // Get project-specific context
+  const isEnvironmentBased = state.project?.workflowType === 'environment_based'
+  const projectName = state.project?.name || 'Unknown Project'
+
   // Check if we should open the modal from URL params
   useEffect(() => {
     if (searchParams.get('action') === 'new') {
@@ -25,10 +29,16 @@ function TestCases() {
     }
   }, [searchParams, setSearchParams])
 
-  // Filter test cases based on current filters
+  // Filter test cases based on current filters and project scope
   const filteredTestCases = state.testCases.filter(testCase => {
     const filters = state.filters.testCases
-    return (
+    
+    // Only show test cases for current project
+    const isProjectTestCase = testCase.projectId === state.project?.id || 
+                             testCase.projectName === projectName ||
+                             (!testCase.projectId && !testCase.projectName) // Legacy test cases
+    
+    return isProjectTestCase && (
       (!filters.search || 
         testCase.intent?.toLowerCase().includes(filters.search.toLowerCase()) ||
         testCase.details?.toLowerCase().includes(filters.search.toLowerCase())) &&
@@ -53,13 +63,17 @@ function TestCases() {
       if (editingTestCase) {
         await actions.updateTestCaseAsync(editingTestCase.id, formData)
       } else {
-        // Transform form data to match API expectations
+        // Transform form data to match API expectations with project context
         const apiData = {
           name: formData.name,
           tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
           description: formData.details,
           intent: formData.intent,
           duration: 2000, // Default duration
+          // Add project context
+          projectId: state.project?.id || `project_${Date.now()}`,
+          projectName: projectName,
+          workflowType: state.project?.workflowType,
           bddSteps: [
             { type: 'given', text: `Given ${formData.testSteps}`, formatted: `Given ${formData.testSteps}` },
             { type: 'when', text: 'When user performs the action', formatted: 'When user performs the action' },
@@ -123,7 +137,14 @@ function TestCases() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Test Cases</h1>
-          <p className="text-gray-600">Manage and track your test cases</p>
+          <div className="flex items-center space-x-3 mt-1">
+            <p className="text-gray-600">
+              {isEnvironmentBased ? 'Environment-based test cases' : 'PR-centric test cases'} for {projectName}
+            </p>
+            <span className={`badge ${isEnvironmentBased ? 'badge-success' : 'badge-primary'}`}>
+              {isEnvironmentBased ? 'Environment Workflow' : 'PR Workflow'}
+            </span>
+          </div>
         </div>
         <button
           onClick={() => setShowModal(true)}

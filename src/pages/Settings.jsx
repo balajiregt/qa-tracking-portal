@@ -29,6 +29,7 @@ function Settings() {
   })
 
   const [hasChanges, setHasChanges] = useState(false)
+  const [showProjectEdit, setShowProjectEdit] = useState(false)
 
   useEffect(() => {
     // Load settings from context when component mounts
@@ -85,6 +86,312 @@ function Settings() {
       }
     })
     setHasChanges(false)
+  }
+
+  // Project Setup Section Component
+  const ProjectSetupSection = () => {
+    const [step, setStep] = useState(1)
+    const [projectData, setProjectData] = useState({
+      name: '',
+      description: '',
+      workflowType: '',
+      team: { size: '', role: '' },
+      integration: {
+        github: { enabled: false, repo: '' },
+        jira: { enabled: false, url: '', project_key: '' }
+      },
+      environments: ['qa', 'staging', 'production']
+    })
+
+    const handleProjectDataChange = (field, value) => {
+      setProjectData(prev => ({ ...prev, [field]: value }))
+    }
+
+    const handleNestedChange = (section, field, value) => {
+      setProjectData(prev => ({
+        ...prev,
+        [section]: { ...prev[section], [field]: value }
+      }))
+    }
+
+    const handleIntegrationChange = (type, field, value) => {
+      setProjectData(prev => ({
+        ...prev,
+        integration: {
+          ...prev.integration,
+          [type]: { ...prev.integration[type], [field]: value }
+        }
+      }))
+    }
+
+    const saveProject = async () => {
+      try {
+        const projectConfig = {
+          id: `project_${Date.now()}`,
+          ...projectData,
+          createdAt: new Date().toISOString()
+        }
+
+        await actions.setProject(projectConfig)
+        localStorage.setItem('qaProjectConfig', JSON.stringify(projectConfig))
+        actions.showNotification('Project configured successfully!', 'success')
+        setStep(1)
+        setProjectData({
+          name: '',
+          description: '',
+          workflowType: '',
+          team: { size: '', role: '' },
+          integration: {
+            github: { enabled: false, repo: '' },
+            jira: { enabled: false, url: '', project_key: '' }
+          },
+          environments: ['qa', 'staging', 'production']
+        })
+      } catch (error) {
+        console.error('Error saving project:', error)
+        actions.showNotification('Failed to configure project', 'error')
+      }
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <span className="text-yellow-400">⚠️</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">Project Setup Required</h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                Configure your project to get started with QA tracking. This includes selecting your workflow type and integration preferences.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Step 1: Select Workflow Type</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                className={`p-6 border-2 rounded-lg cursor-pointer transition-colors ${
+                  projectData.workflowType === 'pr_centric' 
+                    ? 'border-primary-500 bg-primary-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => handleProjectDataChange('workflowType', 'pr_centric')}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-gray-900">PR-Centric Workflow</h4>
+                  <span className="text-2xl">🔄</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Best for teams practicing shift-left testing with pull request-based development workflows.
+                </p>
+                <ul className="text-xs text-gray-500 space-y-1">
+                  <li>• GitHub/GitLab integration</li>
+                  <li>• Test cases linked to PRs</li>
+                  <li>• Automated testing workflows</li>
+                  <li>• Code review integration</li>
+                </ul>
+              </div>
+
+              <div 
+                className={`p-6 border-2 rounded-lg cursor-pointer transition-colors ${
+                  projectData.workflowType === 'environment_based' 
+                    ? 'border-primary-500 bg-primary-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => handleProjectDataChange('workflowType', 'environment_based')}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-gray-900">Environment-Based Workflow</h4>
+                  <span className="text-2xl">🏢</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Traditional QA approach with environment deployments and JIRA ticket tracking.
+                </p>
+                <ul className="text-xs text-gray-500 space-y-1">
+                  <li>• JIRA ticket integration</li>
+                  <li>• QA → UAT → Production pipeline</li>
+                  <li>• Environment-based testing</li>
+                  <li>• Manual test execution tracking</li>
+                </ul>
+              </div>
+            </div>
+
+            {projectData.workflowType && (
+              <div className="flex justify-end">
+                <button 
+                  onClick={() => setStep(2)}
+                  className="btn btn-primary"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Step 2: Project Details</h3>
+              <button 
+                onClick={() => setStep(1)}
+                className="btn btn-secondary btn-sm"
+              >
+                Back
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Name *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={projectData.name}
+                  onChange={(e) => handleProjectDataChange('name', e.target.value)}
+                  placeholder="Enter project name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Team Size
+                </label>
+                <select
+                  className="select"
+                  value={projectData.team.size}
+                  onChange={(e) => handleNestedChange('team', 'size', e.target.value)}
+                >
+                  <option value="">Select team size</option>
+                  <option value="1-5">1-5 members</option>
+                  <option value="6-15">6-15 members</option>
+                  <option value="16-50">16-50 members</option>
+                  <option value="50+">50+ members</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Description
+              </label>
+              <textarea
+                className="textarea"
+                rows={3}
+                value={projectData.description}
+                onChange={(e) => handleProjectDataChange('description', e.target.value)}
+                placeholder="Brief description of your project"
+              />
+            </div>
+
+            {/* Integration Settings */}
+            <div className="border-t pt-4">
+              <h4 className="text-md font-medium text-gray-900 mb-3">Integration Setup</h4>
+              
+              {projectData.workflowType === 'pr_centric' ? (
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="github-integration"
+                      checked={projectData.integration.github.enabled}
+                      onChange={(e) => handleIntegrationChange('github', 'enabled', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="github-integration" className="text-sm font-medium text-gray-700">
+                      Enable GitHub Integration
+                    </label>
+                  </div>
+                  
+                  {projectData.integration.github.enabled && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        GitHub Repository
+                      </label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={projectData.integration.github.repo}
+                        onChange={(e) => handleIntegrationChange('github', 'repo', e.target.value)}
+                        placeholder="username/repository"
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="jira-integration"
+                      checked={projectData.integration.jira.enabled}
+                      onChange={(e) => handleIntegrationChange('jira', 'enabled', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="jira-integration" className="text-sm font-medium text-gray-700">
+                      Enable JIRA Integration
+                    </label>
+                  </div>
+                  
+                  {projectData.integration.jira.enabled && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          JIRA URL
+                        </label>
+                        <input
+                          type="url"
+                          className="input"
+                          value={projectData.integration.jira.url}
+                          onChange={(e) => handleIntegrationChange('jira', 'url', e.target.value)}
+                          placeholder="https://yourcompany.atlassian.net"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Project Key
+                        </label>
+                        <input
+                          type="text"
+                          className="input"
+                          value={projectData.integration.jira.project_key}
+                          onChange={(e) => handleIntegrationChange('jira', 'project_key', e.target.value)}
+                          placeholder="PROJ"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button 
+                onClick={() => setStep(1)}
+                className="btn btn-secondary"
+              >
+                Back
+              </button>
+              <button 
+                onClick={saveProject}
+                className="btn btn-primary"
+                disabled={!projectData.name}
+              >
+                Complete Setup
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -365,6 +672,57 @@ function Settings() {
         </div>
       </div>
 
+      {/* Project Configuration */}
+      <div className="card p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Configuration</h2>
+        
+        {!state.project?.name ? (
+          <ProjectSetupSection />
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div>
+                <h3 className="text-sm font-medium text-blue-900">Current Project</h3>
+                <p className="text-sm text-blue-700">
+                  {state.project?.name} • {state.project.workflowType?.replace('_', ' ')} workflow
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Environments: {state.project?.environments?.join(', ')}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setShowProjectEdit(true)}
+                >
+                  Edit Project
+                </button>
+                <button 
+                  className="btn btn-danger btn-sm"
+                  onClick={() => {
+                    if (confirm('Reset project configuration? You will need to set up your project again.')) {
+                      actions.setProject({
+                        name: '',
+                        workflowType: 'pr_centric',
+                        environments: ['qa', 'staging', 'production'],
+                        integration: {
+                          github: { enabled: false, repo: '' },
+                          jira: { enabled: false, url: '', project_key: '' }
+                        }
+                      })
+                      localStorage.removeItem('qaProjectConfig')
+                      actions.showNotification('Project configuration reset', 'info')
+                    }
+                  }}
+                >
+                  Reset Project
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Data Management */}
       <div className="card p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Data Management</h2>
@@ -379,6 +737,7 @@ function Settings() {
               className="btn btn-secondary btn-sm"
               onClick={() => {
                 const dataToExport = {
+                  project: state.project,
                   testCases: state.testCases,
                   prs: state.prs,
                   settings: settings,

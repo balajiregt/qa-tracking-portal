@@ -14,6 +14,17 @@ const initialState = {
   activities: [],
   settings: {},
   
+  // Project configuration
+  project: {
+    name: '',
+    workflowType: 'pr_centric', // 'pr_centric' or 'environment_based'
+    environments: ['qa', 'staging', 'production'],
+    integration: {
+      github: { enabled: false, repo: '' },
+      jira: { enabled: false, url: '', project_key: '' }
+    }
+  },
+  
   // UI state
   loading: false,
   error: null,
@@ -51,6 +62,10 @@ const QA_ACTIONS = {
   SET_ACTIVITIES: 'SET_ACTIVITIES',
   SET_SETTINGS: 'SET_SETTINGS',
   SET_CURRENT_USER: 'SET_CURRENT_USER',
+  
+  // Project actions
+  SET_PROJECT: 'SET_PROJECT',
+  UPDATE_PROJECT: 'UPDATE_PROJECT',
   
   // CRUD actions
   ADD_TEST_CASE: 'ADD_TEST_CASE',
@@ -102,6 +117,12 @@ function qaReducer(state, action) {
     
     case QA_ACTIONS.SET_CURRENT_USER:
       return { ...state, currentUser: action.payload }
+    
+    case QA_ACTIONS.SET_PROJECT:
+      return { ...state, project: action.payload }
+    
+    case QA_ACTIONS.UPDATE_PROJECT:
+      return { ...state, project: { ...state.project, ...action.payload } }
     
     case QA_ACTIONS.ADD_TEST_CASE:
       return { 
@@ -191,6 +212,10 @@ export function QAProvider({ children }) {
     setActivities: (activities) => dispatch({ type: QA_ACTIONS.SET_ACTIVITIES, payload: activities }),
     setSettings: (settings) => dispatch({ type: QA_ACTIONS.SET_SETTINGS, payload: settings }),
     setCurrentUser: (user) => dispatch({ type: QA_ACTIONS.SET_CURRENT_USER, payload: user }),
+    
+    // Project actions
+    setProject: (project) => dispatch({ type: QA_ACTIONS.SET_PROJECT, payload: project }),
+    updateProject: (updates) => dispatch({ type: QA_ACTIONS.UPDATE_PROJECT, payload: updates }),
     
     // CRUD actions
     addTestCase: (testCase) => dispatch({ type: QA_ACTIONS.ADD_TEST_CASE, payload: testCase }),
@@ -381,6 +406,17 @@ export function QAProvider({ children }) {
 
   // Initialize data on mount
   useEffect(() => {
+    // Load project configuration from localStorage if available
+    const savedProject = localStorage.getItem('qaProjectConfig')
+    if (savedProject) {
+      try {
+        const projectConfig = JSON.parse(savedProject)
+        actions.updateProject(projectConfig)
+      } catch (error) {
+        console.error('Failed to load project configuration:', error)
+      }
+    }
+    
     actions.loadAllData()
   }, [])
 

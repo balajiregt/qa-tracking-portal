@@ -6,14 +6,19 @@ function Layout({ children }) {
   const location = useLocation()
   const { state } = useQA()
 
+  const isEnvironmentBased = state.project?.workflowType === 'environment_based'
+  
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: '📊' },
     { name: 'Test Cases', href: '/test-cases', icon: '📋' },
-    { name: 'Create PR', href: '/create-pr', icon: '🔄' },
+    // Workflow-specific navigation
+    isEnvironmentBased 
+      ? { name: 'Track Tickets', href: '/track-tickets', icon: '🎫' }
+      : { name: 'Create PR', href: '/create-pr', icon: '🔄' },
     { name: 'Upload Traces', href: '/upload-traces', icon: '🎬' },
     { name: 'Analytics', href: '/analytics', icon: '📈' },
     { name: 'Settings', href: '/settings', icon: '⚙️' },
-  ]
+  ].filter(Boolean)
 
   const isActive = (href) => location.pathname === href
 
