@@ -1,10 +1,56 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-15T16:27:34.066Z",
-    "totalCount": 32
+    "lastUpdated": "2025-09-16T07:08:21.818Z",
+    "totalCount": 33
   },
   "activities": [
+    {
+      "id": "act_1758006501818",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-16T07:08:21.818Z",
+      "details": {
+        "pr_id": "pr_001",
+        "pr_name": "feature/shopping-cart-improvements",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "merge_readiness",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by",
+          "blocked_reason"
+        ],
+        "developer": "mike_dev",
+        "priority": "medium"
+      },
+      "message": "Mike Rodriguez updated PR: feature/shopping-cart-improvements",
+      "icon": "📋"
+    },
     {
       "id": "act_1757953654066",
       "type": "pr_updated",
