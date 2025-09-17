@@ -30,6 +30,7 @@ function Settings() {
 
   const [hasChanges, setHasChanges] = useState(false)
   const [showProjectEdit, setShowProjectEdit] = useState(false)
+  const [showNewProjectForm, setShowNewProjectForm] = useState(false)
 
   useEffect(() => {
     // Load settings from context when component mounts
@@ -89,7 +90,7 @@ function Settings() {
   }
 
   // Project Setup Section Component
-  const ProjectSetupSection = () => {
+  const ProjectSetupSection = ({ onComplete }) => {
     const [step, setStep] = useState(1)
     const [projectData, setProjectData] = useState({
       name: '',
@@ -126,15 +127,9 @@ function Settings() {
 
     const saveProject = async () => {
       try {
-        const projectConfig = {
-          id: `project_${Date.now()}`,
-          ...projectData,
-          createdAt: new Date().toISOString()
-        }
-
-        await actions.setProject(projectConfig)
-        localStorage.setItem('qaProjectConfig', JSON.stringify(projectConfig))
-        actions.showNotification('Project configured successfully!', 'success')
+        const newProject = actions.createProject(projectData)
+        
+        // Reset form
         setStep(1)
         setProjectData({
           name: '',
@@ -147,6 +142,11 @@ function Settings() {
           },
           environments: ['qa', 'staging', 'production']
         })
+
+        // Call completion callback if provided (for modal usage)
+        if (onComplete) {
+          onComplete(newProject)
+        }
       } catch (error) {
         console.error('Error saving project:', error)
         actions.showNotification('Failed to configure project', 'error')
@@ -672,51 +672,135 @@ function Settings() {
         </div>
       </div>
 
-      {/* Project Configuration */}
+      {/* Project Management */}
       <div className="card p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Configuration</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Project Management</h2>
+          <button 
+            className="btn btn-primary"
+            onClick={() => setShowNewProjectForm(true)}
+          >
+            Add New Project
+          </button>
+        </div>
         
-        {!state.project?.name ? (
+        {state.projects.length === 0 ? (
           <ProjectSetupSection />
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div>
-                <h3 className="text-sm font-medium text-blue-900">Current Project</h3>
-                <p className="text-sm text-blue-700">
-                  {state.project?.name} • {state.project.workflowType?.replace('_', ' ')} workflow
-                </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Environments: {state.project?.environments?.join(', ')}
-                </p>
+            {/* Current Active Project */}
+            {state.project?.name && (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-900">Current Active Project</h3>
+                    <p className="text-sm text-blue-700">
+                      {state.project.name} • {state.project.workflowType?.replace('_', ' ')} workflow
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Environments: {state.project.environments?.join(', ')}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setShowProjectEdit(true)}
+                    >
+                      Edit Project
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex space-x-2">
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setShowProjectEdit(true)}
-                >
-                  Edit Project
-                </button>
-                <button 
-                  className="btn btn-danger btn-sm"
-                  onClick={() => {
-                    if (confirm('Reset project configuration? You will need to set up your project again.')) {
-                      actions.setProject({
-                        name: '',
-                        workflowType: 'pr_centric',
-                        environments: ['qa', 'staging', 'production'],
-                        integration: {
-                          github: { enabled: false, repo: '' },
-                          jira: { enabled: false, url: '', project_key: '' }
-                        }
-                      })
-                      localStorage.removeItem('qaProjectConfig')
-                      actions.showNotification('Project configuration reset', 'info')
-                    }
-                  }}
-                >
-                  Reset Project
-                </button>
+            )}
+
+            {/* All Projects List */}
+            <div>
+              <h3 className="text-md font-medium text-gray-900 mb-3">All Projects ({state.projects.length})</h3>
+              <div className="space-y-2">
+                {state.projects.map((project) => (
+                  <div 
+                    key={project.id} 
+                    className={`p-4 border rounded-lg transition-colors ${
+                      project.id === state.currentProjectId 
+                        ? 'border-primary-300 bg-primary-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <h4 className="text-sm font-medium text-gray-900">
+                            {project.name}
+                            {project.id === state.currentProjectId && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800">
+                                Active
+                              </span>
+                            )}
+                          </h4>
+                          <span className="text-xs text-gray-500">
+                            {project.workflowType === 'pr_centric' ? '🔄 PR-Centric' : '🏢 Environment-Based'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Created: {new Date(project.createdAt).toLocaleDateString()} • 
+                          Environments: {project.environments?.join(', ')}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        {project.id !== state.currentProjectId && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => actions.switchToProject(project.id)}
+                          >
+                            Switch To
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            // TODO: Implement edit project modal
+                            actions.showNotification('Edit project functionality coming soon', 'info')
+                          }}
+                        >
+                          Edit
+                        </button>
+                        {state.projects.length > 1 && (
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => {
+                              if (confirm(`Delete project "${project.name}"? This action cannot be undone.`)) {
+                                actions.deleteProjectById(project.id)
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* New Project Form Modal */}
+        {showNewProjectForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Add New Project</h3>
+                  <button
+                    onClick={() => setShowNewProjectForm(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <ProjectSetupSection onComplete={() => setShowNewProjectForm(false)} />
               </div>
             </div>
           </div>

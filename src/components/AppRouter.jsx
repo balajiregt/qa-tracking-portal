@@ -16,12 +16,13 @@ import TrackTickets from '../pages/TrackTickets'
 function AppRouter() {
   const { state } = useQA()
   
-  // Check if project exists (has name and workflow type configured)
-  const hasProject = state.project?.name && state.project?.workflowType
+  // Check if any projects exist and if current project is set
+  const hasProjects = state.projects && state.projects.length > 0
+  const hasCurrentProject = state.project?.name && state.project?.workflowType && state.currentProjectId
   const isEnvironmentBased = state.project?.workflowType === 'environment_based'
   
-  // If no project exists, redirect to Settings for project setup
-  if (!hasProject) {
+  // If no projects exist at all, redirect to Settings for project setup
+  if (!hasProjects || !hasCurrentProject) {
     return (
       <Layout>
         <Routes>

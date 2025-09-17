@@ -14,15 +14,19 @@ const initialState = {
   activities: [],
   settings: {},
   
-  // Project configuration
+  // Multi-project support
+  projects: [], // Array of all projects
+  currentProjectId: null, // ID of currently active project
   project: {
+    id: null,
     name: '',
     workflowType: 'pr_centric', // 'pr_centric' or 'environment_based'
     environments: ['qa', 'staging', 'production'],
     integration: {
       github: { enabled: false, repo: '' },
       jira: { enabled: false, url: '', project_key: '' }
-    }
+    },
+    createdAt: null
   },
   
   // UI state
@@ -66,6 +70,12 @@ const QA_ACTIONS = {
   // Project actions
   SET_PROJECT: 'SET_PROJECT',
   UPDATE_PROJECT: 'UPDATE_PROJECT',
+  SET_PROJECTS: 'SET_PROJECTS',
+  ADD_PROJECT: 'ADD_PROJECT',
+  UPDATE_PROJECT_IN_LIST: 'UPDATE_PROJECT_IN_LIST',
+  DELETE_PROJECT: 'DELETE_PROJECT',
+  SWITCH_PROJECT: 'SWITCH_PROJECT',
+  SET_CURRENT_PROJECT_ID: 'SET_CURRENT_PROJECT_ID',
   
   // CRUD actions
   ADD_TEST_CASE: 'ADD_TEST_CASE',
@@ -123,6 +133,48 @@ function qaReducer(state, action) {
     
     case QA_ACTIONS.UPDATE_PROJECT:
       return { ...state, project: { ...state.project, ...action.payload } }
+    
+    case QA_ACTIONS.SET_PROJECTS:
+      return { ...state, projects: action.payload }
+    
+    case QA_ACTIONS.ADD_PROJECT:
+      return { 
+        ...state, 
+        projects: [...state.projects, action.payload],
+        project: action.payload,
+        currentProjectId: action.payload.id
+      }
+    
+    case QA_ACTIONS.UPDATE_PROJECT_IN_LIST:
+      return {
+        ...state,
+        projects: state.projects.map(p => 
+          p.id === action.payload.id ? action.payload : p
+        ),
+        project: state.currentProjectId === action.payload.id ? action.payload : state.project
+      }
+    
+    case QA_ACTIONS.DELETE_PROJECT:
+      const updatedProjects = state.projects.filter(p => p.id !== action.payload)
+      const wasCurrentProject = state.currentProjectId === action.payload
+      const newCurrentProject = wasCurrentProject && updatedProjects.length > 0 ? updatedProjects[0] : state.project
+      return {
+        ...state,
+        projects: updatedProjects,
+        project: wasCurrentProject ? (updatedProjects.length > 0 ? newCurrentProject : initialState.project) : state.project,
+        currentProjectId: wasCurrentProject ? (updatedProjects.length > 0 ? newCurrentProject.id : null) : state.currentProjectId
+      }
+    
+    case QA_ACTIONS.SWITCH_PROJECT:
+      const selectedProject = state.projects.find(p => p.id === action.payload)
+      return {
+        ...state,
+        project: selectedProject || state.project,
+        currentProjectId: action.payload
+      }
+    
+    case QA_ACTIONS.SET_CURRENT_PROJECT_ID:
+      return { ...state, currentProjectId: action.payload }
     
     case QA_ACTIONS.ADD_TEST_CASE:
       return { 
@@ -216,6 +268,12 @@ export function QAProvider({ children }) {
     // Project actions
     setProject: (project) => dispatch({ type: QA_ACTIONS.SET_PROJECT, payload: project }),
     updateProject: (updates) => dispatch({ type: QA_ACTIONS.UPDATE_PROJECT, payload: updates }),
+    setProjects: (projects) => dispatch({ type: QA_ACTIONS.SET_PROJECTS, payload: projects }),
+    addProject: (project) => dispatch({ type: QA_ACTIONS.ADD_PROJECT, payload: project }),
+    updateProjectInList: (project) => dispatch({ type: QA_ACTIONS.UPDATE_PROJECT_IN_LIST, payload: project }),
+    deleteProject: (projectId) => dispatch({ type: QA_ACTIONS.DELETE_PROJECT, payload: projectId }),
+    switchProject: (projectId) => dispatch({ type: QA_ACTIONS.SWITCH_PROJECT, payload: projectId }),
+    setCurrentProjectId: (projectId) => dispatch({ type: QA_ACTIONS.SET_CURRENT_PROJECT_ID, payload: projectId }),
     
     // CRUD actions
     addTestCase: (testCase) => dispatch({ type: QA_ACTIONS.ADD_TEST_CASE, payload: testCase }),
@@ -401,22 +459,104 @@ export function QAProvider({ children }) {
       } finally {
         actions.setLoading(false)
       }
+    },
+
+    // Project management utility functions
+    createProject(projectData) {
+      const project = {
+        id: `project_${Date.now()}`,
+        name: projectData.name,
+        workflowType: projectData.workflowType,
+        environments: projectData.environments || ['qa', 'staging', 'production'],
+        integration: projectData.integration || {
+          github: { enabled: false, repo: '' },
+          jira: { enabled: false, url: '', project_key: '' }
+        },
+        createdAt: new Date().toISOString()
+      }
+      
+      actions.addProject(project)
+      actions.saveProjectsToStorage()
+      actions.showNotification(`Project "${project.name}" created successfully`, 'success')
+      return project
+    },
+
+    updateProjectDetails(projectId, updates) {
+      const updatedProject = {
+        ...state.projects.find(p => p.id === projectId),
+        ...updates
+      }
+      
+      actions.updateProjectInList(updatedProject)
+      actions.saveProjectsToStorage()
+      actions.showNotification(`Project updated successfully`, 'success')
+      return updatedProject
+    },
+
+    deleteProjectById(projectId) {
+      const project = state.projects.find(p => p.id === projectId)
+      if (project) {
+        actions.deleteProject(projectId)
+        actions.saveProjectsToStorage()
+        actions.showNotification(`Project "${project.name}" deleted successfully`, 'success')
+      }
+    },
+
+    switchToProject(projectId) {
+      const project = state.projects.find(p => p.id === projectId)
+      if (project) {
+        actions.switchProject(projectId)
+        localStorage.setItem('qaCurrentProjectId', projectId)
+        actions.showNotification(`Switched to project "${project.name}"`, 'success')
+        
+        // Reload data for the new project
+        actions.loadAllData()
+      }
+    },
+
+    saveProjectsToStorage() {
+      try {
+        localStorage.setItem('qaProjects', JSON.stringify(state.projects))
+        if (state.currentProjectId) {
+          localStorage.setItem('qaCurrentProjectId', state.currentProjectId)
+        }
+        if (state.project?.id) {
+          localStorage.setItem('qaProjectConfig', JSON.stringify(state.project))
+        }
+      } catch (error) {
+        console.error('Failed to save projects to storage:', error)
+      }
+    },
+
+    loadProjectsFromStorage() {
+      try {
+        const savedProjects = localStorage.getItem('qaProjects')
+        const savedCurrentProjectId = localStorage.getItem('qaCurrentProjectId')
+        
+        if (savedProjects) {
+          const projects = JSON.parse(savedProjects)
+          actions.setProjects(projects)
+          
+          // Set current project if we have a saved ID and it exists
+          if (savedCurrentProjectId && projects.find(p => p.id === savedCurrentProjectId)) {
+            actions.switchProject(savedCurrentProjectId)
+          } else if (projects.length > 0) {
+            // Default to first project if no saved current project
+            actions.switchProject(projects[0].id)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load projects from storage:', error)
+      }
     }
   }
 
   // Initialize data on mount
   useEffect(() => {
-    // Load project configuration from localStorage if available
-    const savedProject = localStorage.getItem('qaProjectConfig')
-    if (savedProject) {
-      try {
-        const projectConfig = JSON.parse(savedProject)
-        actions.updateProject(projectConfig)
-      } catch (error) {
-        console.error('Failed to load project configuration:', error)
-      }
-    }
+    // Load projects and set current project
+    actions.loadProjectsFromStorage()
     
+    // Load other data
     actions.loadAllData()
   }, [])
 
