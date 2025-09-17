@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
 
@@ -7,68 +7,53 @@ function EnvironmentDashboard() {
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [showTestAssociation, setShowTestAssociation] = useState(false)
   const [selectedTestCases, setSelectedTestCases] = useState([])
+  const [jiraTickets, setJiraTickets] = useState([])
+
+  // Load JIRA tickets from localStorage
+  useEffect(() => {
+    const loadJiraTickets = () => {
+      const storedTickets = JSON.parse(localStorage.getItem('jiraTickets') || '[]')
+      
+      // Filter tickets for current project if multi-project support is enabled
+      const projectTickets = storedTickets.filter(ticket => 
+        !state.project?.id || 
+        ticket.projectId === state.project.id || 
+        ticket.projectName === state.project.name ||
+        (!ticket.projectId && !ticket.projectName)
+      )
+      
+      setJiraTickets(projectTickets)
+    }
+
+    loadJiraTickets()
+
+    // Listen for localStorage changes to update tickets in real-time
+    const handleStorageChange = (e) => {
+      if (e.key === 'jiraTickets') {
+        loadJiraTickets()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom events when localStorage is updated from the same window
+    const handleLocalUpdate = () => {
+      loadJiraTickets()
+    }
+    
+    window.addEventListener('jiraTicketsUpdated', handleLocalUpdate)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('jiraTicketsUpdated', handleLocalUpdate)
+    }
+  }, [state.project])
 
   // Get associated test cases for each JIRA ticket
   const getAssociatedTestCases = (ticketId) => {
-    // For now, get from localStorage - later this would come from backend
-    const ticketData = JSON.parse(localStorage.getItem('jiraTickets') || '[]')
-    const ticket = ticketData.find(t => t.id === ticketId)
+    const ticket = jiraTickets.find(t => t.id === ticketId)
     return ticket?.associatedTestCases || []
   }
-
-  // Mock JIRA tickets data - this would come from JIRA integration
-  const jiraTickets = [
-    {
-      id: "PROJ-123",
-      title: "User Authentication Enhancement",
-      description: "Improve login flow with 2FA support",
-      type: "Story",
-      priority: "High",
-      status: "In Testing",
-      assignee: "John Developer",
-      environment: "qa",
-      testProgress: {
-        qa: { total: 8, passed: 5, failed: 1, pending: 2, status: "In Progress" },
-        uat: { total: 0, passed: 0, failed: 0, pending: 0, status: "Pending" },
-        production: { total: 0, passed: 0, failed: 0, pending: 0, status: "Not Started" }
-      },
-      associatedTestCases: [
-        { id: "tc_001", name: "Login with 2FA", status: "Pass", environment: "qa" },
-        { id: "tc_002", name: "Password Reset", status: "Pass", environment: "qa" },
-        { id: "tc_003", name: "Account Lockout", status: "Fail", environment: "qa" }
-      ]
-    },
-    {
-      id: "PROJ-124", 
-      title: "Payment Gateway Integration",
-      description: "Integrate new payment processor",
-      type: "Feature",
-      priority: "Medium",
-      status: "Ready for UAT",
-      assignee: "Sarah Developer",
-      environment: "uat",
-      testProgress: {
-        qa: { total: 12, passed: 12, failed: 0, pending: 0, status: "Completed" },
-        uat: { total: 6, passed: 2, failed: 0, pending: 4, status: "In Progress" },
-        production: { total: 0, passed: 0, failed: 0, pending: 0, status: "Not Started" }
-      }
-    },
-    {
-      id: "PROJ-125",
-      title: "Database Performance Optimization", 
-      description: "Optimize slow queries and indexing",
-      type: "Task",
-      priority: "Low",
-      status: "Development",
-      assignee: "Mike Developer",
-      environment: "qa",
-      testProgress: {
-        qa: { total: 0, passed: 0, failed: 0, pending: 0, status: "Not Started" },
-        uat: { total: 0, passed: 0, failed: 0, pending: 0, status: "Not Started" },
-        production: { total: 0, passed: 0, failed: 0, pending: 0, status: "Not Started" }
-      }
-    }
-  ]
 
   const getEnvironmentBadgeColor = (env, status) => {
     if (status === "Completed") return "badge-success"
@@ -91,7 +76,7 @@ function EnvironmentDashboard() {
           <p className="text-gray-600">Environment-based testing workflow • Track JIRA tickets through QA pipeline</p>
         </div>
         <div className="flex space-x-3">
-          <Link to="/create-ticket" className="btn btn-primary">
+          <Link to="/track-tickets" className="btn btn-primary">
             Import JIRA Ticket
           </Link>
           <Link to="/test-cases" className="btn btn-secondary">
@@ -145,26 +130,27 @@ function EnvironmentDashboard() {
           <p className="text-sm text-gray-600">Track testing progress across environments</p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ticket
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Environment Pipeline
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Test Progress
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {jiraTickets.map((ticket) => (
+        {jiraTickets.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ticket
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Environment Pipeline
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Test Progress
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {jiraTickets.map((ticket) => (
                 <tr key={ticket.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-start space-x-3">
@@ -259,6 +245,20 @@ function EnvironmentDashboard() {
             </tbody>
           </table>
         </div>
+        ) : (
+          <div className="p-12 text-center">
+            <span className="text-6xl">🎫</span>
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No JIRA tickets to track</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Map your first JIRA ticket to start tracking testing progress across environments
+            </p>
+            <div className="mt-6">
+              <Link to="/track-tickets" className="btn btn-primary">
+                Map JIRA Ticket
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions for Environment Testing */}

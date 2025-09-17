@@ -31,7 +31,7 @@ function TrackTickets() {
         description: formData.description,
         type: formData.type,
         priority: formData.priority,
-        status: 'In Development',
+        status: 'Development',
         assignee: formData.assignee,
         environment: formData.environment,
         jiraUrl: formData.jiraUrl,
@@ -50,6 +50,9 @@ function TrackTickets() {
       const existingTickets = JSON.parse(localStorage.getItem('jiraTickets') || '[]')
       existingTickets.push(ticketData)
       localStorage.setItem('jiraTickets', JSON.stringify(existingTickets))
+
+      // Dispatch custom event to notify other components of the update
+      window.dispatchEvent(new Event('jiraTicketsUpdated'))
 
       actions.showNotification('JIRA ticket mapped successfully!', 'success')
       resetForm()
