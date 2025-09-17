@@ -104,7 +104,7 @@ function Analytics() {
       totalItems: totalTickets,
       completedItems: completedTickets,
       blockedItems: blockedTickets,
-      inProgressItems: totalTickets - completedItems - blockedTickets,
+      inProgressItems: totalTickets - completedTickets - blockedTickets,
       avgProcessingTime: avgTicketTime,
       formattedAvgProcessingTime: formatDuration(avgTicketTime),
       environmentProgress,
@@ -427,7 +427,6 @@ function Analytics() {
   }
 
   return (
-    <>
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex justify-between items-center">
@@ -445,7 +444,7 @@ function Analytics() {
           <label className="text-sm font-medium text-gray-700">Time Range:</label>
           <select
             className="select"
-            value={state.filters.analytics.timeRange}
+            value={state.filters?.analytics?.timeRange || 30}
             onChange={(e) => handleTimeRangeChange(e.target.value)}
           >
             <option value={7}>Last 7 days</option>
@@ -744,122 +743,123 @@ function Analytics() {
           ) : (
             analytics.longestTotalPR ? (
               <div className="space-y-4">
-              {/* Time-Based Records */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="text-yellow-600 mr-2">🕐</span>
-                      <p className="font-medium text-yellow-900">Longest Total Cycle</p>
-                    </div>
-                    <p className="text-2xl font-bold text-yellow-600">{analytics.longestTotalPR.formattedTotalDuration}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-yellow-700">{analytics.longestTotalPR.prName}</p>
-                    <p className="text-xs text-yellow-600">Developer: {analytics.longestTotalPR.developer}</p>
-                    <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
-                        <span className="text-yellow-500">Pure QA: </span>
-                        <span className="font-medium text-yellow-700">{analytics.longestTotalPR.formattedPureQATime}</span>
-                      </div>
-                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
-                        <span className="text-yellow-500">Blocked: </span>
-                        <span className="font-medium text-yellow-700">{analytics.longestTotalPR.formattedBlockedTime}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {analytics.fastestPureQAPR && (
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                {/* Time-Based Records */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
-                        <span className="text-green-600 mr-2">⚡</span>
-                        <p className="font-medium text-green-900">Fastest QA Completion</p>
+                        <span className="text-yellow-600 mr-2">🕐</span>
+                        <p className="font-medium text-yellow-900">Longest Total Cycle</p>
                       </div>
-                      <p className="text-2xl font-bold text-green-600">{analytics.fastestPureQAPR.formattedPureQATime}</p>
+                      <p className="text-2xl font-bold text-yellow-600">{analytics.longestTotalPR.formattedTotalDuration}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium text-green-700">{analytics.fastestPureQAPR.prName}</p>
-                      <p className="text-xs text-green-600">Developer: {analytics.fastestPureQAPR.developer}</p>
+                      <p className="text-sm font-medium text-yellow-700">{analytics.longestTotalPR.prName}</p>
+                      <p className="text-xs text-yellow-600">Developer: {analytics.longestTotalPR.developer}</p>
                       <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
                         <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
-                          <span className="text-green-500">Total Time: </span>
-                          <span className="font-medium text-green-700">{analytics.fastestPureQAPR.formattedTotalDuration}</span>
+                          <span className="text-yellow-500">Pure QA: </span>
+                          <span className="font-medium text-yellow-700">{analytics.longestTotalPR.formattedPureQATime}</span>
                         </div>
                         <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
-                          <span className="text-green-500">Efficiency: </span>
-                          <span className="font-medium text-green-700">{100 - analytics.fastestPureQAPR.blockedPercentage}%</span>
+                          <span className="text-yellow-500">Blocked: </span>
+                          <span className="font-medium text-yellow-700">{analytics.longestTotalPR.formattedBlockedTime}</span>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {analytics.fastestPureQAPR && (
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <span className="text-green-600 mr-2">⚡</span>
+                          <p className="font-medium text-green-900">Fastest QA Completion</p>
+                        </div>
+                        <p className="text-2xl font-bold text-green-600">{analytics.fastestPureQAPR.formattedPureQATime}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-green-700">{analytics.fastestPureQAPR.prName}</p>
+                        <p className="text-xs text-green-600">Developer: {analytics.fastestPureQAPR.developer}</p>
+                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                          <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
+                            <span className="text-green-500">Total Time: </span>
+                            <span className="font-medium text-green-700">{analytics.fastestPureQAPR.formattedTotalDuration}</span>
+                          </div>
+                          <div className="bg-white bg-opacity-50 px-2 py-1 rounded">
+                            <span className="text-green-500">Efficiency: </span>
+                            <span className="font-medium text-green-700">{100 - analytics.fastestPureQAPR.blockedPercentage}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Blocking Analysis */}
+                {analytics.mostBlockedPR && (
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <span className="text-red-600 mr-2">🚫</span>
+                        <div>
+                          <p className="font-medium text-red-900">Most Blocked PR</p>
+                          <p className="text-sm text-red-700">{analytics.mostBlockedPR.prName || 'Unknown PR'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-red-600">{analytics.mostBlockedPR.blockedPercentage || 0}%</p>
+                        <p className="text-xs text-red-500">blocked time</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-xs">
+                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
+                        <p className="text-red-500">Total Time</p>
+                        <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedTotalDuration}</p>
+                      </div>
+                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
+                        <p className="text-red-500">QA Time</p>
+                        <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedPureQATime}</p>
+                      </div>
+                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
+                        <p className="text-red-500">Blocked Time</p>
+                        <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedBlockedTime || '0h'}</p>
+                      </div>
+                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
+                        <p className="text-red-500">Developer</p>
+                        <p className="font-medium text-red-700">{analytics.mostBlockedPR.developer || 'Unknown'}</p>
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Blocking Analysis */}
-              {analytics.mostBlockedPR && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                {/* Team Average Performance */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <span className="text-red-600 mr-2">🚫</span>
+                      <span className="text-blue-600 mr-2">📊</span>
                       <div>
-                        <p className="font-medium text-red-900">Most Blocked PR</p>
-                        <p className="text-sm text-red-700">{analytics.mostBlockedPR.prName || 'Unknown PR'}</p>
+                        <p className="font-medium text-blue-900">Team Average Performance</p>
+                        <p className="text-sm text-blue-700">Based on {analytics.completedPRsCount} completed QA cycles</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-red-600">{analytics.mostBlockedPR.blockedPercentage || 0}%</p>
-                      <p className="text-xs text-red-500">blocked time</p>
-                    </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 text-xs">
-                    <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
-                      <p className="text-red-500">Total Time</p>
-                      <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedTotalDuration}</p>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <div className="bg-white bg-opacity-60 p-3 rounded text-center">
+                      <p className="text-blue-500 text-xs mb-1">Average QA Time</p>
+                      <p className="text-xl font-bold text-blue-700">{analytics.formattedAvgPureQATime}</p>
+                      <p className="text-blue-600 text-xs">per PR cycle</p>
                     </div>
-                    <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
-                      <p className="text-red-500">QA Time</p>
-                      <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedPureQATime}</p>
+                    <div className="bg-white bg-opacity-60 p-3 rounded text-center">
+                      <p className="text-blue-500 text-xs mb-1">Average Total Time</p>
+                      <p className="text-xl font-bold text-blue-700">{analytics.formattedAvgTotalTime}</p>
+                      <p className="text-blue-600 text-xs">per PR cycle</p>
                     </div>
-                    <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
-                      <p className="text-red-500">Blocked Time</p>
-                      <p className="font-medium text-red-700">{analytics.mostBlockedPR.formattedBlockedTime || '0h'}</p>
+                    <div className="bg-white bg-opacity-60 p-3 rounded text-center">
+                      <p className="text-blue-500 text-xs mb-1">Average Blocked</p>
+                      <p className="text-xl font-bold text-blue-700">{analytics.avgBlockedPercentage}%</p>
+                      <p className="text-blue-600 text-xs">({analytics.formattedAvgBlockedTime})</p>
                     </div>
-                    <div className="bg-white bg-opacity-50 px-2 py-1 rounded text-center">
-                      <p className="text-red-500">Developer</p>
-                      <p className="font-medium text-red-700">{analytics.mostBlockedPR.developer || 'Unknown'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Team Average Performance */}
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center">
-                    <span className="text-blue-600 mr-2">📊</span>
-                    <div>
-                      <p className="font-medium text-blue-900">Team Average Performance</p>
-                      <p className="text-sm text-blue-700">Based on {analytics.completedPRsCount} completed QA cycles</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div className="bg-white bg-opacity-60 p-3 rounded text-center">
-                    <p className="text-blue-500 text-xs mb-1">Average QA Time</p>
-                    <p className="text-xl font-bold text-blue-700">{analytics.formattedAvgPureQATime}</p>
-                    <p className="text-blue-600 text-xs">per PR cycle</p>
-                  </div>
-                  <div className="bg-white bg-opacity-60 p-3 rounded text-center">
-                    <p className="text-blue-500 text-xs mb-1">Average Total Time</p>
-                    <p className="text-xl font-bold text-blue-700">{analytics.formattedAvgTotalTime}</p>
-                    <p className="text-blue-600 text-xs">per PR cycle</p>
-                  </div>
-                  <div className="bg-white bg-opacity-60 p-3 rounded text-center">
-                    <p className="text-blue-500 text-xs mb-1">Average Blocked</p>
-                    <p className="text-xl font-bold text-blue-700">{analytics.avgBlockedPercentage}%</p>
-                    <p className="text-blue-600 text-xs">({analytics.formattedAvgBlockedTime})</p>
                   </div>
                 </div>
               </div>
@@ -870,6 +870,7 @@ function Analytics() {
             )
           )}
         </div>
+      </div>
 
       {!isEnvironmentBased && (
         <div className="card p-6">
@@ -911,7 +912,7 @@ function Analytics() {
           {isEnvironmentBased ? 'Ticket Activity Trend' : 'PR Activity Trend'}
         </h2>
         
-        {analytics.trendData.some(d => d.created > 0 || d.completed > 0) ? (
+        {analytics.trendData && analytics.trendData.some(d => d.created > 0 || d.completed > 0) ? (
           <div className="space-y-4">
             <div className="grid grid-cols-7 gap-2 text-xs text-gray-500">
               {analytics.trendData.slice(-7).map((day, index) => (
@@ -922,14 +923,16 @@ function Analytics() {
                       {(day.created > 0 || day.completed > 0) && (
                         <div className="w-full flex flex-col justify-end h-full">
                           {day.completed > 0 && (
-                            <div className="w-full bg-green-400" 
-                                 style={{ height: `${(day.completed / Math.max(...analytics.trendData.map(d => Math.max(d.created, d.completed)))) * 30}px` }}>
-                            </div>
+                            <div 
+                              className="w-full bg-green-400" 
+                              style={{ height: `${(day.completed / Math.max(...analytics.trendData.map(d => Math.max(d.created, d.completed)))) * 30}px` }}
+                            ></div>
                           )}
                           {day.created > 0 && (
-                            <div className="w-full bg-blue-400" 
-                                 style={{ height: `${(day.created / Math.max(...analytics.trendData.map(d => Math.max(d.created, d.completed)))) * 30}px` }}>
-                            </div>
+                            <div 
+                              className="w-full bg-blue-400" 
+                              style={{ height: `${(day.created / Math.max(...analytics.trendData.map(d => Math.max(d.created, d.completed)))) * 30}px` }}
+                            ></div>
                           )}
                         </div>
                       )}
@@ -961,7 +964,6 @@ function Analytics() {
         )}
       </div>
     </div>
-    </>
   )
 }
 
