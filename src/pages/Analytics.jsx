@@ -120,7 +120,188 @@ function Analytics() {
     }
   }
 
-  // PR-based analytics calculation (existing logic)
+  // TDD-specific metrics calculation
+  function calculateTDDMetrics(prs) {
+    // Debug: Log PR data to understand structure
+    console.log('TDD Analytics - PR Data:', prs.map(pr => ({
+      id: pr.id,
+      name: pr.name,
+      status: pr.status,
+      created_at: pr.created_at,
+      createdAt: pr.createdAt,
+      qaTestsMergedAt: pr.qaTestsMergedAt,
+      devPRMergedAt: pr.devPRMergedAt,
+      hasAnyCreatedField: !!(pr.created_at || pr.createdAt || pr.date || pr.timestamp),
+      hasTDDTimestamps: !!(pr.qaTestsMergedAt && pr.devPRMergedAt)
+    })))
+
+    // Helper function to format duration
+    const formatDuration = (hours) => {
+      if (!hours || isNaN(hours) || hours <= 0) return '0h'
+      if (hours < 24) return `${hours}h`
+      const days = Math.floor(hours / 24)
+      const remainingHours = hours % 24
+      return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`
+    }
+
+    // Helper function to calculate time between stages
+    const calculateStageTime = (startDate, endDate) => {
+      if (!startDate || !endDate) return 0
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      
+      // Check for invalid dates
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+      
+      const duration = Math.round((end - start) / (1000 * 60 * 60))
+      return duration > 0 ? duration : 0
+    }
+
+    // Categorize PRs by TDD stage - include all possible statuses
+    const readyPRs = prs.filter(pr => pr.status === 'ready' || pr.status === 'new' || pr.status === 'testing')
+    const qaTestsMergedPRs = prs.filter(pr => pr.status === 'qa-tests-merged')
+    const fullyMergedPRs = prs.filter(pr => pr.status === 'fully-merged')
+    const blockedPRs = prs.filter(pr => pr.status === 'blocked')
+
+
+    // TDD stage distribution
+    const stageDistribution = {
+      ready: readyPRs.length,
+      qaTestsMerged: qaTestsMergedPRs.length,
+      fullyMerged: fullyMergedPRs.length,
+      blocked: blockedPRs.length,
+      total: prs.length
+    }
+
+    // Calculate percentages
+    const total = stageDistribution.total || 1
+    stageDistribution.readyPercentage = Math.round((stageDistribution.ready / total) * 100)
+    stageDistribution.qaTestsMergedPercentage = Math.round((stageDistribution.qaTestsMerged / total) * 100)
+    stageDistribution.fullyMergedPercentage = Math.round((stageDistribution.fullyMerged / total) * 100)
+    stageDistribution.blockedPercentage = Math.round((stageDistribution.blocked / total) * 100)
+
+    // TDD cycle completion analysis
+    const tddCycleData = fullyMergedPRs.map(pr => {
+      // Handle multiple date field formats
+      const createdTime = new Date(pr.created_at || pr.createdAt || pr.date || pr.timestamp || Date.now())
+      const qaTestsMergedTime = pr.qaTestsMergedAt ? new Date(pr.qaTestsMergedAt) : null
+      const devMergedTime = pr.devPRMergedAt ? new Date(pr.devPRMergedAt) : null
+
+      // If we don't have TDD timestamps, use estimated times based on status progression
+      let timeToQATestsMerge = 0
+      let timeFromQAToDevMerge = 0
+      let totalCycleTime = 0
+
+      if (qaTestsMergedTime && devMergedTime) {
+        // We have actual TDD timestamps - use them
+        timeToQATestsMerge = calculateStageTime(createdTime, qaTestsMergedTime)
+        timeFromQAToDevMerge = calculateStageTime(qaTestsMergedTime, devMergedTime)
+        totalCycleTime = calculateStageTime(createdTime, devMergedTime)
+      } else {
+        // Estimate times for PRs without TDD timestamps
+        const estimatedTotalTime = calculateStageTime(createdTime, new Date())
+        timeToQATestsMerge = Math.round(estimatedTotalTime * 0.6) // Assume 60% for QA phase
+        timeFromQAToDevMerge = Math.round(estimatedTotalTime * 0.4) // Assume 40% for dev phase
+        totalCycleTime = estimatedTotalTime
+      }
+
+      return {
+        prId: pr.id,
+        prName: pr.name,
+        timeToQATestsMerge,
+        timeFromQAToDevMerge,
+        totalCycleTime,
+        formattedTimeToQATestsMerge: formatDuration(timeToQATestsMerge),
+        formattedTimeFromQAToDevMerge: formatDuration(timeFromQAToDevMerge),
+        formattedTotalCycleTime: formatDuration(totalCycleTime),
+        developer: pr.developer
+      }
+    }).filter(cycle => cycle.totalCycleTime > 0)
+
+    // TDD efficiency metrics
+    const avgTimeToQATestsMerge = tddCycleData.length > 0 ? 
+      Math.round(tddCycleData.reduce((sum, cycle) => sum + cycle.timeToQATestsMerge, 0) / tddCycleData.length) : 0
+    
+    const avgTimeFromQAToDevMerge = tddCycleData.length > 0 ? 
+      Math.round(tddCycleData.reduce((sum, cycle) => sum + cycle.timeFromQAToDevMerge, 0) / tddCycleData.length) : 0
+    
+    const avgTotalCycleTime = tddCycleData.length > 0 ? 
+      Math.round(tddCycleData.reduce((sum, cycle) => sum + cycle.totalCycleTime, 0) / tddCycleData.length) : 0
+
+    // QA-to-Dev handoff efficiency (how quickly dev responds after QA tests are merged)
+    const handoffEfficiency = avgTimeFromQAToDevMerge > 0 ? 
+      Math.round((avgTimeToQATestsMerge / (avgTimeToQATestsMerge + avgTimeFromQAToDevMerge)) * 100) : 0
+
+    // Fail-first success rate (PRs that completed full TDD cycle)
+    const failFirstSuccessRate = prs.length > 0 ? 
+      Math.round((fullyMergedPRs.length / prs.length) * 100) : 0
+
+    // Test quality metrics (based on associated test cases)
+    const testCaseMetrics = prs.reduce((metrics, pr) => {
+      const testCases = pr.associatedTestCases || []
+      metrics.totalTestCases += testCases.length
+      metrics.prWithTests += testCases.length > 0 ? 1 : 0
+      
+      testCases.forEach(tc => {
+        if (tc.localResult === 'Pass') metrics.localPassingTests++
+        if (tc.mainResult === 'Pass') metrics.mainPassingTests++
+        if (tc.mainResult === 'Fail') metrics.mainFailingTests++
+      })
+      
+      return metrics
+    }, {
+      totalTestCases: 0,
+      prWithTests: 0,
+      localPassingTests: 0,
+      mainPassingTests: 0,
+      mainFailingTests: 0
+    })
+
+    const avgTestCasesPerPR = testCaseMetrics.prWithTests > 0 ? 
+      Math.round(testCaseMetrics.totalTestCases / testCaseMetrics.prWithTests) : 0
+    
+    const testCoverageRate = prs.length > 0 ? 
+      Math.round((testCaseMetrics.prWithTests / prs.length) * 100) : 0
+
+    // TDD flow insights - percentage-based efficiency metrics
+    const tddFlowInsights = {
+      // QA Efficiency: Percentage of time spent in QA phase vs total cycle
+      qaPhaseEfficiency: avgTotalCycleTime > 0 ? 
+        Math.round((avgTimeToQATestsMerge / avgTotalCycleTime) * 100) : 100,
+      
+      // Dev Response Efficiency: How quickly dev responds after QA tests merged
+      devResponseEfficiency: avgTotalCycleTime > 0 && avgTimeFromQAToDevMerge > 0 ? 
+        Math.round((avgTimeFromQAToDevMerge / avgTotalCycleTime) * 100) : 
+        (avgTimeFromQAToDevMerge > 0 ? 50 : 0),
+      
+      // TDD Adoption Rate: Percentage of PRs using proper TDD flow
+      tddAdoptionRate: prs.length > 0 ? 
+        Math.round(((qaTestsMergedPRs.length + fullyMergedPRs.length) / prs.length) * 100) : 0,
+      
+      // Flow Completion Rate: Percentage of started TDD flows that complete
+      flowCompletionRate: (qaTestsMergedPRs.length + fullyMergedPRs.length) > 0 ? 
+        Math.round((fullyMergedPRs.length / (qaTestsMergedPRs.length + fullyMergedPRs.length)) * 100) : 0
+    }
+
+    return {
+      stageDistribution,
+      tddCycleData,
+      avgTimeToQATestsMerge,
+      avgTimeFromQAToDevMerge,
+      avgTotalCycleTime,
+      formattedAvgTimeToQATestsMerge: formatDuration(avgTimeToQATestsMerge),
+      formattedAvgTimeFromQAToDevMerge: formatDuration(avgTimeFromQAToDevMerge),
+      formattedAvgTotalCycleTime: formatDuration(avgTotalCycleTime),
+      handoffEfficiency,
+      failFirstSuccessRate,
+      testCaseMetrics,
+      avgTestCasesPerPR,
+      testCoverageRate,
+      tddFlowInsights
+    }
+  }
+
+  // PR-based analytics calculation with TDD insights
   function calculatePRAnalytics(timeRange) {
     const prs = state.prs || []
     
@@ -129,28 +310,47 @@ function Analytics() {
     cutoffDate.setDate(cutoffDate.getDate() - timeRange)
 
     const recentPRs = prs.filter(pr => {
-      const prDate = new Date(pr.created_at || pr.createdAt)
-      return prDate >= cutoffDate
+      // Handle various date field names and provide fallback
+      const dateField = pr.created_at || pr.createdAt || pr.date || pr.timestamp
+      if (!dateField) return true // Include PRs without dates for now
+      const prDate = new Date(dateField)
+      return !isNaN(prDate.getTime()) && prDate >= cutoffDate
     })
 
     // Helper function to calculate duration in hours
     const calculateDurationHours = (startDate, endDate = new Date()) => {
+      if (!startDate) return 0
       const start = new Date(startDate)
       const end = new Date(endDate)
-      return Math.round((end - start) / (1000 * 60 * 60))
+      
+      // Check for invalid dates
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+      
+      const duration = Math.round((end - start) / (1000 * 60 * 60))
+      return duration > 0 ? duration : 0
+    }
+
+    // Helper function to get PR date field
+    const getPRDate = (pr, field = 'created') => {
+      if (field === 'created') {
+        return pr.created_at || pr.createdAt || pr.date || pr.timestamp
+      } else if (field === 'updated') {
+        return pr.updated_at || pr.updatedAt || pr.lastModified
+      }
+      return null
     }
 
     // Helper function to estimate blocked time (simplified)
     const estimateBlockedTime = (pr) => {
       // If currently blocked, assume it's been blocked for a portion of total time
       if (pr.status === 'blocked') {
-        const totalTime = calculateDurationHours(pr.created_at)
+        const totalTime = calculateDurationHours(getPRDate(pr, 'created'))
         // Assume blocked for last 25% of time (can be improved with actual status history)
         return Math.round(totalTime * 0.25)
       }
       // For completed PRs, estimate based on priority and complexity
       if (pr.status === 'ready') {
-        const totalTime = calculateDurationHours(pr.created_at, pr.updated_at)
+        const totalTime = calculateDurationHours(getPRDate(pr, 'created'), getPRDate(pr, 'updated'))
         // High priority PRs likely had fewer blocks, low priority more
         const blockFactor = pr.priority === 'high' ? 0.1 : pr.priority === 'medium' ? 0.15 : 0.2
         return Math.round(totalTime * blockFactor)
@@ -161,14 +361,15 @@ function Analytics() {
     // Helper function to calculate pure QA testing time
     const calculatePureQATime = (pr) => {
       const totalTime = pr.status === 'ready' 
-        ? calculateDurationHours(pr.created_at, pr.updated_at)
-        : calculateDurationHours(pr.created_at)
+        ? calculateDurationHours(getPRDate(pr, 'created'), getPRDate(pr, 'updated'))
+        : calculateDurationHours(getPRDate(pr, 'created'))
       const blockedTime = estimateBlockedTime(pr)
       return Math.max(0, totalTime - blockedTime)
     }
 
     // Helper function to format duration
     const formatDuration = (hours) => {
+      if (!hours || isNaN(hours) || hours <= 0) return '0h'
       if (hours < 24) return `${hours}h`
       const days = Math.floor(hours / 24)
       const remainingHours = hours % 24
@@ -180,7 +381,7 @@ function Analytics() {
     const inProgressPRs = recentPRs.filter(pr => ['new', 'testing', 'blocked'].includes(pr.status))
     
     const completionTimes = completedPRs.map(pr => {
-      const totalDuration = calculateDurationHours(pr.created_at, pr.updated_at)
+      const totalDuration = calculateDurationHours(getPRDate(pr, 'created'), getPRDate(pr, 'updated'))
       const blockedTime = estimateBlockedTime(pr)
       const pureQATime = calculatePureQATime(pr)
       return {
@@ -198,7 +399,7 @@ function Analytics() {
     })
 
     const inProgressTimes = inProgressPRs.map(pr => {
-      const totalDuration = calculateDurationHours(pr.created_at)
+      const totalDuration = calculateDurationHours(getPRDate(pr, 'created'))
       const blockedTime = estimateBlockedTime(pr)
       const pureQATime = calculatePureQATime(pr)
       return {
@@ -332,6 +533,9 @@ function Analytics() {
         blockedPercentage: stats.avgTotalTime > 0 ? Math.round((stats.avgBlockedTime / stats.avgTotalTime) * 100) : 0
       }))
 
+    // TDD-specific analytics calculations
+    const tddMetrics = calculateTDDMetrics(recentPRs)
+
     return {
       totalPRs,
       completedPRsCount,
@@ -353,7 +557,8 @@ function Analytics() {
       inProgressTimes,
       trendData,
       topPerformers,
-      workflowType: 'pr'
+      workflowType: 'pr',
+      tddMetrics: tddMetrics
     }
   }
 
@@ -905,6 +1110,177 @@ function Analytics() {
             </div>
           )}
         </div>
+      )}
+
+      {/* TDD Analytics - Only for PR-based workflow */}
+      {!isEnvironmentBased && analytics.tddMetrics && (
+        <>
+          {/* TDD Stage Distribution */}
+          <div className="card p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">TDD Workflow Distribution</h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="text-2xl font-bold text-yellow-600">{analytics.tddMetrics.stageDistribution.ready}</div>
+                <div className="text-sm text-yellow-700">Ready/Testing</div>
+                <div className="text-xs text-yellow-600">{analytics.tddMetrics.stageDistribution.readyPercentage}%</div>
+              </div>
+              
+              <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="text-2xl font-bold text-orange-600">{analytics.tddMetrics.stageDistribution.qaTestsMerged}</div>
+                <div className="text-sm text-orange-700">QA Tests Merged</div>
+                <div className="text-xs text-orange-600">{analytics.tddMetrics.stageDistribution.qaTestsMergedPercentage}%</div>
+              </div>
+              
+              <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-2xl font-bold text-blue-600">{analytics.tddMetrics.stageDistribution.fullyMerged}</div>
+                <div className="text-sm text-blue-700">Fully Merged</div>
+                <div className="text-xs text-blue-600">{analytics.tddMetrics.stageDistribution.fullyMergedPercentage}%</div>
+              </div>
+              
+              <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                <div className="text-2xl font-bold text-red-600">{analytics.tddMetrics.stageDistribution.blocked}</div>
+                <div className="text-sm text-red-700">Blocked</div>
+                <div className="text-xs text-red-600">{analytics.tddMetrics.stageDistribution.blockedPercentage}%</div>
+              </div>
+            </div>
+          </div>
+
+          {/* TDD Cycle Efficiency */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">TDD Cycle Performance</h2>
+              
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Fail-First Success Rate</span>
+                    <span className="text-2xl font-bold text-green-600">{analytics.tddMetrics.failFirstSuccessRate}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${analytics.tddMetrics.failFirstSuccessRate}%` }}></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">PRs completing full TDD cycle</p>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-700">Average TDD Cycle Time</span>
+                    <span className="text-xl font-bold text-blue-600">{analytics.tddMetrics.formattedAvgTotalCycleTime}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white bg-opacity-60 p-2 rounded">
+                      <span className="text-blue-500">QA Phase: </span>
+                      <span className="font-medium text-blue-700">{analytics.tddMetrics.formattedAvgTimeToQATestsMerge}</span>
+                    </div>
+                    <div className="bg-white bg-opacity-60 p-2 rounded">
+                      <span className="text-blue-500">Dev Phase: </span>
+                      <span className="font-medium text-blue-700">{analytics.tddMetrics.formattedAvgTimeFromQAToDevMerge}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-purple-700">QA-Dev Handoff Efficiency</span>
+                    <span className="text-xl font-bold text-purple-600">{analytics.tddMetrics.handoffEfficiency}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${analytics.tddMetrics.handoffEfficiency}%` }}></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">How responsive devs are to QA test merges</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Test Quality Metrics</h2>
+              
+              <div className="space-y-4">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-green-700">Test Coverage Rate</span>
+                    <span className="text-2xl font-bold text-green-600">{analytics.tddMetrics.testCoverageRate}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${analytics.tddMetrics.testCoverageRate}%` }}></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">PRs with associated test cases</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white p-3 rounded-lg border text-center">
+                    <div className="text-lg font-bold text-gray-700">{analytics.tddMetrics.avgTestCasesPerPR}</div>
+                    <div className="text-xs text-gray-600">Avg Tests per PR</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border text-center">
+                    <div className="text-lg font-bold text-gray-700">{analytics.tddMetrics.testCaseMetrics.totalTestCases}</div>
+                    <div className="text-xs text-gray-600">Total Test Cases</div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <div className="text-sm font-medium text-yellow-700 mb-2">Test Execution Results</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white bg-opacity-60 p-2 rounded text-center">
+                      <div className="text-green-600 font-bold">{analytics.tddMetrics.testCaseMetrics.localPassingTests}</div>
+                      <div className="text-gray-600">Local Passing</div>
+                    </div>
+                    <div className="bg-white bg-opacity-60 p-2 rounded text-center">
+                      <div className="text-red-600 font-bold">{analytics.tddMetrics.testCaseMetrics.mainFailingTests}</div>
+                      <div className="text-gray-600">Main Failing (Expected)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* TDD Flow Insights */}
+          {analytics.tddMetrics.tddFlowInsights && (
+            <div className="card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">TDD Flow Insights</h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center mb-2">
+                    <span className="text-green-600 mr-2">🧪</span>
+                    <span className="font-medium text-green-900">QA Phase Efficiency</span>
+                  </div>
+                  <div className="text-xl font-bold text-green-600">{analytics.tddMetrics.tddFlowInsights.qaPhaseEfficiency}%</div>
+                  <div className="text-xs text-green-600">Time spent in QA phase</div>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center mb-2">
+                    <span className="text-blue-600 mr-2">⚡</span>
+                    <span className="font-medium text-blue-900">Dev Response</span>
+                  </div>
+                  <div className="text-xl font-bold text-blue-600">{analytics.tddMetrics.tddFlowInsights.devResponseEfficiency}%</div>
+                  <div className="text-xs text-blue-600">Dev phase of cycle</div>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center mb-2">
+                    <span className="text-purple-600 mr-2">📈</span>
+                    <span className="font-medium text-purple-900">TDD Adoption</span>
+                  </div>
+                  <div className="text-xl font-bold text-purple-600">{analytics.tddMetrics.tddFlowInsights.tddAdoptionRate}%</div>
+                  <div className="text-xs text-purple-600">PRs using TDD flow</div>
+                </div>
+                
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <div className="flex items-center mb-2">
+                    <span className="text-orange-600 mr-2">🎯</span>
+                    <span className="font-medium text-orange-900">Flow Completion</span>
+                  </div>
+                  <div className="text-xl font-bold text-orange-600">{analytics.tddMetrics.tddFlowInsights.flowCompletionRate}%</div>
+                  <div className="text-xs text-orange-600">Started flows completed</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="card p-6">

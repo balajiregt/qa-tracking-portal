@@ -23,6 +23,60 @@ function Dashboard() {
     mainResult: 'Pending'
   })
 
+  // Merge QA tests first (TDD/Fail-First approach)
+  const handleMergeQATests = async (pr) => {
+    try {
+      // Update all associated test cases' main branch results to 'Fail' (expected)
+      const updatedAssociatedTestCases = pr.associatedTestCases.map(tc => ({
+        ...tc,
+        mainResult: 'Fail'
+      }))
+
+      // Update PR status to qa-tests-merged
+      const updatedPR = {
+        ...pr,
+        status: 'qa-tests-merged',
+        associatedTestCases: updatedAssociatedTestCases,
+        qaTestsMergedAt: new Date().toISOString()
+      }
+
+      // Update the PR in backend and global state
+      await actions.updatePRAsync(updatedPR)
+      
+      actions.showNotification(`QA tests merged to main - Tests failing as expected!`, 'success')
+    } catch (error) {
+      console.error('Error merging QA tests:', error)
+      actions.showNotification('Failed to merge QA tests', 'error')
+    }
+  }
+
+  // Merge Dev PR (should make tests pass)
+  const handleMergeDevPR = async (pr) => {
+    try {
+      // Update all associated test cases' main branch results to 'Pass'
+      const updatedAssociatedTestCases = pr.associatedTestCases.map(tc => ({
+        ...tc,
+        mainResult: 'Pass'
+      }))
+
+      // Update PR status to fully merged
+      const updatedPR = {
+        ...pr,
+        status: 'fully-merged',
+        associatedTestCases: updatedAssociatedTestCases,
+        devPRMergedAt: new Date().toISOString()
+      }
+
+      // Update the PR in backend and global state
+      await actions.updatePRAsync(updatedPR)
+      
+      actions.showNotification(`Dev PR merged - All tests now passing!`, 'success')
+    } catch (error) {
+      console.error('Error merging dev PR:', error)
+      actions.showNotification('Failed to merge dev PR', 'error')
+    }
+  }
+
   
   // Get associated test cases for each PR
   const getAssociatedTestCases = (prId) => {
@@ -50,7 +104,11 @@ function Dashboard() {
     
     // Automatically calculate status based on test results
     let calculatedStatus
-    if (pr.blocked_reason || localFailedTests > 0) {
+    if (pr.status === 'fully-merged') {
+      calculatedStatus = 'fully-merged'
+    } else if (pr.status === 'qa-tests-merged') {
+      calculatedStatus = 'qa-tests-merged'
+    } else if (pr.blocked_reason || localFailedTests > 0) {
       calculatedStatus = 'blocked'
     } else if (totalTests > 0 && localPendingTests === 0 && localPassedTests === totalTests) {
       calculatedStatus = 'ready'
@@ -98,16 +156,20 @@ function Dashboard() {
   }, [state.testCases])
 
   // Filter PRs by status for different views
-  const openPRs = prsWithTestProgress.filter(pr => pr.status !== 'merged' && pr.status !== 'closed')
+  const openPRs = prsWithTestProgress.filter(pr => !['fully-merged', 'closed'].includes(pr.status))
   const readyToMergePRs = prsWithTestProgress.filter(pr => pr.status === 'ready')
+  const qaTestsMergedPRs = prsWithTestProgress.filter(pr => pr.status === 'qa-tests-merged')
   const blockedPRs = prsWithTestProgress.filter(pr => pr.status === 'blocked')
+  const fullyMergedPRs = prsWithTestProgress.filter(pr => pr.status === 'fully-merged')
   
   // Summary statistics
   const stats = {
     totalPRs: state.prs.length,
     openPRs: openPRs.length,
     readyToMerge: readyToMergePRs.length,
+    qaTestsMerged: qaTestsMergedPRs.length,
     blockedPRs: blockedPRs.length,
+    fullyMerged: fullyMergedPRs.length,
     totalTests: state.testCases.length
   }
 
@@ -120,7 +182,7 @@ function Dashboard() {
       </div>
 
       {/* PR Status Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="card p-6">
           <div className="flex items-center">
             <div className="p-2 bg-primary-100 rounded-lg">
@@ -153,6 +215,30 @@ function Dashboard() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Blocked PRs</p>
               <p className="text-2xl font-semibold text-danger-600">{stats.blockedPRs}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <span className="text-2xl">🧪</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">QA Tests Merged</p>
+              <p className="text-2xl font-semibold text-orange-600">{stats.qaTestsMerged}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <span className="text-2xl">🎉</span>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Fully Merged</p>
+              <p className="text-2xl font-semibold text-blue-600">{stats.fullyMerged}</p>
             </div>
           </div>
         </div>
@@ -219,12 +305,74 @@ function Dashboard() {
                         Progress: {Math.round(pr.localProgress)}% complete • Branch: {pr.branch_comparison?.feature_branch?.name || pr.name}
                       </div>
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-4 space-x-2">
                       <button 
                         onClick={() => setSelectedPR(pr)}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-secondary btn-sm"
                       >
                         View Details
+                      </button>
+                      <button 
+                        onClick={() => handleMergeQATests(pr)}
+                        className="btn btn-warning btn-sm"
+                      >
+                        🧪 Merge QA Tests
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* QA Tests Merged PRs (Fail-First Stage) */}
+        {qaTestsMergedPRs.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-orange-700">🧪 QA Tests Merged (Failing as Expected)</h2>
+              <span className="badge badge-warning">{qaTestsMergedPRs.length} PRs</span>
+            </div>
+            
+            <div className="space-y-4">
+              {qaTestsMergedPRs.map((pr) => (
+                <div key={pr.id} className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                        <span className="badge badge-warning">qa-tests-merged</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
+                      <div className="flex items-center mt-2 space-x-2">
+                        <span className="badge badge-success">{pr.localPassedTests}/{pr.totalTests} local tests passed</span>
+                        <span className="badge badge-danger">{pr.mainFailedTests}/{pr.totalTests} main tests failing</span>
+                        {pr.developer && (
+                          <span className="text-sm text-gray-500">Developer: {pr.developer}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        QA Tests Merged: {pr.qaTestsMergedAt ? new Date(pr.qaTestsMergedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : 'Recently'} • Branch: {pr.branch_comparison?.feature_branch?.name || pr.name}
+                      </div>
+                    </div>
+                    <div className="ml-4 space-x-2">
+                      <button 
+                        onClick={() => setSelectedPR(pr)}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        View Details
+                      </button>
+                      <button 
+                        onClick={() => handleMergeDevPR(pr)}
+                        className="btn btn-success btn-sm"
+                      >
+                        🚀 Merge Dev PR
                       </button>
                     </div>
                   </div>
@@ -331,6 +479,56 @@ function Dashboard() {
                       <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-primary btn-sm"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fully Merged PRs */}
+        {fullyMergedPRs.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-blue-700">🎉 Fully Merged PRs</h2>
+              <span className="badge badge-primary">{fullyMergedPRs.length} PRs</span>
+            </div>
+            
+            <div className="space-y-4">
+              {fullyMergedPRs.map((pr) => (
+                <div key={pr.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900">{pr.name}</h3>
+                        <span className="badge badge-primary">fully-merged</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{pr.description}</p>
+                      <div className="flex items-center mt-2 space-x-2">
+                        <span className="badge badge-success">{pr.localPassedTests}/{pr.totalTests} local tests passed</span>
+                        <span className="badge badge-success">{pr.mainPassedTests}/{pr.totalTests} main tests passed</span>
+                        {pr.developer && (
+                          <span className="text-sm text-gray-500">Developer: {pr.developer}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Dev PR Merged: {pr.devPRMergedAt ? new Date(pr.devPRMergedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : 'Recently'} • Branch: {pr.branch_comparison?.feature_branch?.name || pr.name}
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <button 
+                        onClick={() => setSelectedPR(pr)}
+                        className="btn btn-secondary btn-sm"
                       >
                         View Details
                       </button>
@@ -636,7 +834,7 @@ function Dashboard() {
                                       testCase.mainResult === 'Pass' ? 'badge-success' :
                                       testCase.mainResult === 'Fail' ? 'badge-danger' : 'badge-warning'
                                     }`}>
-                                      {testCase.mainResult === 'Pending' ? 'Expected Fail' : testCase.mainResult || 'Expected Fail'}
+                                      {testCase.mainResult || 'Pending'}
                                     </span>
                                   </div>
                                 </div>
@@ -1143,9 +1341,9 @@ function Dashboard() {
                       value={formData.mainResult}
                       onChange={(e) => setFormData(prev => ({ ...prev, mainResult: e.target.value }))}
                     >
-                      <option value="Pending">Expected to Fail</option>
-                      <option value="Pass">Pass (Issue)</option>
-                      <option value="Fail">Fail (Expected)</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Pass">Pass</option>
+                      <option value="Fail">Fail</option>
                     </select>
                   </div>
                 </div>

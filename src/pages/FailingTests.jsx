@@ -277,7 +277,7 @@ function FailingTests() {
                     selectedTest.mainResult === 'Pass' ? 'badge-success' :
                     selectedTest.mainResult === 'Fail' ? 'badge-danger' : 'badge-warning'
                   }`}>
-                    {selectedTest.mainResult || 'Expected Fail'}
+                    {selectedTest.mainResult || 'Pending'}
                   </span>
                 </div>
               </div>
