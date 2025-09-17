@@ -138,12 +138,23 @@ function qaReducer(state, action) {
       return { ...state, projects: action.payload }
     
     case QA_ACTIONS.ADD_PROJECT:
-      return { 
+      const newStateAdd = { 
         ...state, 
         projects: [...state.projects, action.payload],
         project: action.payload,
         currentProjectId: action.payload.id
       }
+      // Save to storage after state update
+      setTimeout(() => {
+        try {
+          localStorage.setItem('qaProjects', JSON.stringify(newStateAdd.projects))
+          localStorage.setItem('qaCurrentProjectId', newStateAdd.currentProjectId)
+          localStorage.setItem('qaProjectConfig', JSON.stringify(newStateAdd.project))
+        } catch (error) {
+          console.error('Failed to save projects to storage:', error)
+        }
+      }, 0)
+      return newStateAdd
     
     case QA_ACTIONS.UPDATE_PROJECT_IN_LIST:
       return {
@@ -167,11 +178,21 @@ function qaReducer(state, action) {
     
     case QA_ACTIONS.SWITCH_PROJECT:
       const selectedProject = state.projects.find(p => p.id === action.payload)
-      return {
+      const newStateSwitch = {
         ...state,
         project: selectedProject || state.project,
         currentProjectId: action.payload
       }
+      // Save to storage after state update
+      setTimeout(() => {
+        try {
+          localStorage.setItem('qaCurrentProjectId', newStateSwitch.currentProjectId)
+          localStorage.setItem('qaProjectConfig', JSON.stringify(newStateSwitch.project))
+        } catch (error) {
+          console.error('Failed to save projects to storage:', error)
+        }
+      }, 0)
+      return newStateSwitch
     
     case QA_ACTIONS.SET_CURRENT_PROJECT_ID:
       return { ...state, currentProjectId: action.payload }
@@ -476,7 +497,6 @@ export function QAProvider({ children }) {
       }
       
       actions.addProject(project)
-      actions.saveProjectsToStorage()
       actions.showNotification(`Project "${project.name}" created successfully`, 'success')
       return project
     },
@@ -488,7 +508,6 @@ export function QAProvider({ children }) {
       }
       
       actions.updateProjectInList(updatedProject)
-      actions.saveProjectsToStorage()
       actions.showNotification(`Project updated successfully`, 'success')
       return updatedProject
     },
@@ -497,7 +516,6 @@ export function QAProvider({ children }) {
       const project = state.projects.find(p => p.id === projectId)
       if (project) {
         actions.deleteProject(projectId)
-        actions.saveProjectsToStorage()
         actions.showNotification(`Project "${project.name}" deleted successfully`, 'success')
       }
     },
@@ -506,7 +524,6 @@ export function QAProvider({ children }) {
       const project = state.projects.find(p => p.id === projectId)
       if (project) {
         actions.switchProject(projectId)
-        localStorage.setItem('qaCurrentProjectId', projectId)
         actions.showNotification(`Switched to project "${project.name}"`, 'success')
         
         // Reload data for the new project
@@ -514,42 +531,50 @@ export function QAProvider({ children }) {
       }
     },
 
-    saveProjectsToStorage() {
+    saveProjectsToStorage(projectsData, currentProjectId, currentProject) {
       try {
-        localStorage.setItem('qaProjects', JSON.stringify(state.projects))
-        if (state.currentProjectId) {
-          localStorage.setItem('qaCurrentProjectId', state.currentProjectId)
+        const projects = projectsData || state.projects
+        const currentId = currentProjectId || state.currentProjectId
+        const project = currentProject || state.project
+        
+        localStorage.setItem('qaProjects', JSON.stringify(projects))
+        if (currentId) {
+          localStorage.setItem('qaCurrentProjectId', currentId)
         }
-        if (state.project?.id) {
-          localStorage.setItem('qaProjectConfig', JSON.stringify(state.project))
+        if (project?.id) {
+          localStorage.setItem('qaProjectConfig', JSON.stringify(project))
         }
       } catch (error) {
         console.error('Failed to save projects to storage:', error)
       }
-    },
-
-    loadProjectsFromStorage() {
-      try {
-        const savedProjects = localStorage.getItem('qaProjects')
-        const savedCurrentProjectId = localStorage.getItem('qaCurrentProjectId')
-        
-        if (savedProjects) {
-          const projects = JSON.parse(savedProjects)
-          actions.setProjects(projects)
-          
-          // Set current project if we have a saved ID and it exists
-          if (savedCurrentProjectId && projects.find(p => p.id === savedCurrentProjectId)) {
-            actions.switchProject(savedCurrentProjectId)
-          } else if (projects.length > 0) {
-            // Default to first project if no saved current project
-            actions.switchProject(projects[0].id)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load projects from storage:', error)
-      }
     }
   }
+
+  // Helper function to load projects from storage
+  const loadProjectsFromStorage = () => {
+    try {
+      const savedProjects = localStorage.getItem('qaProjects')
+      const savedCurrentProjectId = localStorage.getItem('qaCurrentProjectId')
+      
+      if (savedProjects) {
+        const projects = JSON.parse(savedProjects)
+        actions.setProjects(projects)
+        
+        // Set current project if we have a saved ID and it exists
+        if (savedCurrentProjectId && projects.find(p => p.id === savedCurrentProjectId)) {
+          actions.switchProject(savedCurrentProjectId)
+        } else if (projects.length > 0) {
+          // Default to first project if no saved current project
+          actions.switchProject(projects[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load projects from storage:', error)
+    }
+  }
+
+  // Add loadProjectsFromStorage to actions
+  actions.loadProjectsFromStorage = loadProjectsFromStorage
 
   // Initialize data on mount
   useEffect(() => {
