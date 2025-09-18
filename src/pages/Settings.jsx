@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
+import webhookNotifier, { WEBHOOK_EVENTS } from '../utils/webhookNotifier'
 
 function Settings() {
   const { state, actions } = useQA()
@@ -32,13 +33,31 @@ function Settings() {
   const [hasChanges, setHasChanges] = useState(false)
   const [showProjectEdit, setShowProjectEdit] = useState(false)
   const [showNewProjectForm, setShowNewProjectForm] = useState(false)
+  const [webhooks, setWebhooks] = useState([])
+  const [showWebhookForm, setShowWebhookForm] = useState(false)
+  const [editingWebhook, setEditingWebhook] = useState(null)
+  const [webhookFormData, setWebhookFormData] = useState({
+    name: '',
+    url: '',
+    events: [],
+    enabled: true,
+    headers: {}
+  })
 
   useEffect(() => {
     // Load settings from context when component mounts
     if (state.settings && Object.keys(state.settings).length > 0) {
       setSettings(state.settings)
     }
+    
+    // Load webhooks
+    loadWebhooks()
   }, [state.settings])
+
+  const loadWebhooks = () => {
+    webhookNotifier.loadWebhooks()
+    setWebhooks(webhookNotifier.webhooks)
+  }
 
   const handleSettingChange = (section, key, value) => {
     setSettings(prev => ({
@@ -60,6 +79,133 @@ function Settings() {
       console.error('Error saving settings:', error)
       actions.showNotification('Failed to save settings', 'error')
     }
+  }
+
+  const testSlackNotification = async () => {
+    try {
+      const testMessage = {
+        text: `🧪 Test Notification from QA Portal`,
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "🧪 Test Notification - QA Portal"
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `✅ Slack integration is working correctly!\n\nYour QA team will now receive notifications when QA tests are merged and ready for dev merge.`
+            }
+          },
+          {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: `Sent from QA Tracking Portal • ${new Date().toLocaleString()}`
+              }
+            ]
+          }
+        ]
+      }
+
+      await fetch(settings.integration.slackWebhook, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testMessage)
+      })
+
+      actions.showNotification('Test notification sent to Slack!', 'success')
+    } catch (error) {
+      console.error('Failed to send test notification:', error)
+      actions.showNotification('Failed to send test notification', 'error')
+    }
+  }
+
+  // Webhook management functions
+  const handleAddWebhook = () => {
+    setEditingWebhook(null)
+    setWebhookFormData({
+      name: '',
+      url: '',
+      events: [],
+      enabled: true,
+      headers: {}
+    })
+    setShowWebhookForm(true)
+  }
+
+  const handleEditWebhook = (webhook) => {
+    setEditingWebhook(webhook)
+    setWebhookFormData({
+      name: webhook.name,
+      url: webhook.url,
+      events: webhook.events,
+      enabled: webhook.enabled,
+      headers: webhook.headers || {}
+    })
+    setShowWebhookForm(true)
+  }
+
+  const handleSaveWebhook = () => {
+    if (!webhookFormData.name || !webhookFormData.url || webhookFormData.events.length === 0) {
+      actions.showNotification('Please fill in all required fields', 'error')
+      return
+    }
+
+    if (editingWebhook) {
+      // Update existing webhook
+      const index = webhooks.findIndex(w => w.id === editingWebhook.id)
+      if (index !== -1) {
+        const updatedWebhooks = [...webhooks]
+        updatedWebhooks[index] = { ...editingWebhook, ...webhookFormData }
+        webhookNotifier.webhooks = updatedWebhooks
+        webhookNotifier.saveWebhooks()
+        loadWebhooks()
+      }
+    } else {
+      // Add new webhook
+      webhookNotifier.addWebhook(webhookFormData)
+      loadWebhooks()
+    }
+
+    setShowWebhookForm(false)
+    actions.showNotification('Webhook saved successfully', 'success')
+  }
+
+  const handleDeleteWebhook = (id) => {
+    if (confirm('Are you sure you want to delete this webhook?')) {
+      webhookNotifier.removeWebhook(id)
+      loadWebhooks()
+      actions.showNotification('Webhook deleted', 'success')
+    }
+  }
+
+  const handleTestWebhook = async (webhook) => {
+    try {
+      const result = await webhookNotifier.testWebhook(webhook)
+      if (result.success) {
+        actions.showNotification('Test webhook sent successfully!', 'success')
+      } else {
+        actions.showNotification(`Test failed: ${result.error}`, 'error')
+      }
+    } catch (error) {
+      actions.showNotification(`Test failed: ${error.message}`, 'error')
+    }
+  }
+
+  const handleWebhookEventToggle = (event) => {
+    setWebhookFormData(prev => ({
+      ...prev,
+      events: prev.events.includes(event)
+        ? prev.events.filter(e => e !== event)
+        : [...prev.events, event]
+    }))
   }
 
   const handleReset = () => {
@@ -597,9 +743,19 @@ function Settings() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Slack Webhook URL
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Slack Integration
+              </label>
+              {settings.integration.slackWebhook && (
+                <button 
+                  onClick={() => testSlackNotification()}
+                  className="btn btn-sm btn-outline"
+                >
+                  🧪 Test Notification
+                </button>
+              )}
+            </div>
             <input
               type="url"
               className="input"
@@ -607,7 +763,9 @@ function Settings() {
               value={settings.integration.slackWebhook}
               onChange={(e) => handleSettingChange('integration', 'slackWebhook', e.target.value)}
             />
-            <p className="text-xs text-gray-500 mt-1">Send notifications to Slack channel</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Automatically notify dev team when QA tests are merged and ready for dev merge
+            </p>
           </div>
 
           <div>
@@ -624,6 +782,81 @@ function Settings() {
             <p className="text-xs text-gray-500 mt-1">Link test cases to JIRA issues</p>
           </div>
         </div>
+      </div>
+
+      {/* Webhook Settings */}
+      <div className="card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Webhook Notifications</h2>
+            <p className="text-sm text-gray-500">Send real-time events from QA Portal to external systems</p>
+          </div>
+          <button 
+            onClick={handleAddWebhook}
+            className="btn btn-primary btn-sm"
+          >
+            <span className="mr-1">➕</span>
+            Add Webhook
+          </button>
+        </div>
+        
+        {webhooks.length === 0 ? (
+          <div className="text-center py-8">
+            <span className="text-4xl">🔗</span>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No webhooks configured</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Add webhook endpoints to receive real-time notifications from your QA portal
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {webhooks.map((webhook) => (
+              <div key={webhook.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-medium text-gray-900">{webhook.name}</h3>
+                      <span className={`badge ${webhook.enabled ? 'badge-success' : 'badge-secondary'}`}>
+                        {webhook.enabled ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{webhook.url}</p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {webhook.events.map((event) => (
+                        <span key={event} className="badge badge-outline text-xs">
+                          {event}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 ml-4">
+                    <button 
+                      onClick={() => handleTestWebhook(webhook)}
+                      className="btn btn-outline btn-sm"
+                      title="Test webhook"
+                    >
+                      🧪
+                    </button>
+                    <button 
+                      onClick={() => handleEditWebhook(webhook)}
+                      className="btn btn-outline btn-sm"
+                      title="Edit webhook"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteWebhook(webhook.id)}
+                      className="btn btn-outline btn-sm text-red-600 hover:bg-red-50"
+                      title="Delete webhook"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Appearance Settings */}
@@ -891,6 +1124,121 @@ function Settings() {
             >
               {state.loading ? 'Saving...' : 'Save Changes'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Webhook Form Modal */}
+      {showWebhookForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                {editingWebhook ? 'Edit Webhook' : 'Add New Webhook'}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Configure webhook to receive real-time notifications from QA Portal
+              </p>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              handleSaveWebhook()
+            }} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Webhook Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="input"
+                    value={webhookFormData.name}
+                    onChange={(e) => setWebhookFormData(prev => ({...prev, name: e.target.value}))}
+                    placeholder="Development Server"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    className="select"
+                    value={webhookFormData.enabled ? 'enabled' : 'disabled'}
+                    onChange={(e) => setWebhookFormData(prev => ({...prev, enabled: e.target.value === 'enabled'}))}
+                  >
+                    <option value="enabled">Enabled</option>
+                    <option value="disabled">Disabled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Webhook URL *
+                </label>
+                <input
+                  type="url"
+                  required
+                  className="input"
+                  value={webhookFormData.url}
+                  onChange={(e) => setWebhookFormData(prev => ({...prev, url: e.target.value}))}
+                  placeholder="https://your-server.com/webhooks/qa-portal"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Endpoint that will receive POST requests with event data
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Events to Subscribe * (Select at least one)
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {Object.entries(WEBHOOK_EVENTS).map(([key, event]) => (
+                    <label key={event} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={webhookFormData.events.includes(event)}
+                        onChange={() => handleWebhookEventToggle(event)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">{event}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">📋 Event Descriptions</h4>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p><strong>pr.created:</strong> New PR added to portal</p>
+                  <p><strong>qa.tests_merged:</strong> QA tests merged (TDD fail-first)</p>
+                  <p><strong>dev.pr_merged:</strong> Dev code merged (TDD complete)</p>
+                  <p><strong>pr.status_changed:</strong> PR status transitions</p>
+                  <p><strong>test_case.*:</strong> Test case lifecycle events</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowWebhookForm(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!webhookFormData.name || !webhookFormData.url || webhookFormData.events.length === 0}
+                >
+                  {editingWebhook ? 'Update Webhook' : 'Create Webhook'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

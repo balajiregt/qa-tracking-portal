@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
+import { notifyQATestsMerged, notifyDevPRMerged, notifyPRStatusChanged } from '../utils/webhookNotifier'
 
 function Dashboard() {
   const { state, actions } = useQA()
@@ -11,6 +12,15 @@ function Dashboard() {
   const [showBlockedReasonEdit, setShowBlockedReasonEdit] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingTestCase, setEditingTestCase] = useState(null)
+  const [editingPR, setEditingPR] = useState(null)
+  const [showPREditModal, setShowPREditModal] = useState(false)
+  const [prFormData, setPRFormData] = useState({
+    name: '',
+    description: '',
+    priority: 'medium',
+    labels: '',
+    developer: ''
+  })
   const [formData, setFormData] = useState({
     name: '',
     intent: '',
@@ -22,6 +32,131 @@ function Dashboard() {
     localResult: 'Pending',
     mainResult: 'Pending'
   })
+
+  // Send Slack notification to dev
+  const sendSlackNotification = async (pr) => {
+    try {
+      // Get Slack webhook URL from settings
+      const settings = JSON.parse(localStorage.getItem('settings') || '{}')
+      const slackWebhook = settings.integration?.slackWebhook
+      
+      if (!slackWebhook) {
+        console.log('No Slack webhook configured - skipping notification')
+        return
+      }
+
+      const message = {
+        text: `🧪 QA Tests Ready for Dev Merge`,
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "🧪 QA Tests Merged - Ready for Dev Merge"
+            }
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*PR:* ${pr.name}`
+              },
+              {
+                type: "mrkdwn", 
+                text: `*Developer:* ${pr.developer || 'Unassigned'}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Priority:* ${pr.priority || 'Medium'}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Branch:* ${pr.branch_comparison?.feature_branch?.name || pr.name}`
+              }
+            ]
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `📋 *Description:* ${pr.description || 'No description provided'}`
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `✅ QA tests have been merged to main and are failing as expected (TDD/Fail-First approach).\n\n🚀 *Next Step:* Dev can now merge their code to make the tests pass!`
+            }
+          }
+        ]
+      }
+
+      // Send to Slack webhook
+      await fetch(slackWebhook, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message)
+      })
+
+      actions.showNotification('Slack notification sent to dev team!', 'success')
+    } catch (error) {
+      console.error('Failed to send Slack notification:', error)
+      actions.showNotification('Failed to send Slack notification', 'error')
+    }
+  }
+
+  // Handle PR editing
+  const handleEditPR = (pr) => {
+    setEditingPR(pr)
+    setPRFormData({
+      name: pr.name || '',
+      description: pr.description || '',
+      priority: pr.priority || 'medium',
+      labels: Array.isArray(pr.labels) ? pr.labels.join(', ') : (pr.labels || ''),
+      developer: pr.developer || ''
+    })
+    setShowPREditModal(true)
+  }
+
+  const handleSavePREdit = async () => {
+    if (!editingPR) return
+    
+    try {
+      const updatedPR = {
+        ...editingPR,
+        name: prFormData.name,
+        description: prFormData.description,
+        priority: prFormData.priority,
+        labels: prFormData.labels.split(',').map(label => label.trim()).filter(Boolean),
+        developer: prFormData.developer,
+        updated_at: new Date().toISOString()
+      }
+      
+      await actions.updatePRAsync(updatedPR)
+      setShowPREditModal(false)
+      setEditingPR(null)
+      actions.showNotification('PR updated successfully', 'success')
+    } catch (error) {
+      console.error('Error updating PR:', error)
+      actions.showNotification('Failed to update PR', 'error')
+    }
+  }
+
+  const handleCancelPREdit = () => {
+    setShowPREditModal(false)
+    setEditingPR(null)
+    setPRFormData({
+      name: '',
+      description: '',
+      priority: 'medium',
+      labels: '',
+      developer: ''
+    })
+  }
 
   // Merge QA tests first (TDD/Fail-First approach)
   const handleMergeQATests = async (pr) => {
@@ -42,6 +177,13 @@ function Dashboard() {
 
       // Update the PR in backend and global state
       await actions.updatePRAsync(updatedPR)
+      
+      // Send webhook notifications
+      await notifyQATestsMerged(updatedPR)
+      await notifyPRStatusChanged(updatedPR, pr.status, 'qa-tests-merged')
+      
+      // Send Slack notification to dev team
+      await sendSlackNotification(updatedPR)
       
       actions.showNotification(`QA tests merged to main - Tests failing as expected!`, 'success')
     } catch (error) {
@@ -69,6 +211,10 @@ function Dashboard() {
 
       // Update the PR in backend and global state
       await actions.updatePRAsync(updatedPR)
+      
+      // Send webhook notifications
+      await notifyDevPRMerged(updatedPR)
+      await notifyPRStatusChanged(updatedPR, pr.status, 'fully-merged')
       
       actions.showNotification(`Dev PR merged - All tests now passing!`, 'success')
     } catch (error) {
@@ -371,6 +517,12 @@ function Dashboard() {
                     </div>
                     <div className="ml-4 space-x-2">
                       <button 
+                        onClick={() => handleEditPR(pr)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-secondary btn-sm"
                       >
@@ -427,6 +579,12 @@ function Dashboard() {
                     </div>
                     <div className="ml-4 space-x-2">
                       <button 
+                        onClick={() => handleEditPR(pr)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-secondary btn-sm"
                       >
@@ -480,7 +638,13 @@ function Dashboard() {
                         Branch: {pr.branch_comparison?.feature_branch?.name || pr.name} → {pr.branch_comparison?.main_branch?.name || 'main'}
                       </div>
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-4 space-x-2">
+                      <button 
+                        onClick={() => handleEditPR(pr)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        ✏️ Edit
+                      </button>
                       <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-primary btn-sm"
@@ -589,7 +753,13 @@ function Dashboard() {
                         }) : 'Recently'} • Branch: {pr.branch_comparison?.feature_branch?.name || pr.name}
                       </div>
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-4 space-x-2">
+                      <button 
+                        onClick={() => handleEditPR(pr)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        ✏️ Edit
+                      </button>
                       <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-secondary btn-sm"
@@ -1433,6 +1603,101 @@ function Dashboard() {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PR Edit Modal */}
+      {showPREditModal && editingPR && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">✏️ Edit PR</h3>
+              <p className="text-sm text-gray-500 mt-1">Update PR information and details</p>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              handleSavePREdit()
+            }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">PR Title *</label>
+                <input
+                  type="text"
+                  required
+                  className="input"
+                  value={prFormData.name}
+                  onChange={(e) => setPRFormData(prev => ({...prev, name: e.target.value}))}
+                  placeholder="Enter PR title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  className="textarea"
+                  rows={4}
+                  value={prFormData.description}
+                  onChange={(e) => setPRFormData(prev => ({...prev, description: e.target.value}))}
+                  placeholder="Describe the changes in this PR"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <select
+                    className="select"
+                    value={prFormData.priority}
+                    onChange={(e) => setPRFormData(prev => ({...prev, priority: e.target.value}))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Developer</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={prFormData.developer}
+                    onChange={(e) => setPRFormData(prev => ({...prev, developer: e.target.value}))}
+                    placeholder="GitHub username"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Labels</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={prFormData.labels}
+                  onChange={(e) => setPRFormData(prev => ({...prev, labels: e.target.value}))}
+                  placeholder="bug, feature, enhancement (comma-separated)"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCancelPREdit}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={state.loading || !prFormData.name}
+                >
+                  {state.loading ? 'Updating...' : 'Update PR'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
