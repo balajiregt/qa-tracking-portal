@@ -1,10 +1,57 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:47:49.670Z",
-    "totalCount": 75
+    "lastUpdated": "2025-09-18T14:48:01.647Z",
+    "totalCount": 76
   },
   "activities": [
+    {
+      "id": "act_1758206881647",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T14:48:01.647Z",
+      "details": {
+        "pr_id": "pr_004",
+        "pr_name": "feature/dark-mode-toggle",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by",
+          "qaTestsMergedAt",
+          "labels",
+          "devPRMergedAt"
+        ],
+        "developer": "waheedahiya@gmail.com",
+        "priority": "low"
+      },
+      "message": "Mike Rodriguez updated PR: feature/dark-mode-toggle",
+      "icon": "📋"
+    },
     {
       "id": "act_1758206869670",
       "type": "pr_updated",
