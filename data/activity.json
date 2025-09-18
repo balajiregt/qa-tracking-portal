@@ -1,10 +1,56 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:27:11.436Z",
-    "totalCount": 61
+    "lastUpdated": "2025-09-18T14:27:34.889Z",
+    "totalCount": 62
   },
   "activities": [
+    {
+      "id": "act_1758205654888",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T14:27:34.889Z",
+      "details": {
+        "pr_id": "pr_1757953612522",
+        "pr_name": "pr10_track_time",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "merge_readiness",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by"
+        ],
+        "developer": "user_005",
+        "priority": "medium"
+      },
+      "message": "Mike Rodriguez updated PR: pr10_track_time",
+      "icon": "📋"
+    },
     {
       "id": "act_1758205631436",
       "type": "pr_updated",
