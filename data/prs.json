@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T13:34:15.674Z",
+    "lastUpdated": "2025-09-18T13:34:44.166Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -630,14 +630,14 @@
     {
       "id": "pr_003",
       "name": "hotfix/payment-gateway-timeout",
-      "developer": "waheedahiya@gmail.com",
+      "developer": "waheedahiya",
       "description": "Critical fix for payment gateway timeout issues",
       "priority": "urgent",
       "environment": "staging",
       "status": "ready",
       "progress": 20,
       "created_at": "2025-09-04T04:00:00Z",
-      "updated_at": "2025-09-18T13:34:15.674Z",
+      "updated_at": "2025-09-18T13:34:44.166Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "hotfix/payment",
