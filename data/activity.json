@@ -1,10 +1,56 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T13:34:16.310Z",
-    "totalCount": 48
+    "lastUpdated": "2025-09-18T13:34:44.698Z",
+    "totalCount": 49
   },
   "activities": [
+    {
+      "id": "act_1758202484697",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T13:34:44.697Z",
+      "details": {
+        "pr_id": "pr_003",
+        "pr_name": "hotfix/payment-gateway-timeout",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "blocked_reason",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by",
+          "labels"
+        ],
+        "developer": "waheedahiya",
+        "priority": "urgent"
+      },
+      "message": "Mike Rodriguez updated PR: hotfix/payment-gateway-timeout",
+      "icon": "📋"
+    },
     {
       "id": "act_1758202456310",
       "type": "pr_updated",
