@@ -112,13 +112,22 @@ function Settings() {
         ]
       }
 
-      await fetch(settings.integration.slackWebhook, {
+      // Send via Netlify function to avoid CORS issues
+      const response = await fetch('/.netlify/functions/send-slack-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(testMessage)
+        body: JSON.stringify({
+          webhookUrl: settings.integration.slackWebhook,
+          message: testMessage
+        })
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send notification')
+      }
 
       actions.showNotification('Test notification sent to Slack!', 'success')
     } catch (error) {
