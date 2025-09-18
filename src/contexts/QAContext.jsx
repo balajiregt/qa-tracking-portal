@@ -283,7 +283,11 @@ export function QAProvider({ children }) {
     setUsers: (users) => dispatch({ type: QA_ACTIONS.SET_USERS, payload: users }),
     setIssues: (issues) => dispatch({ type: QA_ACTIONS.SET_ISSUES, payload: issues }),
     setActivities: (activities) => dispatch({ type: QA_ACTIONS.SET_ACTIVITIES, payload: activities }),
-    setSettings: (settings) => dispatch({ type: QA_ACTIONS.SET_SETTINGS, payload: settings }),
+    setSettings: (settings) => {
+      // Save to localStorage for persistence
+      localStorage.setItem('settings', JSON.stringify(settings))
+      dispatch({ type: QA_ACTIONS.SET_SETTINGS, payload: settings })
+    },
     setCurrentUser: (user) => dispatch({ type: QA_ACTIONS.SET_CURRENT_USER, payload: user }),
     
     // Project actions
