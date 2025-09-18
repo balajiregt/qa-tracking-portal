@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:29:24.878Z",
+    "lastUpdated": "2025-09-18T14:43:45.335Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -1313,10 +1313,10 @@
       "description": "",
       "priority": "medium",
       "environment": "staging",
-      "status": "new",
+      "status": "testing",
       "progress": 0,
       "created_at": "2025-09-17T13:49:02.644Z",
-      "updated_at": "2025-09-17T13:49:21.063Z",
+      "updated_at": "2025-09-18T14:43:45.335Z",
       "created_by": "user_005",
       "branch_comparison": {
         "feature_branch": {
@@ -1391,7 +1391,12 @@
           "updated_at": "2025-01-10T10:00:00Z",
           "created_by": "system",
           "is_custom": false,
-          "source": "built-in"
+          "source": "built-in",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Pass",
+          "mainResult": "Pending"
         },
         {
           "id": "tc_002",
@@ -1441,16 +1446,16 @@
           "source": "manual"
         }
       ],
-      "totalTests": 0,
+      "totalTests": 2,
       "passedTests": 0,
       "failedTests": 0,
-      "pendingTests": 0,
+      "pendingTests": 2,
       "localPassedTests": 0,
       "localFailedTests": 0,
-      "localPendingTests": 0,
+      "localPendingTests": 2,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
-      "mainPendingTests": 0,
+      "mainPendingTests": 2,
       "testProgress": 0,
       "localProgress": 0,
       "readyToMerge": false,
