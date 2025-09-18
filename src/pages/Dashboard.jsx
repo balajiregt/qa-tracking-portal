@@ -36,14 +36,24 @@ function Dashboard() {
   // Send Slack notification to dev
   const sendSlackNotification = async (pr) => {
     try {
-      // Get Slack webhook URL from settings
-      const settings = JSON.parse(localStorage.getItem('settings') || '{}')
+      // Get Slack webhook URL from settings (try both storage locations)
+      let settings = JSON.parse(localStorage.getItem('settings') || '{}')
+      if (!settings.integration?.slackWebhook) {
+        // Fallback to old storage location
+        const oldSettings = JSON.parse(localStorage.getItem('githubSettings') || '{}')
+        if (oldSettings.integration?.slackWebhook) {
+          settings = { integration: oldSettings.integration }
+        }
+      }
       const slackWebhook = settings.integration?.slackWebhook
       
       if (!slackWebhook) {
         console.log('No Slack webhook configured - skipping notification')
+        console.log('Settings found:', settings)
         return
       }
+      
+      console.log('Found Slack webhook, sending notification for PR:', pr.name)
 
       const message = {
         text: `🧪 QA Tests Ready for Dev Merge - ${pr.name} (${pr.developer ? `@${pr.developer}` : 'Developer needed'})`,
