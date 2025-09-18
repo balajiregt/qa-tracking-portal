@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T13:31:50.337Z",
+    "lastUpdated": "2025-09-18T13:33:20.665Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -21,14 +21,14 @@
       "developer": "balajiregt",
       "assignees": [],
       "reviewers": [],
-      "status": "testing",
+      "status": "new",
       "github_state": "open",
       "source_branch": "test-branch-sync",
       "target_branch": "main",
       "priority": "medium",
       "environment": "staging",
       "created_at": "2025-09-18T06:13:31Z",
-      "updated_at": "2025-09-18T06:14:11Z",
+      "updated_at": "2025-09-18T13:33:20.665Z",
       "closed_at": null,
       "merged_at": null,
       "github_url": "https://github.com/balajiregt/qa-tracking-portal/pull/1",
@@ -46,7 +46,55 @@
           "tests_failed": 0
         }
       },
-      "associatedTestCases": [],
+      "associatedTestCases": [
+        {
+          "id": "tc_001",
+          "name": "User Login Flow",
+          "description": "Complete user login process validation",
+          "tags": [
+            "@regression",
+            "@smoke",
+            "@auth"
+          ],
+          "intent": "regression",
+          "type": "functional",
+          "priority": "high",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the user is on the login page",
+              "formatted": "Given the user is on the login page"
+            },
+            {
+              "type": "when",
+              "text": "the user enters valid credentials",
+              "formatted": "When the user enters valid credentials"
+            },
+            {
+              "type": "and",
+              "text": "clicks the login button",
+              "formatted": "And clicks the login button"
+            },
+            {
+              "type": "then",
+              "text": "the user should be redirected to dashboard",
+              "formatted": "Then the user should be redirected to dashboard"
+            }
+          ],
+          "steps": [
+            "Given the user is on the login page",
+            "When the user enters valid credentials",
+            "And clicks the login button",
+            "Then the user should be redirected to dashboard"
+          ],
+          "expected_duration": 2500,
+          "created_at": "2025-01-10T10:00:00Z",
+          "updated_at": "2025-01-10T10:00:00Z",
+          "created_by": "system",
+          "is_custom": false,
+          "source": "built-in"
+        }
+      ],
       "assigned_testers": [],
       "test_results": [],
       "qaTestsMergedAt": null,
@@ -64,7 +112,22 @@
       "github_metadata": {
         "labels": [],
         "milestone": null
-      }
+      },
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "pendingTests": 0,
+      "localPassedTests": 0,
+      "localFailedTests": 0,
+      "localPendingTests": 0,
+      "mainPassedTests": 0,
+      "mainFailedTests": 0,
+      "mainPendingTests": 0,
+      "testProgress": 0,
+      "localProgress": 0,
+      "readyToMerge": false,
+      "userId": "user_005",
+      "updated_by": "Mike Rodriguez"
     },
     {
       "id": "pr_001",
