@@ -1,10 +1,26 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:48:01.647Z",
-    "totalCount": 76
+    "lastUpdated": "2025-09-18T19:14:41.502Z",
+    "totalCount": 77
   },
   "activities": [
+    {
+      "id": "act_1758222881502",
+      "type": "pr_created",
+      "action": "pr_added",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T19:14:41.502Z",
+      "details": {
+        "pr_id": "pr_1758222880943",
+        "pr_name": "pr15",
+        "developer": "user_005",
+        "priority": "medium",
+        "environment": "staging"
+      },
+      "message": "Mike Rodriguez created new PR: pr15",
+      "icon": "➕"
+    },
     {
       "id": "act_1758206881647",
       "type": "pr_updated",
