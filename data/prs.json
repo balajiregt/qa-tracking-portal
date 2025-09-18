@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:19:57.359Z",
+    "lastUpdated": "2025-09-18T14:23:02.645Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -1056,7 +1056,7 @@
       "status": "new",
       "progress": 0,
       "created_at": "2025-09-15T13:55:01.333Z",
-      "updated_at": "2025-09-15T13:55:01.333Z",
+      "updated_at": "2025-09-18T14:23:02.645Z",
       "created_by": "user_005",
       "branch_comparison": {
         "feature_branch": {
@@ -1084,7 +1084,65 @@
         "qa_approval_date": null,
         "merge_requested_at": null,
         "can_proceed_to_merge": false
-      }
+      },
+      "associatedTestCases": [
+        {
+          "id": "tc_003",
+          "name": "API Authentication Test",
+          "description": "Verify API endpoints require proper authentication",
+          "tags": [
+            "@api",
+            "@security",
+            "@backend"
+          ],
+          "intent": "api",
+          "type": "api",
+          "priority": "high",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the API endpoint requires authentication",
+              "formatted": "Given the API endpoint requires authentication"
+            },
+            {
+              "type": "when",
+              "text": "a request is made without auth token",
+              "formatted": "When a request is made without auth token"
+            },
+            {
+              "type": "then",
+              "text": "the API should return 401 Unauthorized",
+              "formatted": "Then the API should return 401 Unauthorized"
+            }
+          ],
+          "steps": [
+            "Given the API endpoint requires authentication",
+            "When a request is made without auth token",
+            "Then the API should return 401 Unauthorized"
+          ],
+          "expected_duration": 1500,
+          "created_at": "2025-01-11T09:15:00Z",
+          "updated_at": "2025-01-11T09:15:00Z",
+          "created_by": "system",
+          "is_custom": false,
+          "source": "built-in"
+        }
+      ],
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "pendingTests": 0,
+      "localPassedTests": 0,
+      "localFailedTests": 0,
+      "localPendingTests": 0,
+      "mainPassedTests": 0,
+      "mainFailedTests": 0,
+      "mainPendingTests": 0,
+      "testProgress": 0,
+      "localProgress": 0,
+      "readyToMerge": false,
+      "userId": "user_005",
+      "updated_by": "Mike Rodriguez"
     },
     {
       "id": "pr_1757953612522",
