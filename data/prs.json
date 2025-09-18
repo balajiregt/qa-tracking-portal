@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T19:15:33.753Z",
+    "lastUpdated": "2025-09-18T19:15:45.514Z",
     "totalCount": 10,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -1477,10 +1477,10 @@
       "description": "slack test",
       "priority": "medium",
       "environment": "staging",
-      "status": "new",
+      "status": "testing",
       "progress": 0,
       "created_at": "2025-09-18T19:14:40.943Z",
-      "updated_at": "2025-09-18T19:15:33.753Z",
+      "updated_at": "2025-09-18T19:15:45.514Z",
       "created_by": "user_005",
       "branch_comparison": {
         "feature_branch": {
@@ -1549,19 +1549,24 @@
           "updated_at": "2025-01-11T09:15:00Z",
           "created_by": "system",
           "is_custom": false,
-          "source": "built-in"
+          "source": "built-in",
+          "details": "",
+          "testSteps": "",
+          "expectedResults": "",
+          "localResult": "Pass",
+          "mainResult": "Pending"
         }
       ],
-      "totalTests": 0,
+      "totalTests": 1,
       "passedTests": 0,
       "failedTests": 0,
-      "pendingTests": 0,
+      "pendingTests": 1,
       "localPassedTests": 0,
       "localFailedTests": 0,
-      "localPendingTests": 0,
+      "localPendingTests": 1,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
-      "mainPendingTests": 0,
+      "mainPendingTests": 1,
       "testProgress": 0,
       "localProgress": 0,
       "readyToMerge": false,
