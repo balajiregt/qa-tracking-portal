@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T13:34:44.166Z",
+    "lastUpdated": "2025-09-18T13:34:51.847Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -634,10 +634,10 @@
       "description": "Critical fix for payment gateway timeout issues",
       "priority": "urgent",
       "environment": "staging",
-      "status": "ready",
+      "status": "qa-tests-merged",
       "progress": 20,
       "created_at": "2025-09-04T04:00:00Z",
-      "updated_at": "2025-09-18T13:34:44.166Z",
+      "updated_at": "2025-09-18T13:34:51.847Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "hotfix/payment",
@@ -707,7 +707,7 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Pending"
+          "mainResult": "Fail"
         },
         {
           "id": "tc_002",
@@ -759,7 +759,7 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Pending"
+          "mainResult": "Fail"
         }
       ],
       "totalTests": 2,
@@ -777,7 +777,8 @@
       "readyToMerge": true,
       "userId": "user_005",
       "updated_by": "Mike Rodriguez",
-      "labels": []
+      "labels": [],
+      "qaTestsMergedAt": "2025-09-18T13:34:50.939Z"
     },
     {
       "id": "pr_004",
