@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T13:33:48.916Z",
+    "lastUpdated": "2025-09-18T13:34:15.674Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -630,14 +630,14 @@
     {
       "id": "pr_003",
       "name": "hotfix/payment-gateway-timeout",
-      "developer": "alex_dev",
+      "developer": "waheedahiya@gmail.com",
       "description": "Critical fix for payment gateway timeout issues",
       "priority": "urgent",
       "environment": "staging",
-      "status": "testing",
+      "status": "ready",
       "progress": 20,
       "created_at": "2025-09-04T04:00:00Z",
-      "updated_at": "2025-09-18T13:33:48.916Z",
+      "updated_at": "2025-09-18T13:34:15.674Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "hotfix/payment",
@@ -763,20 +763,21 @@
         }
       ],
       "totalTests": 2,
-      "passedTests": 1,
+      "passedTests": 2,
       "failedTests": 0,
-      "pendingTests": 1,
-      "localPassedTests": 1,
+      "pendingTests": 0,
+      "localPassedTests": 2,
       "localFailedTests": 0,
-      "localPendingTests": 1,
+      "localPendingTests": 0,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
       "mainPendingTests": 2,
-      "testProgress": 50,
-      "localProgress": 50,
-      "readyToMerge": false,
+      "testProgress": 100,
+      "localProgress": 100,
+      "readyToMerge": true,
       "userId": "user_005",
-      "updated_by": "Mike Rodriguez"
+      "updated_by": "Mike Rodriguez",
+      "labels": []
     },
     {
       "id": "pr_004",
