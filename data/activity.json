@@ -1,10 +1,56 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:29:25.433Z",
-    "totalCount": 64
+    "lastUpdated": "2025-09-18T14:43:45.988Z",
+    "totalCount": 65
   },
   "activities": [
+    {
+      "id": "act_1758206625988",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T14:43:45.988Z",
+      "details": {
+        "pr_id": "pr_1758116942644",
+        "pr_name": "pr 111",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "merge_readiness",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge",
+          "updated_by"
+        ],
+        "developer": "user_005",
+        "priority": "medium"
+      },
+      "message": "Mike Rodriguez updated PR: pr 111",
+      "icon": "📋"
+    },
     {
       "id": "act_1758205765433",
       "type": "pr_updated",
