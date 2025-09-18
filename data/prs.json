@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T14:47:40.656Z",
+    "lastUpdated": "2025-09-18T14:47:48.991Z",
     "totalCount": 9,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -793,10 +793,10 @@
       "description": "Added dark mode theme toggle functionality",
       "priority": "low",
       "environment": "dev",
-      "status": "qa-tests-merged",
+      "status": "fully-merged",
       "progress": 100,
       "created_at": "2025-09-11T09:30:00Z",
-      "updated_at": "2025-09-18T13:31:50.337Z",
+      "updated_at": "2025-09-18T14:47:48.991Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/dark-mode",
@@ -863,7 +863,7 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Fail"
+          "mainResult": "Pass"
         },
         {
           "id": "tc_002",
@@ -915,7 +915,7 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Fail"
+          "mainResult": "Pass"
         }
       ],
       "totalTests": 2,
@@ -934,7 +934,8 @@
       "userId": "user_005",
       "updated_by": "Mike Rodriguez",
       "qaTestsMergedAt": "2025-09-18T05:38:59.850Z",
-      "labels": []
+      "labels": [],
+      "devPRMergedAt": "2025-09-18T14:47:48.429Z"
     },
     {
       "id": "pr_1757862904444",
