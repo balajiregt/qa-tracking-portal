@@ -46,7 +46,7 @@ function Dashboard() {
       }
 
       const message = {
-        text: `🧪 QA Tests Ready for Dev Merge`,
+        text: `🧪 QA Tests Ready for Dev Merge - ${pr.name} (${pr.developer ? `@${pr.developer}` : 'Developer needed'})`,
         blocks: [
           {
             type: "header",
@@ -57,22 +57,29 @@ function Dashboard() {
           },
           {
             type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*PR:* ${pr.name}\n*Developer:* ${pr.developer ? `<@${pr.developer}>` : 'Unassigned - needs developer assignment'}`
+            }
+          },
+          {
+            type: "section",
             fields: [
               {
                 type: "mrkdwn",
-                text: `*PR:* ${pr.name}`
-              },
-              {
-                type: "mrkdwn", 
-                text: `*Developer:* ${pr.developer || 'Unassigned'}`
+                text: `*Priority:* ${pr.priority ? pr.priority.charAt(0).toUpperCase() + pr.priority.slice(1) : 'Medium'}`
               },
               {
                 type: "mrkdwn",
-                text: `*Priority:* ${pr.priority || 'Medium'}`
+                text: `*Branch:* \`${pr.branch_comparison?.feature_branch?.name || pr.branch || pr.name}\``
               },
               {
                 type: "mrkdwn",
-                text: `*Branch:* ${pr.branch_comparison?.feature_branch?.name || pr.name}`
+                text: `*Status:* qa-tests-merged`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Test Cases:* ${pr.associatedTestCases?.length || 0} tests`
               }
             ]
           },
@@ -80,16 +87,40 @@ function Dashboard() {
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `📋 *Description:* ${pr.description || 'No description provided'}`
+              text: `📋 *Description:*\n${pr.description || 'No description provided'}`
+            }
+          },
+          {
+            type: "divider"
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `✅ *TDD Status:* QA tests have been merged to main and are *failing as expected* (Fail-First approach)\n\n🚀 *Next Action Required:* ${pr.developer ? `<@${pr.developer}>` : 'Developer'} can now merge their development code to make the tests pass!`
             }
           },
           {
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `✅ QA tests have been merged to main and are failing as expected (TDD/Fail-First approach).\n\n🚀 *Next Step:* Dev can now merge their code to make the tests pass!`
+              text: `⏰ *QA Tests Merged:* ${new Date(pr.qaTestsMergedAt).toLocaleString()}\n📊 *PR ID:* ${pr.id}`
             }
-          }
+          },
+          ...(pr.github_url ? [{
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "View PR on GitHub"
+                },
+                url: pr.github_url,
+                style: "primary"
+              }
+            ]
+          }] : [])
         ]
       }
 
