@@ -1,10 +1,29 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T05:39:02.436Z",
-    "totalCount": 42
+    "lastUpdated": "2025-09-18T12:13:40.729Z",
+    "totalCount": 43
   },
   "activities": [
+    {
+      "id": "act_1758197620729",
+      "type": "github_sync",
+      "action": "prs_synced",
+      "user": "user_005",
+      "timestamp": "2025-09-18T12:13:40.729Z",
+      "details": {
+        "sync_results": {
+          "added": 1,
+          "updated": 0,
+          "skipped": 8,
+          "errors": []
+        },
+        "state": "open",
+        "pr_count": 1
+      },
+      "message": "GitHub PRs synced: 1 added, 0 updated",
+      "icon": "📋"
+    },
     {
       "id": "act_1758173942436",
       "type": "pr_updated",
