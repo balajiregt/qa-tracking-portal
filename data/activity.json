@@ -1,10 +1,55 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T19:15:09.196Z",
-    "totalCount": 78
+    "lastUpdated": "2025-09-18T19:15:34.912Z",
+    "totalCount": 79
   },
   "activities": [
+    {
+      "id": "act_1758222934911",
+      "type": "pr_updated",
+      "action": "pr_modified",
+      "user": "Mike Rodriguez",
+      "timestamp": "2025-09-18T19:15:34.911Z",
+      "details": {
+        "pr_id": "pr_1758222880943",
+        "pr_name": "pr15",
+        "updated_fields": [
+          "name",
+          "developer",
+          "description",
+          "priority",
+          "environment",
+          "status",
+          "progress",
+          "created_at",
+          "updated_at",
+          "created_by",
+          "branch_comparison",
+          "assigned_testers",
+          "test_results",
+          "merge_readiness",
+          "associatedTestCases",
+          "totalTests",
+          "passedTests",
+          "failedTests",
+          "pendingTests",
+          "localPassedTests",
+          "localFailedTests",
+          "localPendingTests",
+          "mainPassedTests",
+          "mainFailedTests",
+          "mainPendingTests",
+          "testProgress",
+          "localProgress",
+          "readyToMerge"
+        ],
+        "developer": "user_005",
+        "priority": "medium"
+      },
+      "message": "Mike Rodriguez updated PR: pr15",
+      "icon": "📋"
+    },
     {
       "id": "act_1758222909196",
       "type": "pr_updated",
