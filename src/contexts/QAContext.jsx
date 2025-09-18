@@ -576,6 +576,36 @@ export function QAProvider({ children }) {
   // Add loadProjectsFromStorage to actions
   actions.loadProjectsFromStorage = loadProjectsFromStorage
 
+  // GitHub PR sync action
+  actions.syncGitHubPRs = async (options = {}) => {
+    try {
+      actions.setLoading(true)
+      actions.showNotification('Syncing GitHub PRs...', 'info')
+      
+      const result = await apiClient.syncGitHubPRs(options)
+      
+      if (result.success) {
+        // Reload all data to reflect synced PRs
+        await actions.loadAllData()
+        
+        const { sync_results } = result.data
+        const message = `GitHub sync complete: ${sync_results.added} added, ${sync_results.updated} updated`
+        actions.showNotification(message, 'success')
+        
+        return result.data
+      } else {
+        throw new Error(result.error || 'GitHub sync failed')
+      }
+    } catch (error) {
+      console.error('GitHub sync error:', error)
+      actions.setError(error.message)
+      actions.showNotification(`GitHub sync failed: ${error.message}`, 'error')
+      throw error
+    } finally {
+      actions.setLoading(false)
+    }
+  }
+
   // Initialize data on mount
   useEffect(() => {
     // Load projects and set current project

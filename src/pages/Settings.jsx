@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
 
 function Settings() {
@@ -573,9 +574,18 @@ function Settings() {
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              GitHub Repository
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                GitHub Integration
+              </label>
+              <Link 
+                to="/github-settings"
+                className="btn btn-sm btn-primary"
+              >
+                <span className="mr-1">🔗</span>
+                Configure GitHub
+              </Link>
+            </div>
             <input
               type="text"
               className="input"
@@ -583,7 +593,7 @@ function Settings() {
               value={settings.integration.githubRepo}
               onChange={(e) => handleSettingChange('integration', 'githubRepo', e.target.value)}
             />
-            <p className="text-xs text-gray-500 mt-1">Link to your GitHub repository for PR integration</p>
+            <p className="text-xs text-gray-500 mt-1">Repository for PR sync and automation</p>
           </div>
 
           <div>

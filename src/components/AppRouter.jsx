@@ -12,6 +12,7 @@ import CreatePR from '../pages/CreatePR'
 import UploadTraces from '../pages/UploadTraces'
 import ProjectSetup from '../pages/ProjectSetup'
 import TrackTickets from '../pages/TrackTickets'
+import GitHubSettings from '../pages/GitHubSettings'
 
 function AppRouter() {
   const { state } = useQA()
@@ -48,6 +49,7 @@ function AppRouter() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/failing-tests" element={<FailingTests />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/github-settings" element={<GitHubSettings />} />
       </Routes>
     </Layout>
   )

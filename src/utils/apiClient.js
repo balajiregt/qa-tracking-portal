@@ -327,6 +327,101 @@ class APIClient {
       throw new Error('Failed to load application data')
     }
   }
+
+  async syncGitHubPRs(options = {}) {
+    const {
+      state = 'open', // 'open', 'closed', 'all'
+      per_page = 50,
+      syncMode = 'merge', // 'merge' or 'replace'
+      userId = 'user_005'
+    } = options;
+
+    if (this.isDevelopment()) {
+      // For development, simulate GitHub sync by generating some mock PRs
+      const prs = this.getLocalData('prs');
+      const mockGitHubPRs = [
+        {
+          id: `gh_pr_${Date.now()}_1`,
+          github_id: Date.now() + 1,
+          github_number: 123,
+          name: 'Add user authentication system',
+          description: 'Implement JWT-based authentication with login/logout functionality',
+          developer: 'john_doe',
+          status: 'ready',
+          priority: 'high',
+          environment: 'staging',
+          source_branch: 'feature/auth-system',
+          target_branch: 'main',
+          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          updated_at: new Date().toISOString(),
+          github_url: 'https://github.com/example/repo/pull/123',
+          associatedTestCases: [],
+          github_metadata: {
+            additions: 245,
+            deletions: 12,
+            changed_files: 8,
+            commits: 5,
+            labels: [{ name: 'priority: high' }, { name: 'feature' }]
+          }
+        },
+        {
+          id: `gh_pr_${Date.now()}_2`,
+          github_id: Date.now() + 2,
+          github_number: 124,
+          name: 'Fix responsive layout issues',
+          description: 'Resolve mobile layout problems in dashboard components',
+          developer: 'jane_smith',
+          status: 'testing',
+          priority: 'medium',
+          environment: 'qa',
+          source_branch: 'bugfix/responsive-layout',
+          target_branch: 'main',
+          created_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
+          updated_at: new Date().toISOString(),
+          github_url: 'https://github.com/example/repo/pull/124',
+          associatedTestCases: [],
+          github_metadata: {
+            additions: 67,
+            deletions: 23,
+            changed_files: 4,
+            commits: 2,
+            labels: [{ name: 'bugfix' }, { name: 'priority: medium' }]
+          }
+        }
+      ];
+
+      // Add mock PRs to existing PRs if they don't already exist
+      const existingGitHubNumbers = new Set(prs.filter(pr => pr.github_number).map(pr => pr.github_number));
+      const newPRs = mockGitHubPRs.filter(pr => !existingGitHubNumbers.has(pr.github_number));
+      
+      if (newPRs.length > 0) {
+        prs.push(...newPRs);
+        this.setLocalData('prs', prs);
+      }
+
+      return {
+        success: true,
+        data: {
+          sync_results: {
+            added: newPRs.length,
+            updated: 0,
+            skipped: mockGitHubPRs.length - newPRs.length,
+            errors: []
+          },
+          total_prs: prs.length,
+          github_prs_fetched: mockGitHubPRs.length
+        }
+      };
+    }
+
+    // For production, call the actual sync endpoint
+    return this.post('/sync-github-prs', {
+      state,
+      per_page,
+      syncMode,
+      userId
+    });
+  }
 }
 
 export const apiClient = new APIClient()

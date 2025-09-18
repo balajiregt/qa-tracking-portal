@@ -201,6 +201,220 @@ class GitHubAPI {
 
     return iconMap[action] || iconMap[type] || '📋';
   }
+
+  /**
+   * Fetch PRs from GitHub repository
+   */
+  async fetchGitHubPRs(state = 'all', per_page = 100) {
+    try {
+      const response = await this.octokit.rest.pulls.list({
+        owner: this.owner,
+        repo: this.repo,
+        state: state, // 'open', 'closed', 'all'
+        per_page: per_page,
+        sort: 'updated',
+        direction: 'desc'
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('GitHub PR Fetch Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get detailed PR information including commits and checks
+   */
+  async fetchPRDetails(prNumber) {
+    try {
+      const [prData, commits, checks] = await Promise.all([
+        this.octokit.rest.pulls.get({
+          owner: this.owner,
+          repo: this.repo,
+          pull_number: prNumber
+        }),
+        this.octokit.rest.pulls.listCommits({
+          owner: this.owner,
+          repo: this.repo,
+          pull_number: prNumber
+        }),
+        this.octokit.rest.checks.listForRef({
+          owner: this.owner,
+          repo: this.repo,
+          ref: `refs/pull/${prNumber}/head`
+        }).catch(() => ({ data: { check_runs: [] } })) // Handle case where checks don't exist
+      ]);
+
+      return {
+        pr: prData.data,
+        commits: commits.data,
+        checks: checks.data.check_runs
+      };
+    } catch (error) {
+      console.error('GitHub PR Details Fetch Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert GitHub PR to portal PR format
+   */
+  convertGitHubPRToPortalFormat(githubPR, existingPortalPR = null) {
+    // Map GitHub PR state to portal status
+    const mapGitHubStateToPortalStatus = (githubPR) => {
+      if (githubPR.merged) return 'fully-merged';
+      if (githubPR.state === 'closed') return 'closed';
+      if (githubPR.draft) return 'new';
+      
+      // Check if PR is mergeable
+      if (githubPR.mergeable === false) return 'blocked';
+      if (githubPR.mergeable_state === 'blocked') return 'blocked';
+      if (githubPR.mergeable_state === 'behind') return 'testing';
+      if (githubPR.mergeable_state === 'clean') return 'ready';
+      
+      return 'testing'; // Default status
+    };
+
+    // Create portal PR object
+    const portalPR = {
+      id: existingPortalPR?.id || `gh_pr_${githubPR.number}`,
+      github_id: githubPR.id,
+      github_number: githubPR.number,
+      name: githubPR.title,
+      description: githubPR.body || '',
+      developer: githubPR.user.login,
+      assignees: githubPR.assignees.map(assignee => assignee.login),
+      reviewers: githubPR.requested_reviewers.map(reviewer => reviewer.login),
+      
+      // Status mapping
+      status: existingPortalPR?.status || mapGitHubStateToPortalStatus(githubPR),
+      github_state: githubPR.state,
+      merged: githubPR.merged,
+      mergeable: githubPR.mergeable,
+      mergeable_state: githubPR.mergeable_state,
+      
+      // Branch information
+      source_branch: githubPR.head.ref,
+      target_branch: githubPR.base.ref,
+      
+      // Priority mapping (try to extract from labels or use default)
+      priority: this.extractPriorityFromLabels(githubPR.labels) || 'medium',
+      
+      // Environment mapping (try to extract from labels or branch name)
+      environment: this.extractEnvironmentFromPR(githubPR) || 'staging',
+      
+      // Timestamps
+      created_at: githubPR.created_at,
+      updated_at: githubPR.updated_at,
+      closed_at: githubPR.closed_at,
+      merged_at: githubPR.merged_at,
+      
+      // GitHub URLs
+      github_url: githubPR.html_url,
+      github_api_url: githubPR.url,
+      
+      // Branch comparison (will be populated by separate call if needed)
+      branch_comparison: existingPortalPR?.branch_comparison || {
+        feature_branch: {
+          name: githubPR.head.ref,
+          tests_passed: 0,
+          tests_failed: 0,
+          tests_skipped: 0
+        },
+        main_branch: {
+          name: githubPR.base.ref,
+          tests_passed: 0,
+          tests_failed: 0
+        }
+      },
+      
+      // Portal-specific fields (preserve from existing or set defaults)
+      associatedTestCases: existingPortalPR?.associatedTestCases || [],
+      assigned_testers: existingPortalPR?.assigned_testers || [],
+      test_results: existingPortalPR?.test_results || [],
+      qaTestsMergedAt: existingPortalPR?.qaTestsMergedAt || null,
+      devPRMergedAt: existingPortalPR?.devPRMergedAt || null,
+      blocked_reason: existingPortalPR?.blocked_reason || null,
+      
+      // Merge readiness
+      merge_readiness: existingPortalPR?.merge_readiness || {
+        ready_for_merge: githubPR.mergeable === true,
+        merge_requirements_met: [],
+        merge_blockers: githubPR.mergeable === false ? ['GitHub merge conflicts'] : [],
+        approved_by: [],
+        qa_approval_date: null,
+        merge_requested_at: null,
+        can_proceed_to_merge: githubPR.mergeable === true
+      },
+      
+      // GitHub-specific metadata
+      github_metadata: {
+        additions: githubPR.additions,
+        deletions: githubPR.deletions,
+        changed_files: githubPR.changed_files,
+        commits: githubPR.commits,
+        labels: githubPR.labels,
+        milestone: githubPR.milestone
+      }
+    };
+
+    return portalPR;
+  }
+
+  /**
+   * Extract priority from GitHub PR labels
+   */
+  extractPriorityFromLabels(labels) {
+    const priorityLabels = {
+      'priority: urgent': 'urgent',
+      'priority: high': 'high', 
+      'priority: medium': 'medium',
+      'priority: low': 'low',
+      'urgent': 'urgent',
+      'high priority': 'high',
+      'low priority': 'low'
+    };
+
+    for (const label of labels) {
+      const labelName = label.name.toLowerCase();
+      if (priorityLabels[labelName]) {
+        return priorityLabels[labelName];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract environment from GitHub PR labels or branch name
+   */
+  extractEnvironmentFromPR(githubPR) {
+    // Check labels first
+    const envLabels = {
+      'env: staging': 'staging',
+      'env: production': 'production', 
+      'env: qa': 'qa',
+      'staging': 'staging',
+      'production': 'production',
+      'qa': 'qa'
+    };
+
+    for (const label of githubPR.labels) {
+      const labelName = label.name.toLowerCase();
+      if (envLabels[labelName]) {
+        return envLabels[labelName];
+      }
+    }
+
+    // Check branch name patterns
+    const branchName = githubPR.head.ref.toLowerCase();
+    if (branchName.includes('prod')) return 'production';
+    if (branchName.includes('staging')) return 'staging';
+    if (branchName.includes('qa')) return 'qa';
+
+    return null;
+  }
 }
 
 export default GitHubAPI;
