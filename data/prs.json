@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-17T20:09:34.930Z",
+    "lastUpdated": "2025-09-18T05:39:01.779Z",
     "totalCount": 8
   },
   "prs": [
@@ -656,10 +656,10 @@
       "description": "Added dark mode theme toggle functionality",
       "priority": "low",
       "environment": "dev",
-      "status": "ready",
+      "status": "qa-tests-merged",
       "progress": 100,
       "created_at": "2025-09-11T09:30:00Z",
-      "updated_at": "2025-09-15T14:34:15.099Z",
+      "updated_at": "2025-09-18T05:39:01.779Z",
       "branch_comparison": {
         "feature_branch": {
           "name": "feature/dark-mode",
@@ -726,7 +726,7 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Pending"
+          "mainResult": "Fail"
         },
         {
           "id": "tc_002",
@@ -778,24 +778,25 @@
           "testSteps": "",
           "expectedResults": "",
           "localResult": "Pass",
-          "mainResult": "Pending"
+          "mainResult": "Fail"
         }
       ],
       "totalTests": 2,
-      "passedTests": 1,
+      "passedTests": 2,
       "failedTests": 0,
-      "pendingTests": 1,
-      "localPassedTests": 1,
+      "pendingTests": 0,
+      "localPassedTests": 2,
       "localFailedTests": 0,
-      "localPendingTests": 1,
+      "localPendingTests": 0,
       "mainPassedTests": 0,
       "mainFailedTests": 0,
       "mainPendingTests": 2,
-      "testProgress": 50,
-      "localProgress": 50,
-      "readyToMerge": false,
+      "testProgress": 100,
+      "localProgress": 100,
+      "readyToMerge": true,
       "userId": "user_005",
-      "updated_by": "Mike Rodriguez"
+      "updated_by": "Mike Rodriguez",
+      "qaTestsMergedAt": "2025-09-18T05:38:59.850Z"
     },
     {
       "id": "pr_1757862904444",
