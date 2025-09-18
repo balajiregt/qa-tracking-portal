@@ -15,7 +15,7 @@ A modern QA test tracking system with PR-centric workflow, advanced analytics, a
 - **Environment Management**: Multi-environment support (dev, staging, production)
 
 ### Advanced Analytics & Insights
-- **Time-Based Analytics**: Pure QA time vs. blocked time tracking
+- **Time-Based Analytics**: Pure QA time vs blocked time tracking
 - **Performance Metrics**: Team efficiency, completion rates, and blocking analysis
 - **Trend Analysis**: PR activity trends and completion patterns
 - **Custom Dashboards**: Real-time insights into QA performance
