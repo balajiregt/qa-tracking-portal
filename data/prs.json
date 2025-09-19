@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-18T19:16:24.964Z",
+    "lastUpdated": "2025-09-19T03:30:46.030Z",
     "totalCount": 10,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -1058,7 +1058,7 @@
       "status": "qa-tests-merged",
       "progress": 0,
       "created_at": "2025-09-15T13:55:01.333Z",
-      "updated_at": "2025-09-18T14:24:58.018Z",
+      "updated_at": "2025-09-19T03:30:46.030Z",
       "created_by": "user_005",
       "branch_comparison": {
         "feature_branch": {
@@ -1133,6 +1133,53 @@
           "expectedResults": "",
           "localResult": "Pass",
           "mainResult": "Fail"
+        },
+        {
+          "id": "tc_001",
+          "name": "User Login Flow",
+          "description": "Complete user login process validation",
+          "tags": [
+            "@regression",
+            "@smoke",
+            "@auth"
+          ],
+          "intent": "regression",
+          "type": "functional",
+          "priority": "high",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the user is on the login page",
+              "formatted": "Given the user is on the login page"
+            },
+            {
+              "type": "when",
+              "text": "the user enters valid credentials",
+              "formatted": "When the user enters valid credentials"
+            },
+            {
+              "type": "and",
+              "text": "clicks the login button",
+              "formatted": "And clicks the login button"
+            },
+            {
+              "type": "then",
+              "text": "the user should be redirected to dashboard",
+              "formatted": "Then the user should be redirected to dashboard"
+            }
+          ],
+          "steps": [
+            "Given the user is on the login page",
+            "When the user enters valid credentials",
+            "And clicks the login button",
+            "Then the user should be redirected to dashboard"
+          ],
+          "expected_duration": 2500,
+          "created_at": "2025-01-10T10:00:00Z",
+          "updated_at": "2025-01-10T10:00:00Z",
+          "created_by": "system",
+          "is_custom": false,
+          "source": "built-in"
         }
       ],
       "totalTests": 1,
@@ -1143,11 +1190,11 @@
       "localFailedTests": 0,
       "localPendingTests": 0,
       "mainPassedTests": 0,
-      "mainFailedTests": 0,
-      "mainPendingTests": 1,
+      "mainFailedTests": 1,
+      "mainPendingTests": 0,
       "testProgress": 100,
       "localProgress": 100,
-      "readyToMerge": true,
+      "readyToMerge": false,
       "userId": "user_005",
       "updated_by": "Mike Rodriguez",
       "labels": [],
