@@ -136,6 +136,7 @@ export const WEBHOOK_EVENTS = {
   TEST_CASE_CREATED: 'test_case.created',
   TEST_CASE_UPDATED: 'test_case.updated',
   TEST_RESULT_CHANGED: 'test.result_changed',
+  TEST_FAILED: 'test.failed',
   PR_BLOCKED: 'pr.blocked',
   PR_UNBLOCKED: 'pr.unblocked'
 }
@@ -191,5 +192,26 @@ export const notifyPRStatusChanged = (pr, oldStatus, newStatus) => {
     old_status: oldStatus,
     new_status: newStatus,
     changed_at: new Date().toISOString()
+  })
+}
+
+export const notifyTestFailed = (pr, failedTests) => {
+  return webhookNotifier.notify(WEBHOOK_EVENTS.TEST_FAILED, {
+    pr_id: pr.id,
+    pr_name: pr.name,
+    developer: pr.developer,
+    branch: pr.branch_comparison?.feature_branch?.name || pr.branch || pr.name,
+    failed_tests: failedTests.map(test => ({
+      id: test.id,
+      name: test.name || test.intent,
+      intent: test.intent,
+      tags: test.tags,
+      source: test.source,
+      previous_result: test.previousResult,
+      current_result: test.localResult
+    })),
+    failed_count: failedTests.length,
+    total_tests: pr.associatedTestCases?.length || 0,
+    failure_detected_at: new Date().toISOString()
   })
 }

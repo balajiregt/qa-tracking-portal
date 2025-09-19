@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQA } from '../contexts/QAContext'
-import { notifyQATestsMerged, notifyDevPRMerged, notifyPRStatusChanged } from '../utils/webhookNotifier'
+import { notifyQATestsMerged, notifyDevPRMerged, notifyPRStatusChanged, notifyTestFailed } from '../utils/webhookNotifier'
 
 function Dashboard() {
   const { state, actions } = useQA()
@@ -39,6 +39,130 @@ function Dashboard() {
     localResult: 'Pending',
     mainResult: 'Pending'
   })
+
+  // Send Slack notification for test failures
+  const sendTestFailureNotification = async (pr, failedTests) => {
+    try {
+      // Get Slack webhook URL from settings
+      let settings = JSON.parse(localStorage.getItem('settings') || '{}')
+      if (!settings.integration?.slackWebhook) {
+        // Fallback to old storage location
+        const oldSettings = JSON.parse(localStorage.getItem('githubSettings') || '{}')
+        if (oldSettings.integration?.slackWebhook) {
+          settings = { integration: oldSettings.integration }
+        }
+      }
+      const slackWebhook = settings.integration?.slackWebhook
+      
+      if (!slackWebhook) {
+        console.log('No Slack webhook configured - skipping test failure notification')
+        return
+      }
+      
+      console.log('Sending test failure notification for PR:', pr.name)
+
+      const message = {
+        text: `🚨 Test Failures Detected - ${pr.name} (${pr.developer ? `@${pr.developer}` : 'Developer needed'})`,
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "🚨 Local Branch Tests Failed"
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*PR:* ${pr.name}\n*Developer:* ${pr.developer ? `<@${pr.developer}>` : 'Unassigned - needs developer assignment'}`
+            }
+          },
+          {
+            type: "section",
+            fields: [
+              {
+                type: "mrkdwn",
+                text: `*Priority:* ${pr.priority ? pr.priority.charAt(0).toUpperCase() + pr.priority.slice(1) : 'Medium'}`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Branch:* \`${pr.branch_comparison?.feature_branch?.name || pr.branch || pr.name}\``
+              },
+              {
+                type: "mrkdwn",
+                text: `*Failed Tests:* ${failedTests.length} test(s)`
+              },
+              {
+                type: "mrkdwn",
+                text: `*Total Tests:* ${pr.associatedTestCases?.length || 0} tests`
+              }
+            ]
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `📋 *Failed Test Cases:*\n${failedTests.map(test => `• ${test.intent || test.name}`).join('\n')}`
+            }
+          },
+          {
+            type: "divider"
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `❌ *Issue:* Local branch tests are failing and need attention\n\n🔧 *Action Required:* ${pr.developer ? `<@${pr.developer}>` : 'Developer'} please review and fix the failing tests before proceeding with QA merge`
+            }
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `⏰ *Detected:* ${new Date().toLocaleString()}\n📊 *PR ID:* ${pr.id}`
+            }
+          },
+          ...(pr.github_url ? [{
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "View PR on GitHub"
+                },
+                url: pr.github_url,
+                style: "danger"
+              }
+            ]
+          }] : [])
+        ]
+      }
+
+      // Send via Netlify function to avoid CORS issues
+      const response = await fetch('/.netlify/functions/send-slack-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          webhookUrl: slackWebhook,
+          message: message
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send notification')
+      }
+
+      actions.showNotification('Test failure notification sent to team!', 'success')
+    } catch (error) {
+      console.error('Failed to send test failure notification:', error)
+      actions.showNotification('Failed to send test failure notification', 'error')
+    }
+  }
 
   // Send Slack notification to dev
   const sendSlackNotification = async (pr) => {
@@ -1538,6 +1662,11 @@ function Dashboard() {
                       ...formData
                     }
                     
+                    // Check if test case result changed to 'Fail' for local branch
+                    const previousLocalResult = editingTestCase.localResult
+                    const newLocalResult = formData.localResult
+                    const testChangedToFail = previousLocalResult !== 'Fail' && newLocalResult === 'Fail'
+                    
                     // Update the associated test case in the PR (for Local/Main branch results)
                     const updatedAssociatedTestCases = selectedPR.associatedTestCases.map(tc =>
                       tc.id === editingTestCase.id ? updatedTestCase : tc
@@ -1551,6 +1680,14 @@ function Dashboard() {
                     
                     // Update the PR in backend and global state
                     await actions.updatePRAsync(updatedPR)
+                    
+                    // Send test failure notification if test changed to fail
+                    if (testChangedToFail) {
+                      const failedTests = updatedAssociatedTestCases.filter(tc => tc.localResult === 'Fail')
+                      await sendTestFailureNotification(updatedPR, failedTests)
+                      // Also send webhook notification
+                      await notifyTestFailed(updatedPR, failedTests)
+                    }
                     
                     // Update local modal state
                     setSelectedPR(updatedPR)
