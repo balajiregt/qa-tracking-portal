@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-19T03:30:46.030Z",
+    "lastUpdated": "2025-09-19T03:32:20.826Z",
     "totalCount": 10,
     "lastGitHubSync": "2025-09-18T12:13:40.146Z",
     "syncResults": {
@@ -1058,7 +1058,7 @@
       "status": "qa-tests-merged",
       "progress": 0,
       "created_at": "2025-09-15T13:55:01.333Z",
-      "updated_at": "2025-09-19T03:30:46.030Z",
+      "updated_at": "2025-09-19T03:32:20.825Z",
       "created_by": "user_005",
       "branch_comparison": {
         "feature_branch": {
@@ -1180,20 +1180,67 @@
           "created_by": "system",
           "is_custom": false,
           "source": "built-in"
+        },
+        {
+          "id": "tc_002",
+          "name": "Shopping Cart Add Item",
+          "description": "Verify items can be added to shopping cart successfully",
+          "tags": [
+            "@regression",
+            "@cart",
+            "@e2e"
+          ],
+          "intent": "regression",
+          "type": "functional",
+          "priority": "medium",
+          "bdd_steps": [
+            {
+              "type": "given",
+              "text": "the user is on the product page",
+              "formatted": "Given the user is on the product page"
+            },
+            {
+              "type": "when",
+              "text": "the user clicks add to cart",
+              "formatted": "When the user clicks add to cart"
+            },
+            {
+              "type": "then",
+              "text": "the item should be added to the cart",
+              "formatted": "Then the item should be added to the cart"
+            },
+            {
+              "type": "and",
+              "text": "the cart count should increase by 1",
+              "formatted": "And the cart count should increase by 1"
+            }
+          ],
+          "steps": [
+            "Given the user is on the product page",
+            "When the user clicks add to cart",
+            "Then the item should be added to the cart",
+            "And the cart count should increase by 1"
+          ],
+          "expected_duration": 1800,
+          "created_at": "2025-01-12T14:30:00Z",
+          "updated_at": "2025-01-12T14:30:00Z",
+          "created_by": "mike_dev",
+          "is_custom": true,
+          "source": "manual"
         }
       ],
-      "totalTests": 1,
+      "totalTests": 2,
       "passedTests": 1,
       "failedTests": 0,
-      "pendingTests": 0,
+      "pendingTests": 1,
       "localPassedTests": 1,
       "localFailedTests": 0,
-      "localPendingTests": 0,
+      "localPendingTests": 1,
       "mainPassedTests": 0,
       "mainFailedTests": 1,
-      "mainPendingTests": 0,
-      "testProgress": 100,
-      "localProgress": 100,
+      "mainPendingTests": 1,
+      "testProgress": 50,
+      "localProgress": 50,
       "readyToMerge": false,
       "userId": "user_005",
       "updated_by": "Mike Rodriguez",
