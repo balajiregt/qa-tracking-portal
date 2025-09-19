@@ -1,8 +1,8 @@
 {
   "metadata": {
     "version": "1.0",
-    "lastUpdated": "2025-09-14T11:27:15.122Z",
-    "totalCount": 7
+    "lastUpdated": "2025-09-19T03:56:06.376Z",
+    "totalCount": 8
   },
   "test_cases": [
     {
@@ -295,6 +295,45 @@
       "created_by": "Mike Rodriguez",
       "is_custom": true,
       "source": "manual"
+    },
+    {
+      "id": "tc_custom_1758254166376",
+      "name": "test slack integration",
+      "description": "",
+      "tags": [
+        "@slack"
+      ],
+      "intent": "api",
+      "type": "functional",
+      "priority": "medium",
+      "bdd_steps": [
+        {
+          "type": "given",
+          "text": "Given ",
+          "formatted": "Given "
+        },
+        {
+          "type": "when",
+          "text": "When user performs the action",
+          "formatted": "When user performs the action"
+        },
+        {
+          "type": "then",
+          "text": "Then ",
+          "formatted": "Then "
+        }
+      ],
+      "steps": [
+        "Given ",
+        "When user performs the action",
+        "Then "
+      ],
+      "expected_duration": 2000,
+      "created_at": "2025-09-19T03:56:06.376Z",
+      "updated_at": "2025-09-19T03:56:06.376Z",
+      "created_by": "Mike Rodriguez",
+      "is_custom": true,
+      "source": "manual"
     }
   ],
   "tags": [
@@ -309,7 +348,8 @@
     "@security",
     "@backend",
     "@frontend",
-    "login"
+    "login",
+    "@slack"
   ],
   "intents": [
     "regression",
