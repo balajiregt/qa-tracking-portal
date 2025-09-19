@@ -21,6 +21,13 @@ function Dashboard() {
     labels: '',
     developer: ''
   })
+  const [visibleSections, setVisibleSections] = useState({
+    ready: true,
+    qaTestsMerged: true,
+    blocked: true,
+    inProgress: true,
+    fullyMerged: false // Hidden by default
+  })
   const [formData, setFormData] = useState({
     name: '',
     intent: '',
@@ -427,6 +434,72 @@ function Dashboard() {
         </div>
       )}
 
+      {/* PR Filters */}
+      <div className="card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-900">🔍 Filter PR Views</h3>
+          <button
+            onClick={() => setVisibleSections({
+              ready: true,
+              qaTestsMerged: true,
+              blocked: true,
+              inProgress: true,
+              fullyMerged: true
+            })}
+            className="btn btn-sm btn-secondary"
+          >
+            Show All
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <label className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={visibleSections.ready}
+              onChange={(e) => setVisibleSections(prev => ({...prev, ready: e.target.checked}))}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-gray-700">✅ Ready ({stats.readyToMerge})</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={visibleSections.qaTestsMerged}
+              onChange={(e) => setVisibleSections(prev => ({...prev, qaTestsMerged: e.target.checked}))}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-gray-700">🧪 QA Tests Merged ({stats.qaTestsMerged})</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={visibleSections.blocked}
+              onChange={(e) => setVisibleSections(prev => ({...prev, blocked: e.target.checked}))}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-gray-700">🚫 Blocked ({stats.blockedPRs})</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={visibleSections.inProgress}
+              onChange={(e) => setVisibleSections(prev => ({...prev, inProgress: e.target.checked}))}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-gray-700">⏳ In Progress ({openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').length})</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={visibleSections.fullyMerged}
+              onChange={(e) => setVisibleSections(prev => ({...prev, fullyMerged: e.target.checked}))}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-gray-700">🎉 Fully Merged ({stats.fullyMerged})</span>
+          </label>
+        </div>
+      </div>
+
       {/* PR Status Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="card p-6">
@@ -539,7 +612,7 @@ function Dashboard() {
       {/* PR Testing Progress */}
       <div className="space-y-6">
         {/* Ready to Merge PRs */}
-        {readyToMergePRs.length > 0 && (
+        {visibleSections.ready && readyToMergePRs.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-success-700">✅ Ready to Merge</h2>
@@ -592,7 +665,7 @@ function Dashboard() {
         )}
 
         {/* QA Tests Merged PRs (Fail-First Stage) */}
-        {qaTestsMergedPRs.length > 0 && (
+        {visibleSections.qaTestsMerged && qaTestsMergedPRs.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-orange-700">🧪 QA Tests Merged (Failing as Expected)</h2>
@@ -654,7 +727,7 @@ function Dashboard() {
         )}
 
         {/* Blocked PRs */}
-        {blockedPRs.length > 0 && (
+        {visibleSections.blocked && blockedPRs.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-danger-700">🚫 Blocked PRs</h2>
@@ -709,7 +782,7 @@ function Dashboard() {
         )}
 
         {/* In Progress PRs */}
-        {openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').length > 0 && (
+        {visibleSections.inProgress && openPRs.filter(pr => pr.status === 'testing' || pr.status === 'new').length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-warning-700">⏳ Testing in Progress</h2>
@@ -752,7 +825,13 @@ function Dashboard() {
                         <p className="text-xs text-gray-500">Branch: {pr.branch_comparison?.feature_branch?.name || pr.name} → {pr.branch_comparison?.main_branch?.name || 'main'}</p>
                       </div>
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-4 space-x-2">
+                      <button 
+                        onClick={() => handleEditPR(pr)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        ✏️ Edit
+                      </button>
                       <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-primary btn-sm"
@@ -768,7 +847,7 @@ function Dashboard() {
         )}
 
         {/* Fully Merged PRs */}
-        {fullyMergedPRs.length > 0 && (
+        {visibleSections.fullyMerged && fullyMergedPRs.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-blue-700">🎉 Fully Merged PRs</h2>
@@ -803,12 +882,6 @@ function Dashboard() {
                       </div>
                     </div>
                     <div className="ml-4 space-x-2">
-                      <button 
-                        onClick={() => handleEditPR(pr)}
-                        className="btn btn-outline btn-sm"
-                      >
-                        ✏️ Edit
-                      </button>
                       <button 
                         onClick={() => setSelectedPR(pr)}
                         className="btn btn-secondary btn-sm"
